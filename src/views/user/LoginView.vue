@@ -27,18 +27,13 @@ function togglePasswordVisibility() {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-900 flex flex-col">
-
-
+    <div class="min-h-screen bg-gray-100 flex flex-col dark:bg-gray-800 ">
         <div class="flex-grow flex items-center justify-center p-4">
             <div class="w-full max-w-md">
                 <div class="bg-gradient-to-r from-red-600 via-white to-blue-600 h-2 rounded-t"></div>
 
                 <div class="bg-gray-800 p-8 rounded-b shadow-lg">
-                    <h1 class="text-2xl font-bold text-center text-gray-100 mb-2">
-                        Centro Cívico Por La Paz
-                    </h1>
-
+                  
                     <h2 class="text-xl font-semibold text-center text-gray-300 mb-6">
                         Iniciar sesión
                     </h2>
