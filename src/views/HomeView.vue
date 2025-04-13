@@ -4,6 +4,5 @@
 <template>
   <main>
     <p class="green">Bienvenido a la página de inicio</p>
-    <TheWelcome />
   </main>
 </template>
