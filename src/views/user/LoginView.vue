@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { ref } from 'vue';
+import ClosedEye from '@/assets/icons/ClosedEye.vue';
 
+import OpenEye from '@/assets/icons/OpenEye.vue';
 const email = ref('');
 const password = ref('');
 const route = useRoute();
@@ -33,7 +35,7 @@ function togglePasswordVisibility() {
                 <div class="bg-gradient-to-r from-red-600 via-white to-blue-600 h-2 rounded-t"></div>
 
                 <div class="bg-gray-800 p-8 rounded-b shadow-lg">
-                  
+
                     <h2 class="text-xl font-semibold text-center text-gray-300 mb-6">
                         Iniciar sesión
                     </h2>
@@ -57,7 +59,8 @@ function togglePasswordVisibility() {
                                     placeholder="******" />
                                 <button type="button" @click="togglePasswordVisibility"
                                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none">
-                                    <span class="text-xs">{{ showPassword ? 'Ocultar' : 'Mostrar' }}</span>
+                                    <ClosedEye v-if="showPassword" :width="20" :height="20" />
+                                    <OpenEye v-else :width="20" :height="20" />
                                 </button>
                             </div>
                         </div>
@@ -74,7 +77,7 @@ function togglePasswordVisibility() {
                         </div>
 
                         <div>
-                            <!-- gracias copilot -->
+
                             <button type="submit"
                                 class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors duration-200"
                                 :disabled="isLoading">
