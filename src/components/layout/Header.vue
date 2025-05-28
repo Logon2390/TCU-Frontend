@@ -13,7 +13,7 @@
                 </RouterLink>
                 <RouterLink to="/user/Login"
                     class="text-gray-300 hover:text-white font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full">
-                    Iniciar sesión
+                    Administración
                 </RouterLink>
             </nav>
         </div>

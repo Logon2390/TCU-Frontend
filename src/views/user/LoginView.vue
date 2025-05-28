@@ -1,25 +1,39 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import { ref } from 'vue';
 import ClosedEye from '@/assets/icons/ClosedEye.vue';
-
+import { login } from '@/service/auth/Auth.service';
 import OpenEye from '@/assets/icons/OpenEye.vue';
 const email = ref('');
 const password = ref('');
-const route = useRoute();
 const isLoading = ref(false);
 const showPassword = ref(false);
-const rememberMe = ref(false);
 
-function handleLogin() {
+
+
+async function handleLogin() {
     isLoading.value = true;
 
-    setTimeout(() => {
-        console.log('Correo:', email.value);
-        console.log('Contraseña:', password.value);
-        console.log('Recordarme:', rememberMe.value);
-        isLoading.value = false;
-    }, 1000);
+
+    const existingToken = localStorage.getItem('token');
+    if (existingToken) {
+        // Si ya hay un token, redirigir al usuario a home
+        window.location.href = '/';
+        return;
+    } else 
+        try {
+            const result = await login(email.value, password.value);
+            console.log('Login successful:', result);
+            localStorage.setItem('token', result.token);
+            localStorage.setItem('user', JSON.stringify(result.user));
+            // Redirigir al usuario a home
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Inicio de sesion fallido:', error);
+            // manejo de error
+            alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
+        } finally {
+            isLoading.value = false;
+        }
 }
 
 function togglePasswordVisibility() {

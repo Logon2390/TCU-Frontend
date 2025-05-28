@@ -5,7 +5,7 @@ import LogoCCPP from '@/assets/icons/LogoCCPP.vue'
 
 const router = useRouter()
 
-// Datos de los programas
+// Datos de los programas (sujeto a cambios)
 const programas = ref([
   {
     titulo: "Educación para la Paz",
@@ -234,7 +234,7 @@ function conoceMas() {
           <LogoCCPP :width="60" :height="60" />
         </div>
         <p class="text-gray-400 mb-2">Centro Cívico por la Paz - Pococi</p>
-        <p class="text-gray-500 text-sm">© 2024 Todos los derechos reservados</p>
+        <p class="text-gray-500 text-sm">© 2025 Todos los derechos reservados</p>
       </div>
     </footer>
 
