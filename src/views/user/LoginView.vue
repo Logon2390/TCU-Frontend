@@ -3,37 +3,40 @@ import { ref } from 'vue';
 import ClosedEye from '@/assets/icons/ClosedEye.vue';
 import { login } from '@/service/auth/Auth.service';
 import OpenEye from '@/assets/icons/OpenEye.vue';
+import { getDecodedToken } from '@/service/auth/Auth.service';
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
 const showPassword = ref(false);
 
-
-
+// Manejo de inicio de sesión
 async function handleLogin() {
     isLoading.value = true;
 
-
     const existingToken = localStorage.getItem('token');
     if (existingToken) {
-        // Si ya hay un token, redirigir al usuario a home
         window.location.href = '/';
         return;
-    } else 
-        try {
-            const result = await login(email.value, password.value);
-            console.log('Login successful:', result);
-            localStorage.setItem('token', result.token);
-            localStorage.setItem('user', JSON.stringify(result.user));
-            // Redirigir al usuario a home
+    }
+
+    try {
+        const result = await login(email.value, password.value);
+        localStorage.setItem('token', result.access_token);
+
+        const decoded = getDecodedToken();
+        if (decoded) {
+            console.log('Correo:', decoded.email);
+            console.log('Rol:', decoded.role);
+            console.log('ID:', decoded.id);
+
             window.location.href = '/';
-        } catch (error) {
-            console.error('Inicio de sesion fallido:', error);
-            // manejo de error
-            alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
-        } finally {
-            isLoading.value = false;
         }
+    } catch (error) {
+        console.error('Inicio de sesion fallido:', error);
+        alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
+    } finally {
+        isLoading.value = false;
+    }
 }
 
 function togglePasswordVisibility() {
