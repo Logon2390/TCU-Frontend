@@ -13,13 +13,9 @@
                 </RouterLink>
             </div>
             <nav class="flex gap-6">
-                <RouterLink to="/"
+                <RouterLink v-for="item in headerConfig.items" :to="item.route"
                     class="text-gray-300 hover:text-white font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full">
-                    Inicio
-                </RouterLink>
-                <RouterLink to="/user/Login"
-                    class="text-gray-300 hover:text-white font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full">
-                    Iniciar sesión
+                    {{ item.title }}
                 </RouterLink>
             </nav>
         </div>
@@ -30,12 +26,11 @@
 import LogoCCPP from '../../assets/icons/LogoCCPP.vue'
 import { RouterLink } from 'vue-router'
 import { useSidebar } from '../../composables/useSidebar'
+import { headerConfig } from '../../config/header.config'
 
 const { toggleSidebar } = useSidebar()
 
 const handleToggleSidebar = () => {
     toggleSidebar()
 }
-
-
 </script>

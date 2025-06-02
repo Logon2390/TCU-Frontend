@@ -1,14 +1,4 @@
-export interface SidebarItem {
-  id: string
-  title: string
-  route: string
-  icon?: string
-}
-
-export interface SidebarConfig {
-  title: string
-  items: SidebarItem[]
-}
+import type { SidebarConfig } from '@/types/layout.types'
 
 export const sidebarConfig: SidebarConfig = {
   title: 'Panel de Control',
