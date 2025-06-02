@@ -1,20 +1,25 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import { ref } from 'vue';
-
+import { login } from '@/service/auth/Auth.service';
 const email = ref('');
 const password = ref('');
-const route = useRoute();
 const isLoading = ref(false);
 const showPassword = ref(false);
-const rememberMe = ref(false);
 
-function handleLogin() {
+async function handleLogin() {
     isLoading.value = true;
 
-    setTimeout(() => {
+    try {
+        await login(email.value, password.value);
+
+        // Redirige al usuario si el login fue exitoso
+        window.location.href = '/';
+    } catch (error) {
+        console.error('Inicio de sesión fallido:', error);
+        alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
+    } finally {
         isLoading.value = false;
-    }, 1000);
+    }
 }
 
 function togglePasswordVisibility() {
