@@ -6,10 +6,11 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const login = async (email: string, password: string) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, {
-      email,
-      password,
-    });
+    const response = await axios.post(
+      `${API_URL}/admins/login`,
+      { email, password },
+      { withCredentials: true } // 👈 necesario para que la cookie se guarde
+    );
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
@@ -19,19 +20,17 @@ export const login = async (email: string, password: string) => {
   }
 };
 
-
 interface JwtPayload {
-  id: number;
-  name: string;
+  sub: number;
   email: string;
   role: string;
-  creatToken: number;
-  expiryTime: number;
+  iat?: number;
+  exp?: number;
 }
 
 // Esta función lee el token del localStorage y lo decodifica
 export function getDecodedToken(): JwtPayload | null {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (!token) return null;
 
   try {
@@ -41,4 +40,3 @@ export function getDecodedToken(): JwtPayload | null {
     return null;
   }
 }
-

@@ -9,35 +9,22 @@ const password = ref('');
 const isLoading = ref(false);
 const showPassword = ref(false);
 
-// Manejo de inicio de sesión
 async function handleLogin() {
     isLoading.value = true;
 
-    const existingToken = localStorage.getItem('token');
-    if (existingToken) {
-        window.location.href = '/';
-        return;
-    }
-
     try {
-        const result = await login(email.value, password.value);
-        localStorage.setItem('token', result.access_token);
+        await login(email.value, password.value);
 
-        const decoded = getDecodedToken();
-        if (decoded) {
-            console.log('Correo:', decoded.email);
-            console.log('Rol:', decoded.role);
-            console.log('ID:', decoded.id);
-
-            window.location.href = '/';
-        }
+        // Redirige al usuario si el login fue exitoso
+        window.location.href = '/';
     } catch (error) {
-        console.error('Inicio de sesion fallido:', error);
+        console.error('Inicio de sesión fallido:', error);
         alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
     } finally {
         isLoading.value = false;
     }
 }
+
 
 function togglePasswordVisibility() {
     showPassword.value = !showPassword.value;

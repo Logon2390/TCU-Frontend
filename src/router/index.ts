@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import UserLoginView from '../views/user/LoginView.vue'
+import UserLoginView from '../views/admins/LoginView.vue'
 import Page404NotFound from '@/views/errors/Page404NotFound.vue'
 
 const router = createRouter({
