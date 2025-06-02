@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { ref } from 'vue';
-import ClosedEye from '@/assets/icons/ClosedEye.vue';
 
-import OpenEye from '@/assets/icons/OpenEye.vue';
 const email = ref('');
 const password = ref('');
 const route = useRoute();
@@ -59,8 +57,8 @@ function togglePasswordVisibility() {
                                     placeholder="******" />
                                 <button type="button" @click="togglePasswordVisibility"
                                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none">
-                                    <ClosedEye v-if="showPassword" :width="20" :height="20" />
-                                    <OpenEye v-else :width="20" :height="20" />
+                                    <span v-if="showPassword" class="icon-[lucide--eye] text-xl"></span>
+                                    <span v-else class="icon-[lucide--eye-off] text-xl"></span>
                                 </button>
                             </div>
                         </div>
