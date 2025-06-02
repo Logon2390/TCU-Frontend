@@ -13,9 +13,6 @@ function handleLogin() {
     isLoading.value = true;
 
     setTimeout(() => {
-        console.log('Correo:', email.value);
-        console.log('Contraseña:', password.value);
-        console.log('Recordarme:', rememberMe.value);
         isLoading.value = false;
     }, 1000);
 }
