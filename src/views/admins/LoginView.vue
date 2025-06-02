@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import ClosedEye from '@/assets/icons/ClosedEye.vue';
 import { login } from '@/service/auth/Auth.service';
-import OpenEye from '@/assets/icons/OpenEye.vue';
-import { getDecodedToken } from '@/service/auth/Auth.service';
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
@@ -24,7 +21,6 @@ async function handleLogin() {
         isLoading.value = false;
     }
 }
-
 
 function togglePasswordVisibility() {
     showPassword.value = !showPassword.value;
@@ -63,8 +59,8 @@ function togglePasswordVisibility() {
                                     placeholder="******" />
                                 <button type="button" @click="togglePasswordVisibility"
                                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none">
-                                    <ClosedEye v-if="showPassword" :width="20" :height="20" />
-                                    <OpenEye v-else :width="20" :height="20" />
+                                    <span v-if="showPassword" class="icon-[lucide--eye] text-xl"></span>
+                                    <span v-else class="icon-[lucide--eye-off] text-xl"></span>
                                 </button>
                             </div>
                         </div>

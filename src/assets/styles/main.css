@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@plugin "@iconify/tailwind4" {
+    prefixes: lucide;
+}
+
 @theme {
     --font-montserrat: 'Montserrat', sans-serif;
 
