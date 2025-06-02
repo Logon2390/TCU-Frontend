@@ -4,15 +4,13 @@ export const headerConfig: HeaderConfig = {
   title: 'Panel de Control',
   items: [
     {
-      title: 'Registrar visita',
-      route: '/visitas',
-    },
-    {
       title: 'Inicio',
+      icon: 'icon-[lucide--home]',
       route: '/',
     },
     {
       title: 'Iniciar sesión',
+      icon: 'icon-[lucide--log-in]',
       route: '/user/Login',
     },
   ],
