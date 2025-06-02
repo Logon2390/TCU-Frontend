@@ -17,5 +17,6 @@ export type HeaderConfig = {
 
 export type HeaderItem = {
   title: string
+  icon: string
   route: string
 }
