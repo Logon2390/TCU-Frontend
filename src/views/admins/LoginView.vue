@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { login } from '@/service/auth/Auth.service';
+import Input from '@/components/common/Input.vue';
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
-const showPassword = ref(false);
 
 async function handleLogin() {
     isLoading.value = true;
@@ -21,11 +21,6 @@ async function handleLogin() {
         isLoading.value = false;
     }
 }
-
-function togglePasswordVisibility() {
-    showPassword.value = !showPassword.value;
-}
-
 </script>
 
 <template>
@@ -41,33 +36,15 @@ function togglePasswordVisibility() {
                     </h2>
 
                     <form @submit.prevent="handleLogin" class="space-y-5">
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Correo
-                                electrónico</label>
-                            <input type="email" id="email" v-model="email" required
-                                class="w-full py-2 px-3 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="jast@gmail.com" />
-                        </div>
+                        <Input :labelProps="{ id: 'email', label: 'Correo electrónico', icon: 'icon-[lucide--mail]' }"
+                            :inputProps="{ type: 'email', placeholder: 'jast@gmail.com', required: true, }"
+                            autocomplete="email" v-model="email" />
 
-                        <div>
-                            <label for="password"
-                                class="block text-sm font-medium text-gray-300 mb-1">Contraseña</label>
-                            <div class="relative">
-                                <input :type="showPassword ? 'text' : 'password'" id="password" v-model="password"
-                                    required
-                                    class="w-full py-2 px-3 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="******" />
-                                <button type="button" @click="togglePasswordVisibility"
-                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none">
-                                    <span v-if="showPassword" class="icon-[lucide--eye] text-xl"></span>
-                                    <span v-else class="icon-[lucide--eye-off] text-xl"></span>
-                                </button>
-                            </div>
-                        </div>
+                        <Input :labelProps="{ id: 'password', label: 'Contraseña', icon: 'icon-[lucide--lock]' }"
+                            :inputProps="{ type: 'password', placeholder: '******', required: true }"
+                            autocomplete="current-password" v-model="password" />
 
                         <div class="flex items-center justify-between">
-
-
                             <div class="text-sm">
                                 <!-- Esto es para después para cuando implementemos la recuperacion de contraseña (cajina) -->
                                 <a href="#" class="font-medium text-green-400 hover:text-green-300">
@@ -77,7 +54,6 @@ function togglePasswordVisibility() {
                         </div>
 
                         <div>
-
                             <button type="submit"
                                 class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors duration-200"
                                 :disabled="isLoading">
