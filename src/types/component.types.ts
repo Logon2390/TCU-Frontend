@@ -13,6 +13,11 @@ export type InputProps = {
   icon?: string
 }
 
+export type SelectProps = Omit<InputProps, 'type'> & {
+  options: string[]
+  onChange?: (event: Event) => void
+}
+
 export type ButtonProps = {
   variant: 'primary' | 'secondary' | 'danger'
   text: string
