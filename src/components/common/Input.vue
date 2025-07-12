@@ -6,9 +6,9 @@
             {{ labelProps.label }}
         </label>
         <div class="relative">
-            <input v-bind="$attrs" :type="currentInputType" :placeholder="inputProps.placeholder" :value="modelValue"
-                @input="handleInput"
-                :class="[baseStyle, props.customStyle || defaultStyle, error ? borderErrorStyle : borderStyle]"
+            <input v-bind="$attrs" :type="currentInputType" :placeholder="inputProps.placeholder"
+                :value="$attrs.modelValue" @input="handleInput"
+                :class="[baseStyle, props.customStyle || defaultStyle, errorProps?.onError ? borderErrorStyle : borderStyle]"
                 :id="labelProps.id" :required="inputProps.required" :disabled="inputProps.disabled" />
 
             <button v-if="isPasswordType" type="button" @click="togglePasswordVisibility"
@@ -19,7 +19,7 @@
             <span v-else-if="inputProps.icon" :class="inputProps.icon"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300"></span>
         </div>
-        <p v-if="error" class="text-red-500 text-sm mt-1">{{ error?.message || error }}</p>
+        <p v-if="errorProps?.onError" class="text-red-500 text-sm mt-1">{{ errorProps?.message }}</p>
     </div>
 </template>
 
@@ -28,15 +28,14 @@ import { ref, computed } from 'vue';
 import type { ErrorProps, LabelProps, InputProps } from '@/types/component.types';
 
 const props = defineProps<{
-    modelValue: string;
     labelProps: LabelProps;
     inputProps: InputProps;
-    error?: ErrorProps;
+    errorProps?: ErrorProps;
     customStyle?: string;
 }>();
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: string): void;
+    (e: 'update:modelValue', value: string): void
 }>();
 
 const baseStyle =
