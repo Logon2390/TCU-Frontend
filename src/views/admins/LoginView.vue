@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import { login } from '@/service/auth/Auth.service';
 import Input from '@/components/common/Input.vue';
+import Button from '@/components/common/Button.vue';
+
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
@@ -28,13 +30,10 @@ async function handleLogin() {
         <div class="flex-grow flex items-center justify-center p-4">
             <div class="w-full max-w-md">
                 <div class="bg-gradient-to-r from-red-600 via-white to-blue-600 h-2 rounded-t"></div>
-
                 <div class="bg-gray-800 p-8 rounded-b shadow-lg">
-
                     <h2 class="text-xl font-semibold text-center text-gray-300 mb-6">
                         Iniciar sesión
                     </h2>
-
                     <form @submit.prevent="handleLogin" class="space-y-5">
                         <Input :labelProps="{ id: 'email', label: 'Correo electrónico', icon: 'icon-[lucide--mail]' }"
                             :inputProps="{ type: 'email', placeholder: 'jast@gmail.com', required: true, }"
@@ -52,16 +51,9 @@ async function handleLogin() {
                                 </a>
                             </div>
                         </div>
-
-                        <div>
-                            <button type="submit"
-                                class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors duration-200"
-                                :disabled="isLoading">
-                                {{ isLoading ? 'Iniciando sesión...' : 'Iniciar sesión' }}
-                            </button>
-                        </div>
+                        <Button
+                            :buttonProps="{ variant: 'primary', text: 'Iniciar sesión', loading: isLoading, icon: 'icon-[lucide--user]', onClick: handleLogin }" />
                     </form>
-
                     <div class="mt-6 text-center text-sm text-gray-400">
                         <p>Centro Cívico por la Paz de Pococí, Limón, Costa Rica</p>
                     </div>
