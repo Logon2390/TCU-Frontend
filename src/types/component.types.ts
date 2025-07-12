@@ -13,6 +13,15 @@ export type InputProps = {
   icon?: string
 }
 
+export type ButtonProps = {
+  variant: 'primary' | 'secondary' | 'danger'
+  text: string
+  icon?: string
+  loading?: boolean
+  disabled?: boolean
+  onClick?: () => void
+}
+
 export type ErrorProps = {
   onError: boolean
   message?: string
