@@ -1,5 +1,9 @@
 import type { ChartType } from 'chart.js'
 
+export type LoaderProps = {
+  message?: string
+}
+
 export type LabelProps = {
   id: string
   label?: string
