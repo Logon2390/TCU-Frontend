@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { login } from '@/service/auth/Auth.service';
-import Input from '@/components/common/Input.vue';
-import Button from '@/components/common/Button.vue';
+import Input from '@/components/common/AppInput.vue';
+import Button from '@/components/common/AppButton.vue';
 
 const email = ref('');
 const password = ref('');
