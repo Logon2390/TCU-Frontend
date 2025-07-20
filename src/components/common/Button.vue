@@ -33,6 +33,8 @@ const computedStyle = computed(() => {
             return `${baseStyle} ${secondaryStyle}`;
         case 'danger':
             return `${baseStyle} ${dangerStyle}`;
+        case 'custom':
+            return '';
         default:
             return `${baseStyle} ${defaultStyle}`;
     }

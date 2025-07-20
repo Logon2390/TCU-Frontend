@@ -25,7 +25,7 @@ export type SelectProps = Omit<InputProps, 'type'> & {
 }
 
 export type ButtonProps = {
-  variant: 'primary' | 'secondary' | 'danger'
+  variant: 'primary' | 'secondary' | 'danger' | 'custom'
   text: string
   icon?: string
   loading?: boolean
