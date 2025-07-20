@@ -42,6 +42,17 @@ export type ChartProps = {
   responsive?: boolean
 }
 
+export type PaginationProps = {
+  currentPage: number
+  totalItems: number
+  itemsPerPage: number
+  showPageNumbers?: boolean
+  showItemsPerPageSelector?: boolean
+  pageSizeOptions?: number[]
+  onPageChange: (page: number) => void
+  onItemsPerPageChange: (itemsPerPage: number) => void
+}
+
 export type ErrorProps = {
   onError: boolean
   message?: string
