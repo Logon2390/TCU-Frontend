@@ -1,3 +1,5 @@
+import type { ChartType } from 'chart.js'
+
 export type LabelProps = {
   id: string
   label?: string
@@ -25,6 +27,15 @@ export type ButtonProps = {
   loading?: boolean
   disabled?: boolean
   onClick?: () => void
+}
+
+export type ChartProps = {
+  type: ChartType
+  data: any
+  options?: any
+  width?: number
+  height?: number
+  responsive?: boolean
 }
 
 export type ErrorProps = {
