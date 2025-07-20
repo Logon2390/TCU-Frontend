@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import router from '@/router';
 import { ref, onMounted } from 'vue';
 import LogoCCPP from '@/assets/icons/LogoCCPP.vue';
