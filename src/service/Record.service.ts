@@ -1,5 +1,5 @@
-import api from '../api'
-import type { Registration } from '../../types/user.types'
+import api from './api'
+import type { Registration } from '../types/user.types'
 
 const RECORD_URL = '/records'
 

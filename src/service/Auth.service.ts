@@ -1,5 +1,5 @@
 // src/service/auth/Auth.service.ts
-import api from '../api'
+import api from './api'
 import { AxiosError } from 'axios'
 
 const AUTH_URL = '/admins'

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { login } from '@/service/auth/Auth.service';
+import { login } from '@/service/Auth.service';
 import Input from '@/components/common/AppInput.vue';
 import Button from '@/components/common/AppButton.vue';
 
