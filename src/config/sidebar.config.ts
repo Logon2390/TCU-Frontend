@@ -4,6 +4,12 @@ export const sidebarConfig: SidebarConfig = {
   title: 'Panel de Control',
   items: [
     {
+      id: 'stats',
+      title: 'Estadísticas',
+      route: '/stats',
+      icon: 'icon-[lucide--chart-bar]',
+    },
+    {
       id: 'admin',
       title: 'Admin',
       route: '/admin',

@@ -13,14 +13,13 @@
                 </RouterLink>
             </div>
             <nav class="flex gap-6">
-                <RouterLink to="/"
-                    class="text-gray-300 hover:text-white font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full">
-                    Inicio
-                </RouterLink>
-                <RouterLink to="/user/Login"
-                    class="text-gray-300 hover:text-white font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full">
-                    Administración
-                </RouterLink>
+                <div v-for="item in headerConfig.items" :key="item.title">
+                    <RouterLink :to="item.route"
+                        class="flex items-center gap-2 text-gray-300 hover:text-white font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full">
+                        <span :class="item.icon" class="text-xl"></span>
+                        {{ item.title }}
+                    </RouterLink>
+                </div>
             </nav>
         </div>
     </header>
