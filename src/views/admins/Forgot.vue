@@ -58,7 +58,7 @@ async function handleSubmit(event: Event) {
             </div>
 
             <div class="text-center">
-              <a href="/user/Login" class="text-sm font-medium text-green-400 hover:text-green-300">
+              <a href="/admin/Login" class="text-sm font-medium text-green-400 hover:text-green-300">
                 Volver al login
               </a>
             </div>

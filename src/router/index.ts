@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import UserLoginView from '../views/admins/LoginView.vue'
+import Login from '../views/admins/Login.vue'
 import Forgot from  '../views/admins/Forgot.vue'
 import Reset from '../views/admins/Reset.vue'
 import Page404NotFound from '@/views/errors/Page404NotFound.vue'
@@ -14,9 +14,9 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/user/Login',
-      name: 'user',
-      component: UserLoginView,
+      path: '/admin/Login',
+      name: 'login',
+      component: Login,
     },
     {
       path: '/:pathMatch(.*)*',
@@ -24,17 +24,17 @@ const router = createRouter({
       component: Page404NotFound,
     },
     {
-      path: '/user/forgot',
+      path: '/admin/forgot',
       name: 'forgot',
       component: Forgot,
     },
     {
-      path: '/user/reset/:token',
+      path: '/admin/reset/:token',
       name: 'reset',
       component: Reset,
     },
     {
-      path: '/user/reset',
+      path: '/admin/reset',
       name: 'reset',
       component: Reset,
     },

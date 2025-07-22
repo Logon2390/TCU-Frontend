@@ -31,7 +31,7 @@ async function handleSubmit(event: Event) {
         if (!res.ok) throw new Error(data.message || 'Error al restablecer contraseña')
 
         alert('Contraseña restablecida correctamente')
-        router.push('/user/Login')
+        router.push('/admin/Login')
     } catch (err: any) {
         alert(`Error: ${err.message}`)
     } finally {
@@ -71,10 +71,15 @@ async function handleSubmit(event: Event) {
                         </div>
 
                         <button type="submit"
-                            class="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-                            Restablecer contraseña
+                            class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors duration-200"
+                            :disabled="isLoading">
+                            {{ isLoading ? 'Restableciendo...' : 'Restablecer contraseña' }}
                         </button>
                     </form>
+
+                    <div class="mt-6 text-center text-sm text-gray-400">
+                        <p>Centro Cívico por la Paz de Pococí, Limón, Costa Rica</p>
+                    </div>
                 </div>
             </div>
         </div>
