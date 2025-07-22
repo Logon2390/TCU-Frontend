@@ -4,17 +4,28 @@ import { ref } from 'vue'
 const email = ref('')
 const isLoading = ref(false)
 
-function handleSubmit(event: Event) {
+async function handleSubmit(event: Event) {
   event.preventDefault()
   isLoading.value = true
-  
-  console.log('Correo:', email.value)
-  //hacer el fetch o emitir un evento
-  
-  setTimeout(() => {
+
+  try {
+    const res = await fetch('http://localhost:3000/admins/requestReset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value })
+    })
+
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || 'Error al enviar correo')
+
+    alert('Correo enviado con enlace para restablecer contraseña')
+  } catch (err: any) {
+    alert(`Error: ${err.message}`)
+  } finally {
     isLoading.value = false
-  }, 2000)
+  }
 }
+
 </script>
 
 <template>
@@ -25,7 +36,7 @@ function handleSubmit(event: Event) {
 
         <div class="bg-gray-800 p-8 rounded-b shadow-lg">
           <h2 class="text-xl font-semibold text-center text-gray-300 mb-6">
-            Recuperar contraseña
+            Restablecer contraseña
           </h2>
 
           <form @submit.prevent="handleSubmit" class="space-y-5">
@@ -33,22 +44,15 @@ function handleSubmit(event: Event) {
               <label for="email" class="block text-sm font-medium text-gray-300 mb-1">
                 Correo electrónico
               </label>
-              <input 
-                type="email" 
-                id="email" 
-                v-model="email" 
-                required
+              <input type="email" id="email" v-model="email" required
                 class="w-full py-2 px-3 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="jast@gmail.com" 
-              />
+                placeholder="jast@gmail.com" />
             </div>
 
             <div>
-              <button 
-                type="submit"
+              <button type="submit"
                 class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors duration-200"
-                :disabled="isLoading"
-              >
+                :disabled="isLoading">
                 {{ isLoading ? 'Enviando...' : 'Enviar enlace' }}
               </button>
             </div>

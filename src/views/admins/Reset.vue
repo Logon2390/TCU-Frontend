@@ -1,25 +1,42 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-import { ref } from 'vue';
+const newPassword = ref('')
+const confirmPassword = ref('')
+const isLoading = ref(false)
+const route = useRoute()
+const router = useRouter()
 
-const password = ref('');
-const confirmPassword = ref('');
-const isLoading = ref(false);
-
-function handleSubmit(event: Event) {
-    event.preventDefault();
-    isLoading.value = true;
-
-    if (password.value !== confirmPassword.value) {
-        alert('Las contraseñas no coinciden');
-        return;
+async function handleSubmit(event: Event) {
+    event.preventDefault()
+    if (newPassword.value !== confirmPassword.value) {
+        alert('Las contraseñas no coinciden')
+        return
     }
+    isLoading.value = true
 
-    setTimeout(() => {
-        isLoading.value = false;
-    }, 2000);
-    console.log(password.value, confirmPassword.value);
+    try {
+        console.log(route.query.token)
+        const res = await fetch('http://localhost:3000/admins/resetPassword', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                token: route.query.token,
+                newPassword: newPassword.value
+            })
+        })
 
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.message || 'Error al restablecer contraseña')
+
+        alert('Contraseña restablecida correctamente')
+        router.push('/user/Login')
+    } catch (err: any) {
+        alert(`Error: ${err.message}`)
+    } finally {
+        isLoading.value = false
+    }
 }
 </script>
 
@@ -36,10 +53,10 @@ function handleSubmit(event: Event) {
 
                     <form @submit.prevent="handleSubmit" class="space-y-5">
                         <div>
-                            <label for="password" class="block text-sm font-medium text-gray-300 mb-1">
+                            <label for="newPassword" class="block text-sm font-medium text-gray-300 mb-1">
                                 Nueva contraseña
                             </label>
-                            <input type="password" id="password" v-model="password" required
+                            <input type="newPassword" id="newPassword" v-model="newPassword" required
                                 class="w-full py-2 px-3 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="******">
                         </div>
@@ -48,7 +65,7 @@ function handleSubmit(event: Event) {
                             <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-1">
                                 Confirmar contraseña
                             </label>
-                            <input type="password" id="confirmPassword" v-model="confirmPassword" required
+                            <input type="newPassword" id="confirmPassword" v-model="confirmPassword" required
                                 class="w-full py-2 px-3 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="******">
                         </div>
