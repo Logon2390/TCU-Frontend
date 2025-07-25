@@ -16,7 +16,7 @@
                 <span v-if="showPassword" class="icon-[lucide--eye]"></span>
                 <span v-else class="icon-[lucide--eye-off]"></span>
             </button>
-            <span v-else-if="inputProps.icon" :class="inputProps.icon"
+            <span v-else-if="inputProps.icon || isDateType" :class="inputProps.icon || 'icon-[lucide--calendar]'"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300"></span>
         </div>
         <p v-if="errorProps?.onError" class="text-red-500 text-sm mt-1">{{ errorProps?.message }}</p>
@@ -47,6 +47,7 @@ const borderErrorStyle = 'border-2 border-red-500';
 
 const showPassword = ref(false);
 const isPasswordType = computed(() => props.inputProps.type === 'password');
+const isDateType = computed(() => props.inputProps.type === 'date');
 const currentInputType = computed(() => {
     if (isPasswordType.value) {
         return showPassword.value ? 'text' : 'password';
@@ -63,3 +64,37 @@ const handleInput = (event: Event) => {
     emit('update:modelValue', target.value);
 };
 </script>
+
+<style scoped>
+/* Hide native date input calendar icon */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+}
+
+/* Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+}
+
+/* Edge */
+input[type="date"]::-ms-clear,
+input[type="date"]::-ms-expand {
+    display: none;
+}
+</style>
