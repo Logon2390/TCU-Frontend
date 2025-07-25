@@ -1,5 +1,5 @@
 <template>
-    <div class="p-6 border-b border-gray-700">
+    <div class="p-6">
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-xl font-semibold text-white">{{ stepperProps.title }}</h1>
             <span class="text-sm text-gray-400">{{ stepperProps.currentStep }}/{{ stepperProps.steps.length }}</span>

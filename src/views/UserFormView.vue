@@ -12,46 +12,29 @@
             </div>
         </div>
 
-        <div class="w-full lg:w-1/2 flex items-center justify-center px-4 py-8">
-            <div class="w-full max-w-md md:max-w-lg bg-gray-800 rounded-lg shadow-xl border border-gray-700">
-                <AppStepper :stepper-props="{
-                    title: 'Registro de Usuario',
+        <div class="w-full lg:w-1/2 flex items-start justify-center p-6">
+            <div class="w-full">
+                <AppStepper class="border border-gray-700 rounded-xl shadow-xl mb-10" :stepper-props="{
+                    title: 'Registro de visitante',
                     currentStep,
                     steps
                 }" />
 
-                <div class="p-6">
+                <div class=" p-0">
                     <form @submit.prevent="handleSubmit">
                         <div v-show="currentStep === 1" :class="[
                             'transition-all duration-300',
                             currentStep === 1 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
                         ]">
-                            <h2 class="text-lg font-medium text-white mb-4">Identificación</h2>
-
-                            <div class="space-y-4">
-                                <AppSelect :label-props="{ id: 'identificationType', label: 'Tipo de identificación' }"
-                                    :select-props="{
-                                        placeholder: 'Seleccione tipo de identificación',
-                                        options: identificationTypes,
-                                        onChange: handleIdentificationTypeChange
-                                    }" :error-props="{ onError: false }" v-model="userRecord.user.document" />
-
-                                <AppInput :label-props="{ id: 'documentNumber', label: 'Número de documento' }"
-                                    :input-props="{
-                                        type: 'text',
-                                        placeholder: 'Ingrese su número de documento',
-                                        required: true
-                                    }" :error-props="{ onError: false }" v-model="userRecord.user.document" />
-                            </div>
-                        </div>
-
-                        <div v-show="currentStep === 2" :class="[
-                            'transition-all duration-300',
-                            currentStep === 2 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
-                        ]">
                             <h2 class="text-lg font-medium text-white mb-4">Datos Personales</h2>
 
                             <div class="space-y-4">
+                                <AppInput :label-props="{ id: 'documentNumber', label: 'Número de documento' }"
+                                    :input-props="{
+                                        type: 'text ',
+                                        placeholder: 'Ingrese su número de documento',
+                                        required: true
+                                    }" :error-props="{ onError: false }" v-model="userRecord.user.document" />
                                 <AppInput :label-props="{ id: 'fullName', label: 'Nombre completo' }" :input-props="{
                                     type: 'text',
                                     placeholder: 'Ingrese su nombre completo',
@@ -71,25 +54,40 @@
                             </div>
                         </div>
 
-                        <div v-show="currentStep === 3" :class="[
+                        <div v-show="currentStep === 2" :class="[
                             'transition-all duration-300',
-                            currentStep === 3 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
+                            currentStep === 2 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
                         ]">
                             <h2 class="text-lg font-medium text-white mb-4">Propósito de Visita</h2>
 
                             <div class="space-y-4">
-                                <AppSelect :label-props="{ id: 'purpose', label: 'Propósito de su visita' }"
+                                <AppSelect
+                                    :label-props="{ id: 'purpose', label: 'Que describe mejor tu propósito de visita' }"
                                     :select-props="{
-                                        placeholder: 'Seleccione el propósito de su visita',
+                                        placeholder: 'Selecciona una opción',
                                         options: visitPurposes,
                                         onChange: handlePurposeChange
                                     }" :error-props="{ onError: false }" v-model="userRecord.module" />
+
+
+                                <div class="flex flex-col items-start justify-center gap-2 text-gray-400 text-sm mt-4">
+                                    <span class="flex items-center gap-2 text-sm text-blue-500 font-medium">
+                                        <span class="icon-[lucide--info] size-4"></span>
+                                        <span>Porque requerimos esta información</span>
+                                    </span>
+                                    <span>
+                                        Los datos que proporciones nos ayudarán a gestionar tu visita de manera más
+                                        eficiente.
+                                    </span>
+                                </div>
+
+
                             </div>
                         </div>
                     </form>
                 </div>
 
-                <div class="px-6 py-4 border-t border-gray-700 flex justify-center gap-8">
+                <div class="flex justify-between gap-8 mt-6">
                     <AppButton v-if="currentStep > 1" :button-props="{
                         variant: 'secondary',
                         text: 'Anterior',
@@ -123,9 +121,8 @@ import AppStepper from '@/components/features/AppStepper.vue'
 import { images } from '@/config/images.config'
 import type { StepperStep } from '@/types/component.types'
 import type { Registration } from '@/types/user.types'
-import { IDENTIFICATION_TYPES, GENDER_OPTIONS, VISIT_PURPOSES } from '@/types/form.types'
+import { GENDER_OPTIONS, VISIT_PURPOSES } from '@/types/form.types'
 
-const identificationTypes = [...IDENTIFICATION_TYPES]
 const genderOptions = [...GENDER_OPTIONS]
 const visitPurposes = [...VISIT_PURPOSES]
 const currentStep = ref(1)
@@ -143,18 +140,12 @@ const userRecord = ref<Registration>({
 const steps = computed<StepperStep[]>(() => [
     {
         id: 1,
-        title: 'Identificación',
-        isCompleted: currentStep.value > 1,
-        isActive: currentStep.value === 1
-    },
-    {
-        id: 2,
         title: 'Datos Personales',
         isCompleted: currentStep.value > 2,
         isActive: currentStep.value === 2
     },
     {
-        id: 3,
+        id: 2,
         title: 'Propósito',
         isCompleted: currentStep.value > 3,
         isActive: currentStep.value === 3
@@ -164,10 +155,8 @@ const steps = computed<StepperStep[]>(() => [
 const isCurrentStepValid = computed(() => {
     switch (currentStep.value) {
         case 1:
-            return userRecord.value.user.document && userRecord.value.user.document.trim()
+            return userRecord.value.user.fullName.trim() && userRecord.value.user.birthDate && userRecord.value.user.gender && userRecord.value.user.document && userRecord.value.user.document.trim()
         case 2:
-            return userRecord.value.user.fullName.trim() && userRecord.value.user.birthDate && userRecord.value.user.gender
-        case 3:
             return userRecord.value.module
         default:
             return false
@@ -184,11 +173,6 @@ const previousStep = () => {
     if (currentStep.value > 1) {
         currentStep.value--
     }
-}
-
-const handleIdentificationTypeChange = (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    userRecord.value.user.document = target.value
 }
 
 const handleGenderChange = (event: Event) => {
