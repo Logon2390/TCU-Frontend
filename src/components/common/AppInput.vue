@@ -97,4 +97,25 @@ input[type="date"]::-ms-clear,
 input[type="date"]::-ms-expand {
     display: none;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px rgb(55 65 81) inset !important;
+    -webkit-text-fill-color: rgb(243 244 246) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Firefox autocomplete */
+input:-moz-autofill {
+    background-color: rgb(55 65 81) !important;
+    color: rgb(243 244 246) !important;
+}
+
+/* General autocomplete styles */
+input:autofill {
+    background-color: rgb(55 65 81) !important;
+    color: rgb(243 244 246) !important;
+}
 </style>
