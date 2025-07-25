@@ -18,7 +18,7 @@ const props = defineProps<{
     customStyle?: string;
 }>();
 
-const baseStyle = 'w-full py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:scale-99 transition-all duration-200 text-white font-medium focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800';
+const baseStyle = 'w-full py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:scale-99 transition-all duration-200 text-white font-medium focus:outline-none focus:ring-offset-2 focus:ring-offset-gray-800';
 const disabledStyle = 'cursor-not-allowed opacity-50';
 
 const defaultStyle = 'bg-green-600 hover:bg-green-700';

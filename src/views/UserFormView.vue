@@ -33,12 +33,14 @@
                                     :input-props="{
                                         type: 'text ',
                                         placeholder: 'Ingrese su número de documento',
-                                        required: true
+                                        required: true,
+                                        icon: 'icon-[lucide--id-card]'
                                     }" :error-props="{ onError: false }" v-model="userRecord.user.document" />
                                 <AppInput :label-props="{ id: 'fullName', label: 'Nombre completo' }" :input-props="{
                                     type: 'text',
                                     placeholder: 'Ingrese su nombre completo',
-                                    required: true
+                                    required: true,
+                                    icon: 'icon-[lucide--user-round]'
                                 }" :error-props="{ onError: false }" v-model="userRecord.user.fullName" />
 
                                 <AppInput :label-props="{ id: 'birthDate', label: 'Fecha de nacimiento' }" :input-props="{
@@ -62,8 +64,9 @@
 
                             <div class="space-y-4">
                                 <AppSelect
-                                    :label-props="{ id: 'purpose', label: 'Que describe mejor tu propósito de visita' }"
+                                    :label-props="{ id: 'purpose', label: 'Que describe mejor tu propósito de visita', icon: 'icon-[lucide--user-round]' }"
                                     :select-props="{
+                                        icon: 'icon-[lucide--info]',
                                         placeholder: 'Selecciona una opción',
                                         options: visitPurposes,
                                         onChange: handlePurposeChange
@@ -97,8 +100,7 @@
                     <AppButton v-if="currentStep < steps.length" :button-props="{
                         variant: 'primary',
                         text: 'Siguiente',
-                        onClick: nextStep,
-                        disabled: !isCurrentStepValid
+                        onClick: nextStep
                     }" />
                     <AppButton v-else :button-props="{
                         variant: 'primary',
