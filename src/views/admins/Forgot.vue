@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { requestPasswordReset } from '@/service/admin/Admin.service'
 
 const email = ref('')
 const isLoading = ref(false)
@@ -9,15 +10,7 @@ async function handleSubmit(event: Event) {
   isLoading.value = true
 
   try {
-    const res = await fetch('http://localhost:3000/admins/requestReset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value })
-    })
-
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.message || 'Error al enviar correo')
-
+    await requestPasswordReset(email.value)
     alert('Correo enviado con enlace para restablecer contraseña')
   } catch (err: any) {
     alert(`Error: ${err.message}`)

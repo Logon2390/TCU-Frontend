@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { resetPassword } from '@/service/admin/Admin.service'
 
 const newPassword = ref('')
 const confirmPassword = ref('')
@@ -17,19 +18,7 @@ async function handleSubmit(event: Event) {
     isLoading.value = true
 
     try {
-        console.log(route.query.token)
-        const res = await fetch('http://localhost:3000/admins/resetPassword', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                token: route.query.token,
-                newPassword: newPassword.value
-            })
-        })
-
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.message || 'Error al restablecer contraseña')
-
+        await resetPassword(route.query.token as string, newPassword.value)
         alert('Contraseña restablecida correctamente')
         router.push('/admin/Login')
     } catch (err: any) {
