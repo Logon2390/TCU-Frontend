@@ -100,7 +100,8 @@
                     <AppButton v-if="currentStep < steps.length" :button-props="{
                         variant: 'primary',
                         text: 'Siguiente',
-                        onClick: nextStep
+                        onClick: nextStep,
+                        disabled: !isCurrentStepValid
                     }" />
                     <AppButton v-else :button-props="{
                         variant: 'primary',
@@ -116,15 +117,27 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+// Components
 import AppInput from '@/components/common/AppInput.vue'
 import AppSelect from '@/components/common/AppSelect.vue'
 import AppButton from '@/components/common/AppButton.vue'
 import AppStepper from '@/components/features/AppStepper.vue'
+
+//hooks
+import { useRouter } from 'vue-router'
+import { useModal } from '@/composables/useModal'
+
+//types & config
 import { images } from '@/config/images.config'
 import type { StepperStep } from '@/types/component.types'
 import type { Registration } from '@/types/user.types'
 import { GENDER_OPTIONS, VISIT_PURPOSES } from '@/types/form.types'
 
+//services
+import RecordService from '@/service/Record.service'
+
+const modal = useModal()
+const router = useRouter()
 const genderOptions = [...GENDER_OPTIONS]
 const visitPurposes = [...VISIT_PURPOSES]
 const currentStep = ref(1)
@@ -187,10 +200,16 @@ const handlePurposeChange = (event: Event) => {
     userRecord.value.module = target.value
 }
 
-const submitForm = () => {
+const submitForm = async () => {
     if (isCurrentStepValid.value) {
-        alert('enviando')
-        console.log('Datos del formulario:', userRecord.value)
+        try {
+            await RecordService.createRecord(userRecord.value)
+            modal.showToast('success', 'El registro se ha realizado correctamente')
+            router.push('/')
+        } catch (error) {
+            modal.showToast('error', 'Error al registrar el visitante')
+            console.error(error)
+        }
     }
 }
 
