@@ -11,7 +11,7 @@ export const headerConfig: HeaderConfig = {
     {
       title: 'Iniciar sesión',
       icon: 'icon-[lucide--log-in]',
-      route: '/user/Login',
+      route: '/admin/Login',
     },
   ],
 }

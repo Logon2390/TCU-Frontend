@@ -45,8 +45,8 @@ async function handleLogin() {
 
                         <div class="flex items-center justify-between">
                             <div class="text-sm">
-                                <!-- Esto es para después para cuando implementemos la recuperacion de contraseña (cajina) -->
-                                <a href="#" class="font-medium text-green-400 hover:text-green-300">
+                             
+                                <a href="/admin/forgot" class="font-medium text-green-400 hover:text-green-300">
                                     ¿Olvidó su contraseña?
                                 </a>
                             </div>
