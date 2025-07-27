@@ -1,13 +1,13 @@
 <template>
-    <div class="h-[calc(100vh-60px)] bg-gray-900 flex">
+    <div class="h-[calc(100vh-60px)] bg-background flex">
         <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden">
             <img :src="images.registration.hero" :alt="images.registration.alt" class="w-full h-full object-cover" />
             <div class="absolute inset-0 bg-black/50"></div>
             <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-700/20"></div>
             <div class="absolute inset-0 flex items-end p-8 z-30">
                 <div class="text-white">
-                    <h2 class="text-3xl font-bold mb-2 text-white drop-shadow-lg">Bienvenido</h2>
-                    <p class="text-gray-100 text-lg drop-shadow-md">Regístrate para acceder a nuestros servicios</p>
+                    <h2 class="text-3xl font-bold mb-2black drop-shadow-lg">Bienvenido</h2>
+                    <p class="text-lg drop-shadow-md">Regístrate para acceder a nuestros servicios</p>
                 </div>
             </div>
         </div>
@@ -26,7 +26,7 @@
                             'transition-all duration-300',
                             currentStep === 1 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
                         ]">
-                            <h2 class="text-lg font-medium text-white mb-4">Datos Personales</h2>
+                            <h2 class="text-lg font-medium text-black mb-4">Datos Personales</h2>
 
                             <div class="space-y-4">
                                 <AppInput :label-props="{ id: 'documentNumber', label: 'Número de documento' }"
@@ -60,7 +60,7 @@
                             'transition-all duration-300',
                             currentStep === 2 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
                         ]">
-                            <h2 class="text-lg font-medium text-white mb-4">Propósito de Visita</h2>
+                            <h2 class="text-lg font-medium text-black mb-4">Propósito de Visita</h2>
 
                             <div class="space-y-4">
                                 <AppSelect

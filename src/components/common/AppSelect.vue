@@ -1,8 +1,8 @@
 <template>
     <div :class="['flex flex-col', customStyle]">
         <label v-if="labelProps.label" :for="labelProps.id"
-            class="flex items-center gap-2 text-sm font-medium text-gray-300 mb-1">
-            <span v-if="labelProps.icon" :class="labelProps.icon" class="text-gray-300"></span>
+            class="flex items-center gap-2 text-sm font-medium text-text-primary mb-1">
+            <span v-if="labelProps.icon" :class="labelProps.icon" class="text-primary"></span>
             {{ labelProps.label }}
         </label>
 
@@ -10,8 +10,8 @@
             <div v-if="selectProps.icon"
                 class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3">
                 <span
-                    :class="['flex items-center justify-center text-gray-500', selectProps.disabled ? 'opacity-50' : '']">
-                    <span v-if="selectProps.icon" :class="selectProps.icon" class="text-white"></span>
+                    :class="['flex items-center justify-center text-primary', selectProps.disabled ? 'opacity-50' : '']">
+                    <span v-if="selectProps.icon" :class="selectProps.icon" class="text-primary"></span>
                 </span>
             </div>
 
@@ -26,14 +26,14 @@
 
             <div class="pointer-events-none absolute inset-y-0 right-0 z-10 flex items-center pr-3">
                 <span :class="[
-                    'icon-[lucide--chevron-down] h-4 w-4 flex-shrink-0 text-gray-500 transition-transform duration-200',
+                    'icon-[lucide--chevron-down] h-4 w-4 flex-shrink-0 text-    primary transition-transform duration-200',
                     selectProps.disabled ? 'opacity-50' : '',
                     isOpen ? 'rotate-180' : ''
                 ]" />
             </div>
         </div>
 
-        <p v-if="errorProps.onError" class="mt-1 text-sm text-red-500" :aria-label="errorProps.message">
+        <p v-if="errorProps.onError" class="mt-1 text-sm text-error" :aria-label="errorProps.message">
             {{ errorProps.message }}
         </p>
     </div>
@@ -57,13 +57,13 @@ const setIsOpen = (value: boolean) => {
 }
 
 const baseStyles = computed(() =>
-    'w-full rounded-md border border-gray-700 bg-gray-900 text-sm font-medium text-gray-300 h-10 md:h-10 appearance-none focus:outline-none cursor-pointer'
+    'w-full rounded-md border border-secondary bg-background text-sm font-medium text-text-primary h-10 md:h-10 appearance-none focus:outline-none cursor-pointer'
 )
 
 const errorStyles = computed(() =>
     props.errorProps.onError
-        ? 'border-red-500 placeholder:text-red-300 focus:ring-2 focus:ring-red-500'
-        : 'focus:ring-2 focus:ring-blue-500'
+        ? 'border-error placeholder:text-error focus:ring-2 focus:ring-error'
+        : 'focus:ring-2 focus:ring-primary focus:border-transparent'
 )
 
 const iconStyles = computed(() => {

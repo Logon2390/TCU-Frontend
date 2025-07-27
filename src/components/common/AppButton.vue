@@ -3,8 +3,8 @@
         :class="[computedStyle, customStyle, buttonProps.disabled ? disabledStyle : 'cursor-pointer']"
         @click="buttonProps.onClick" :aria-label="buttonProps.text" aria-role="button"
         :aria-disabled="buttonProps.loading">
-        <span v-if="buttonProps.icon && !buttonProps.loading" :class="buttonProps.icon" class="text-gray-300"></span>
-        <span v-if="buttonProps.loading" class="icon-[lucide--loader-circle] animate-spin text-gray-300 text-xl"></span>
+        <span v-if="buttonProps.icon && !buttonProps.loading" :class="buttonProps.icon" class="text-primary"></span>
+        <span v-if="buttonProps.loading" class="icon-[lucide--loader-circle] animate-spin text-primary text-xl"></span>
         <span v-else>{{ buttonProps.text }}</span>
     </button>
 </template>
@@ -21,9 +21,9 @@ const props = defineProps<{
 const baseStyle = 'w-full py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:scale-99 transition-all duration-200 text-white font-medium focus:outline-none focus:ring-offset-2 focus:ring-offset-gray-800';
 const disabledStyle = 'cursor-not-allowed opacity-50';
 
-const defaultStyle = 'bg-green-600 hover:bg-green-700';
-const secondaryStyle = 'bg-blue-600 hover:bg-blue-700';
-const dangerStyle = 'bg-red-600 hover:bg-red-700';
+const defaultStyle = 'bg-primary hover:bg-primary/80';
+const secondaryStyle = 'bg-secondary hover:bg-secondary/80';
+const dangerStyle = 'bg-error hover:bg-error/80';
 
 const computedStyle = computed(() => {
     switch (props.buttonProps.variant) {
