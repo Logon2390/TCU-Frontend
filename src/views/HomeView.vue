@@ -224,17 +224,6 @@ function conoceMas() {
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 border-t border-gray-700 py-8 px-4">
-      <div class="max-w-6xl mx-auto text-center">
-        <div class="flex justify-center mb-4">
-          <LogoCCPP :width="60" :height="60" />
-        </div>
-        <p class="text-gray-400 mb-2">Centro Cívico por la Paz - Pococi</p>
-        <p class="text-gray-500 text-sm">© 2025 Todos los derechos reservados</p>
-      </div>
-    </footer>
-
   </div>
 </template>
 
