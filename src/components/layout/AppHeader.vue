@@ -1,5 +1,5 @@
 <template>
-    <header class="bg-gray-800 sticky top-0 z-50 shadow-md">
+    <header class="bg-background-secondary sticky top-0 z-50 shadow-md">
         <div class="container mx-auto flex justify-between items-center h-16 px-4">
             <div class="flex items-center">
                 <button @click="handleToggleSidebar"
@@ -8,8 +8,9 @@
                     <span class="icon-[lucide--menu] text-2xl"></span>
                 </button>
 
-                <RouterLink to="/">
-                    <LogoCCPP :width="50" :height="50" />
+                <RouterLink to="/" class="cursor-pointer flex items-center gap-2">
+                    <LogoCCPP :width="40" :height="40" />
+                    <span class="hidden md:block text-white text-sm font-bold">Centro Cívico por la Paz - Pococi</span>
                 </RouterLink>
             </div>
             <nav class="flex gap-6">
