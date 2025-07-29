@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { resetPassword } from '@/service/admin/Admin.service'
+import { resetPassword } from '@/service/Admin.service'
 
 const newPassword = ref('')
 const confirmPassword = ref('')
