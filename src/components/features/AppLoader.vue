@@ -1,7 +1,7 @@
 <template>
-    <div class="flex flex-col items-center justify-center p-12 text-gray-500">
+    <div class="flex flex-col items-center justify-center p-12 text-text-secondary">
         <div class="mb-4">
-            <span class="icon-[lucide--loader-2] w-8 h-8 animate-spin text-blue-500" aria-hidden="true" />
+            <span class="icon-[lucide--loader-2] w-8 h-8 animate-spin text-primary" aria-hidden="true" />
         </div>
         <p class="text-sm font-medium">{{ message }}</p>
     </div>
