@@ -1,55 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import Login from '../views/LoginView.vue'
-import UserFormView from '../views/UserFormView.vue'
-import Forgot from '../views/ForgotView.vue'
-import Reset from '../views/ResetView.vue'
-import Page404NotFound from '@/views/NotFoundView.vue'
+import adminRoutes from './admin.routes'
+import publicRoutes from './public.routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView,
-    },
-    {
-      path: '/admin/Login',
-      name: 'login',
-      component: Login,
-    },
-    {
-      path: '/registro',
-      name: 'registro',
-      component: UserFormView,
-    },
-    {
-      path: '/registro',
-      name: 'registro',
-      component: UserFormView,
-    },
-    {
-      path: '/:pathMatch(.*)*',
-      name: 'NotFound404',
-      component: Page404NotFound,
-    },
-    {
-      path: '/admin/forgot',
-      name: 'forgot',
-      component: Forgot,
-    },
-    {
-      path: '/admin/reset/:token',
-      name: 'reset',
-      component: Reset,
-    },
-    {
-      path: '/admin/reset',
-      name: 'reset',
-      component: Reset,
-    },
-  ],
+  routes: [...publicRoutes, ...adminRoutes],
+})
+
+router.beforeEach((to, _from, next) => {
+  const requiresAuth = to.matched.some((record) => record.meta?.requiresAuth)
+  const isAuthenticated = Boolean(localStorage.getItem('authToken'))
+
+  if (requiresAuth && !isAuthenticated) {
+    const redirect = encodeURIComponent(to.fullPath)
+    next({ name: 'login', query: { redirect } })
+  } else if (to.name === 'login' && isAuthenticated) {
+    next({ name: 'admin-overview' })
+  } else {
+    next()
+  }
 })
 
 export default router
