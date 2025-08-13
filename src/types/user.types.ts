@@ -1,12 +1,12 @@
 export type User = {
   document: string
-  fullName: string
+  name: string
   birthDate: string
-  gender: string
+  gender: '' | 'F' | 'M' | 'O'
 }
 
 export type Registration = {
   user: User
   date: string
-  module: string
+  moduleId: number | ''
 }

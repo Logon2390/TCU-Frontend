@@ -41,7 +41,7 @@
                                     placeholder: 'Ingrese su nombre completo',
                                     required: true,
                                     icon: 'icon-[lucide--user-round]'
-                                }" :error-props="{ onError: false }" v-model="userRecord.user.fullName" />
+                                }" :error-props="{ onError: false }" v-model="userRecord.user.name" />
 
                                 <AppInput :label-props="{ id: 'birthDate', label: 'Fecha de nacimiento' }" :input-props="{
                                     type: 'date',
@@ -70,7 +70,7 @@
                                         placeholder: 'Selecciona una opción',
                                         options: visitPurposes,
                                         onChange: handlePurposeChange
-                                    }" :error-props="{ onError: false }" v-model="userRecord.module" />
+                                    }" :error-props="{ onError: false }" v-model="userRecord.moduleId" />
 
 
                                 <div class="flex flex-col items-start justify-center gap-2 text-gray-400 text-sm mt-4">
@@ -131,7 +131,7 @@ import { useModal } from '@/composables/useModal'
 import { images } from '@/config/images.config'
 import type { StepperStep } from '@/types/component.types'
 import type { Registration } from '@/types/user.types'
-import { GENDER_OPTIONS, VISIT_PURPOSES } from '@/types/form.types'
+import { GENDER_OPTIONS, VISIT_PURPOSES, type GenderOption, type VisitPurpose } from '@/types/form.types'
 
 //services
 import RecordService from '@/service/Record.service'
@@ -144,12 +144,12 @@ const currentStep = ref(1)
 const userRecord = ref<Registration>({
     user: {
         document: '',
-        fullName: '',
+        name: '',
         birthDate: '',
-        gender: ''
+        gender: '',
     },
-    date: new Date().toISOString().split('T')[0],
-    module: ''
+    date: '',
+    moduleId: '',
 });
 
 const steps = computed<StepperStep[]>(() => [
@@ -170,9 +170,9 @@ const steps = computed<StepperStep[]>(() => [
 const isCurrentStepValid = computed(() => {
     switch (currentStep.value) {
         case 1:
-            return userRecord.value.user.fullName.trim() && userRecord.value.user.birthDate && userRecord.value.user.gender && userRecord.value.user.document && userRecord.value.user.document.trim()
+            return userRecord.value.user.name.trim() && userRecord.value.user.birthDate && userRecord.value.user.gender && userRecord.value.user.document && userRecord.value.user.document.trim()
         case 2:
-            return userRecord.value.module
+            return userRecord.value.moduleId
         default:
             return false
     }
@@ -192,12 +192,12 @@ const previousStep = () => {
 
 const handleGenderChange = (event: Event) => {
     const target = event.target as HTMLSelectElement
-    userRecord.value.user.gender = target.value
+    userRecord.value.user.gender = target.value as GenderOption['id']
 }
 
 const handlePurposeChange = (event: Event) => {
     const target = event.target as HTMLSelectElement
-    userRecord.value.module = target.value
+    userRecord.value.moduleId = (target.value ? parseInt(target.value) : '') as VisitPurpose['id']
 }
 
 const submitForm = async () => {
