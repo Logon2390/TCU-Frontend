@@ -40,6 +40,7 @@ export type ChartProps = {
   width?: number
   height?: number
   responsive?: boolean
+  plugins?: any[]
 }
 
 export type PaginationProps = {

@@ -1,10 +1,11 @@
 import type { RouteRecordRaw } from 'vue-router'
+import StatsView from '@/views/StatsView.vue'
 
 const adminRoutes: RouteRecordRaw[] = [
   {
-    path: '/admin/overview',
-    name: 'admin-overview',
-    component: () => import('@/views/UsersView.vue'),
+    path: '/admin/stats',
+    name: 'admin-stats',
+    component: StatsView,
     meta: { requiresAuth: true },
   },
 ]
