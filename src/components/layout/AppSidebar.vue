@@ -1,19 +1,19 @@
 <template>
     <div class="sidebar-container">
-        <div v-if="isSidebarOpen" class="fixed inset-0 bg-black/80 z-40" @click="closeSidebar"></div>
+        <div v-if="isSidebarOpen" class="fixed inset-0 bg-background/80 z-40" @click="closeSidebar"></div>
 
         <aside :class="[
-            'fixed top-0 mt-15 left-0 h-full bg-gray-800 text-white shadow-lg transition-transform duration-300 ease-in-out z-50',
+            'fixed top-0 mt-15 left-0 h-full bg-background text-white shadow-lg shadow-black/50 transition-transform duration-300 ease-in-out z-50',
             'w-64 lg:w-72',
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         ]">
-            <div class="p-6 border-b border-gray-700">
+            <div class="p-6 border-b border-secondary">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-white">{{ config.title }}</h2>
+                    <h2 class="text-xl font-bold text-text-primary">{{ config.title }}</h2>
                     <button @click="closeSidebar"
-                        class="text-gray-400 rounded-md flex items-center justify-center transition-colors"
+                        class="text-text-secondary rounded-md flex items-center justify-center transition-colors"
                         title="Cerrar menú">
-                        <span class="icon-[lucide--x] text-2xl hover:text-white"></span>
+                        <span class="icon-[lucide--x] text-2xl hover:text-text-primary"></span>
                     </button>
                 </div>
             </div>
@@ -23,9 +23,9 @@
                     <li v-for="item in config.items" :key="item.id">
                         <RouterLink :to="item.route" :class="[
                             'flex items-center px-4 py-3 rounded-lg transition-colors duration-200',
-                            'hover:bg-gray-700 focus:bg-gray-700 focus:outline-none',
-                            'text-gray-300 hover:text-white',
-                            isActiveRoute(item.route) ? 'bg-gray-700 text-white border-l-4 border-blue-500' : ''
+                            'hover:bg-secondary focus:bg-secondary focus:outline-none',
+                            'text-text-secondary hover:text-white',
+                            isActiveRoute(item.route) ? 'bg-secondary/80 text-white border-l-4 border-primary' : ''
                         ]" @click="closeSidebar">
                             <div class="flex items-center justify-center size-8 mr-3">
                                 <span :class="item.icon" class="text-2xl"></span>

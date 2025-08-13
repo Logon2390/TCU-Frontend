@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import router from '@/router';
 import { ref, onMounted } from 'vue';
 import LogoCCPP from '@/assets/icons/LogoCCPP.vue';
@@ -25,7 +24,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-800 to-gray-800 p-4">
+  <div class="min-h-screen flex items-center justify-center bg-background p-4">
     <div class="max-w-md w-full text-center space-y-8">
       <!-- Ilustración de error con logo centrado -->
       <div class="relative mx-auto w-64 h-64 flex items-center justify-center">

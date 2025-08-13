@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import Header from './components/layout/Header.vue'
-import Sidebar from './components/layout/Sidebar.vue'
+import Header from './components/layout/AppHeader.vue'
+import Footer from './components/layout/AppFooter.vue'
+import Sidebar from './components/layout/AppSidebar.vue'
 </script>
 
 <template>
@@ -11,6 +12,7 @@ import Sidebar from './components/layout/Sidebar.vue'
     <main class="flex-1">
       <Header />
       <RouterView />
+      <Footer />
     </main>
   </div>
 </template>

@@ -87,8 +87,8 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import Loader from '@/components/features/Loader.vue'
-import Pagination from '@/components/common/Pagination.vue'
+import Loader from '@/components/features/AppLoader.vue'
+import Pagination from '@/components/common/AppPagination.vue'
 import type { TableProps, TableColumn } from '@/types/component.types'
 
 const props = withDefaults(defineProps<TableProps>(), {
@@ -157,7 +157,7 @@ const handleSort = (column: TableColumn) => {
     props.onSort?.(column.key, sortDirection.value)
 }
 
-const handleRowClick = (row: Record<string, any>) => {
+const handleRowClick = (row: Record<string, unknown>) => {
     props.onRowClick?.(row)
 }
 

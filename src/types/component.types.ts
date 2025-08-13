@@ -84,6 +84,19 @@ export type TableProps = {
   onSort?: (column: string, direction: 'asc' | 'desc') => void
 }
 
+export type StepperStep = {
+  id: number
+  title: string
+  isCompleted: boolean
+  isActive: boolean
+}
+
+export type StepperProps = {
+  title: string
+  currentStep: number
+  steps: StepperStep[]
+}
+
 export type ErrorProps = {
   onError: boolean
   message?: string

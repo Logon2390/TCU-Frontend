@@ -67,8 +67,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import Select from '@/components/common/Select.vue'
-import Button from '@/components/common/Button.vue'
+import Select from '@/components/common/AppSelect.vue'
+import Button from '@/components/common/AppButton.vue'
 import type { PaginationProps } from '@/types/component.types'
 
 const props = withDefaults(defineProps<PaginationProps>(), {
@@ -104,7 +104,7 @@ const visiblePages = computed(() => {
     const pages = []
     const maxVisible = 5
     let start = Math.max(1, props.currentPage - Math.floor(maxVisible / 2))
-    let end = Math.min(totalPages.value, start + maxVisible - 1)
+    const end = Math.min(totalPages.value, start + maxVisible - 1)
 
     if (end - start + 1 < maxVisible) {
         start = Math.max(1, end - maxVisible + 1)

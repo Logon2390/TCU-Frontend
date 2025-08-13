@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { requestPasswordReset } from '@/service/admin/Admin.service'
+import { requestPasswordReset } from '@/service/Admin.service'
 
 const email = ref('')
 const isLoading = ref(false)
