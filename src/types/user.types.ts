@@ -4,9 +4,3 @@ export type User = {
   birthDate: string
   gender: string
 }
-
-export type Registration = {
-  user: User
-  date: string
-  module: string
-}

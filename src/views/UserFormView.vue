@@ -82,7 +82,7 @@
                                         placeholder: 'Selecciona una opción',
                                         options: visitPurposes.map(module => module.name),
                                         onChange: handlePurposeChange
-                                    }" :error-props="{ onError: false }" v-model="userRecord.module" />
+                                    }" :error-props="{ onError: false }" v-model="selectedModuleName" />
 
 
                                 <div class="flex flex-col items-start justify-center gap-2 text-gray-400 text-sm mt-4">
@@ -146,7 +146,7 @@ import { useFetching } from '@/composables/useFetching'
 //types & config
 import { images } from '@/config/images.config'
 import type { StepperStep } from '@/types/component.types'
-import type { Registration } from '@/types/user.types'
+import type { Registration } from '@/types/form.types'
 import { GENDER_OPTIONS } from '@/types/form.types'
 import type { Module } from '@/types/modules.types'
 
@@ -160,6 +160,7 @@ const router = useRouter()
 const genderOptions = [...GENDER_OPTIONS]
 const visitPurposes = ref<Module[]>([])
 const currentStep = ref(1)
+const selectedModuleName = ref('')
 const userRecord = ref<Registration>({
     user: {
         document: '',
@@ -168,7 +169,7 @@ const userRecord = ref<Registration>({
         gender: ''
     },
     date: new Date().toISOString().split('T')[0],
-    module: ''
+    moduleId: 0
 });
 
 const { isLoading, execute } = useFetching(userService.getUserByDocument)
@@ -184,7 +185,7 @@ const getUserByDocument = async () => {
         userRecord.value.user = {
             document: apiUser.document,
             name: apiUser.name || '',
-            birthDate: apiUser.birthday || apiUser.birthDate || '',
+            birthDate: apiUser.birthday || apiUser.birthDate || new Date(),
             gender: genderLabel
         }
     } else {
@@ -220,7 +221,7 @@ const isCurrentStepValid = computed(() => {
         case 2:
             return userRecord.value.user.name?.trim() && userRecord.value.user.birthDate && userRecord.value.user.gender
         case 3:
-            return userRecord.value.module
+            return selectedModuleName.value.trim() !== '' && userRecord.value.moduleId > 0
         default:
             return false
     }
@@ -253,7 +254,10 @@ const handleGenderChange = (event: Event) => {
 
 const handlePurposeChange = (event: Event) => {
     const target = event.target as HTMLSelectElement
-    userRecord.value.module = target.value
+    const moduleName = target.value
+    selectedModuleName.value = moduleName
+    const selectedModule = visitPurposes.value.find(module => module.name === moduleName)
+    userRecord.value.moduleId = selectedModule?.id || 0
 }
 
 const submitForm = async (event?: Event) => {

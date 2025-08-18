@@ -1,3 +1,5 @@
+import type { User } from './user.types'
+
 export const GENDER_OPTIONS = [
   {
     label: 'Femenino',
@@ -12,4 +14,11 @@ export const GENDER_OPTIONS = [
     value: 'O',
   },
 ] as const
+
+export type Registration = {
+  user: User
+  date: string
+  moduleId: number
+}
+
 export type GenderOption = (typeof GENDER_OPTIONS)[number]
