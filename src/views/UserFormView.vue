@@ -58,7 +58,7 @@
                                 <AppInput :label-props="{ id: 'birthDate', label: 'Fecha de nacimiento' }" :input-props="{
                                     type: 'date',
                                     required: true
-                                }" :error-props="{ onError: false }" v-model="userRecord.user.birthDate" />
+                                }" :error-props="{ onError: false }" v-model="userRecord.user.birthdate" />
 
                                 <AppSelect :label-props="{ id: 'gender', label: 'Género' }" :select-props="{
                                     placeholder: 'Seleccione su género',
@@ -165,7 +165,7 @@ const userRecord = ref<Registration>({
     user: {
         document: '',
         name: '',
-        birthDate: '',
+        birthdate: '',
         gender: ''
     },
     date: new Date().toISOString().split('T')[0],
@@ -185,7 +185,7 @@ const getUserByDocument = async () => {
         userRecord.value.user = {
             document: apiUser.document,
             name: apiUser.name || '',
-            birthDate: apiUser.birthday || apiUser.birthDate || new Date(),
+            birthdate: apiUser.birthday || new Date().toISOString().split('T')[0],
             gender: genderLabel
         }
     } else {
@@ -219,7 +219,7 @@ const isCurrentStepValid = computed(() => {
         case 1:
             return userRecord.value.user.document?.trim() && userRecord.value.user.document.length > 1
         case 2:
-            return userRecord.value.user.name?.trim() && userRecord.value.user.birthDate && userRecord.value.user.gender
+            return userRecord.value.user.name?.trim() && userRecord.value.user.birthdate && userRecord.value.user.gender
         case 3:
             return selectedModuleName.value.trim() !== '' && userRecord.value.moduleId > 0
         default:

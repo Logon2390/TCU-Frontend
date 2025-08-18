@@ -1,6 +1,6 @@
 export type User = {
   document: string
   name: string
-  birthDate: string
+  birthdate: string
   gender: string
 }
