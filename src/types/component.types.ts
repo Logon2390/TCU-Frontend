@@ -30,7 +30,8 @@ export type ButtonProps = {
   icon?: string
   loading?: boolean
   disabled?: boolean
-  onClick?: () => void
+  type?: 'button' | 'submit' | 'reset'
+  onClick?: (event?: Event) => void
 }
 
 export type ChartProps = {

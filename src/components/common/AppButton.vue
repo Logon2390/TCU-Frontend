@@ -1,10 +1,10 @@
 <template>
-    <button type="submit" :disabled="buttonProps.loading || buttonProps.disabled"
+    <button :type="buttonProps.type || 'button'" :disabled="buttonProps.loading || buttonProps.disabled"
         :class="[computedStyle, customStyle, buttonProps.disabled ? disabledStyle : 'cursor-pointer']"
         @click="buttonProps.onClick" :aria-label="buttonProps.text" aria-role="button"
         :aria-disabled="buttonProps.loading">
         <span v-if="buttonProps.icon && !buttonProps.loading" :class="buttonProps.icon" class="text-primary"></span>
-        <span v-if="buttonProps.loading" class="icon-[lucide--loader-circle] animate-spin text-primary text-xl"></span>
+        <span v-if="buttonProps.loading" class="icon-[lucide--loader-circle] animate-spin text-white text-xl"></span>
         <span v-else>{{ buttonProps.text }}</span>
     </button>
 </template>
