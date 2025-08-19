@@ -1,20 +1,4 @@
-export interface FooterLink {
-  label: string
-  url: string
-}
-
-export interface SocialMedia {
-  name: string
-  icon: string
-  url: string
-}
-
-export interface ContactInfo {
-  phone: string
-  email: string
-  address: string
-  schedule: string
-}
+import type { ContactInfo, FooterLink, SocialMedia } from '@/types/layout.types'
 
 export const footerConfig = {
   organization: {
