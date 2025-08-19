@@ -1,5 +1,24 @@
-export const GENDER_OPTIONS = ['Femenino', 'Masculino', 'Otro'] as const
-export const VISIT_PURPOSES = ['Biblioteca', 'Teatro', 'Otro'] as const
+import type { User } from './user.types'
+
+export const GENDER_OPTIONS = [
+  {
+    label: 'Femenino',
+    value: 'F',
+  },
+  {
+    label: 'Masculino',
+    value: 'M',
+  },
+  {
+    label: 'Otro',
+    value: 'O',
+  },
+] as const
+
+export type Registration = {
+  user: User
+  date: string
+  moduleId: number
+}
 
 export type GenderOption = (typeof GENDER_OPTIONS)[number]
-export type VisitPurpose = (typeof VISIT_PURPOSES)[number]
