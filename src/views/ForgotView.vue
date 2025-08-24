@@ -1,19 +1,33 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { requestPasswordReset } from '@/service/Admin.service'
+import Card from '@/components/features/AppCard.vue'
+import Input from '@/components/common/AppInput.vue'
+import Button from '@/components/common/AppButton.vue'
+import LogoCCPP from '@/assets/icons/LogoCCPP.vue'
+import { images } from '@/config/images.config'
+import { useRouter } from 'vue-router'
+import { useModal } from '@/composables/useModal'
 
 const email = ref('')
 const isLoading = ref(false)
+const router = useRouter()
+const modal = useModal()
 
 async function handleSubmit(event: Event) {
   event.preventDefault()
   isLoading.value = true
 
   try {
-    await requestPasswordReset(email.value)
-    alert('Correo enviado con enlace para restablecer contraseña')
+    const response = await requestPasswordReset(email.value)
+    if (response?.success) {
+      modal.showToast('success', 'Correo enviado con enlace para restablecer contraseña')
+      router.push('/admin/Login')
+    } else {
+      modal.showToast('error', response?.message)
+    }
   } catch (err: any) {
-    alert(`Error: ${err.message}`)
+    modal.showToast('error', err.message)
   } finally {
     isLoading.value = false
   }
@@ -22,46 +36,46 @@ async function handleSubmit(event: Event) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 flex flex-col dark:bg-gray-800">
-    <div class="flex-grow flex items-center justify-center p-4">
-      <div class="w-full max-w-md">
-        <div class="bg-gradient-to-r from-red-600 via-white to-blue-600 h-2 rounded-t"></div>
+  <div class="min-h-screen bg-gradient-to-bl from-background to-primary flex flex-row p-4 lg:p-0">
+    <div class="w-1/2 hidden lg:block">
+      <img :src="images.registration.hero" :alt="images.registration.alt" class="w-full h-full object-cover" />
+    </div>
+    <div class="w-full lg:w-1/2 flex items-center justify-center">
+      <Card :variant="'elevated'" :padding="'lg'" :rounded="'xl'">
+        <template #header>
+          <div class="flex items-center gap-3">
+            <LogoCCPP class="w-10 h-10" />
+            <div>
+              <p class="text-sm text-text-secondary">Panel Administrativo</p>
+              <h2 class="text-xl font-semibold text-white">Restablecer contraseña</h2>
+            </div>
+          </div>
+        </template>
 
-        <div class="bg-gray-800 p-8 rounded-b shadow-lg">
-          <h2 class="text-xl font-semibold text-center text-gray-300 mb-6">
-            Restablecer contraseña
-          </h2>
-
+        <div class="items-center">
           <form @submit.prevent="handleSubmit" class="space-y-5">
-            <div>
-              <label for="email" class="block text-sm font-medium text-gray-300 mb-1">
-                Correo electrónico
-              </label>
-              <input type="email" id="email" v-model="email" required
-                class="w-full py-2 px-3 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="jast@gmail.com" />
-            </div>
+            <Input
+              :labelProps="{ id: 'email', label: 'Correo electrónico', icon: 'icon-[lucide--mail]', class: 'text-white' }"
+              :inputProps="{ type: 'email', placeholder: 'admin@dominio.com', required: true }" v-model="email" />
 
-            <div>
-              <button type="submit"
-                class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors duration-200"
-                :disabled="isLoading">
-                {{ isLoading ? 'Enviando...' : 'Enviar enlace' }}
-              </button>
-            </div>
+            <Button
+              :buttonProps="{ variant: 'primary', type: 'submit', text: isLoading ? 'Enviando...' : 'Enviar enlace', loading: isLoading, icon: 'icon-[lucide--send] text-white' }" />
 
             <div class="text-center">
-              <a href="/admin/Login" class="text-sm font-medium text-green-400 hover:text-green-300">
+              <div class="text-sm font-medium text-success hover:underline cursor-pointer"
+                @click="router.push('/admin/Login')">
                 Volver al login
-              </a>
+              </div>
             </div>
           </form>
+        </div>
 
-          <div class="mt-6 text-center text-sm text-gray-400">
+        <template #footer>
+          <div class="mt-6 text-center text-sm text-text-secondary">
             <p>Centro Cívico por la Paz de Pococí, Limón, Costa Rica</p>
           </div>
-        </div>
-      </div>
+        </template>
+      </Card>
     </div>
   </div>
 </template>
