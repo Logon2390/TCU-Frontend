@@ -65,7 +65,7 @@ async function handleLogin() {
                                 </a>
                             </div>
                             <Button
-                                :buttonProps="{ variant: 'primary', text: 'Iniciar sesión', loading: isLoading, icon: 'icon-[lucide--user]', onClick: handleLogin }" />
+                                :buttonProps="{ variant: 'primary', text: 'Iniciar sesión', loading: isLoading, icon: 'icon-[lucide--user] text-white', onClick: handleLogin }" />
                         </form>
                     </div>
                 </div>
