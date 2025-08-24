@@ -40,17 +40,17 @@ const cardClasses = computed(() => {
     switch (props.variant) {
         case 'default':
             classes.push(
-                'bg-gray-800',
+                'bg-background-secondary',
                 'border',
-                'border-gray-700',
+                'border-text-secondary/20',
                 'shadow-md'
             )
             break
         case 'elevated':
             classes.push(
-                'bg-gray-800',
+                'bg-background-secondary',
                 'border',
-                'border-gray-700',
+                'border-text-secondary/20',
                 'shadow-2xl',
                 'shadow-black/25'
             )
@@ -59,17 +59,17 @@ const cardClasses = computed(() => {
             classes.push(
                 'bg-transparent',
                 'border-2',
-                'border-gray-600',
+                'border-text-secondary/30',
                 'backdrop-blur-sm'
             )
             break
         case 'gradient':
             classes.push(
                 'bg-gradient-to-br',
-                'from-red-500/20',
-                'to-purple-600/20',
+                'from-primary/10',
+                'to-info/10',
                 'border',
-                'border-gray-600',
+                'border-text-secondary/30',
                 'backdrop-blur-sm'
             )
             break
@@ -79,13 +79,13 @@ const cardClasses = computed(() => {
         switch (props.variant) {
             case 'default':
             case 'elevated':
-                classes.push('hover:border-gray-600')
+                classes.push('hover:border-text-secondary/40')
                 break
             case 'outlined':
-                classes.push('hover:border-gray-500', 'hover:bg-gray-800/20')
+                classes.push('hover:border-text-secondary/40', 'hover:bg-background-secondary/20')
                 break
             case 'gradient':
-                classes.push('hover:border-gray-500')
+                classes.push('hover:border-text-secondary/40')
                 break
         }
     }
