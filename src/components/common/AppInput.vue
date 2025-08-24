@@ -1,7 +1,7 @@
 <template>
     <div class="relative">
         <label v-if="labelProps.label" :for="labelProps.id"
-            class="flex items-center gap-2 text-sm font-medium text-text-primary mb-1">
+            :class="['flex items-center gap-2 text-sm font-medium mb-1', labelProps.class]">
             <span v-if="labelProps.icon" :class="labelProps.icon" class="text-text-secondary"></span>
             {{ labelProps.label }}
         </label>

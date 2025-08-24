@@ -6,6 +6,7 @@ export type LoaderProps = {
 
 export type LabelProps = {
   id: string
+  class?: string
   label?: string
   icon?: string
   for?: string
