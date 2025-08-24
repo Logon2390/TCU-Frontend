@@ -2,7 +2,14 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { resetPassword } from '@/service/Admin.service'
+import Card from '@/components/features/AppCard.vue'
+import Input from '@/components/common/AppInput.vue'
+import Button from '@/components/common/AppButton.vue'
+import LogoCCPP from '@/assets/icons/LogoCCPP.vue'
+import { images } from '@/config/images.config'
+import { useModal } from '@/composables/useModal'
 
+const modal = useModal()
 const newPassword = ref('')
 const confirmPassword = ref('')
 const isLoading = ref(false)
@@ -12,17 +19,21 @@ const router = useRouter()
 async function handleSubmit(event: Event) {
     event.preventDefault()
     if (newPassword.value !== confirmPassword.value) {
-        alert('Las contraseñas no coinciden')
+        modal.showToast('error', 'Las contraseñas no coinciden')
         return
     }
     isLoading.value = true
 
     try {
-        await resetPassword(route.query.token as string, newPassword.value)
-        alert('Contraseña restablecida correctamente')
-        router.push('/admin/Login')
+        const response = await resetPassword(route.query.token as string, newPassword.value)
+        if (response?.success) {
+            modal.showToast('success', 'Contraseña restablecida correctamente')
+            router.push('/admin/Login')
+        } else {
+            modal.showToast('error', response?.message)
+        }
     } catch (err: any) {
-        alert(`Error: ${err.message}`)
+        modal.showToast('error', err.message)
     } finally {
         isLoading.value = false
     }
@@ -30,47 +41,48 @@ async function handleSubmit(event: Event) {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-100 flex flex-col dark:bg-gray-800">
-        <div class="flex-grow flex items-center justify-center p-4">
-            <div class="w-full max-w-md">
-                <div class="bg-gradient-to-r from-red-600 via-white to-blue-600 h-2 rounded-t"></div>
-
-                <div class="bg-gray-800 p-8 rounded-b shadow-lg">
-                    <h2 class="text-xl font-semibold text-center text-gray-300 mb-6">
-                        Restablecer contraseña
-                    </h2>
-
-                    <form @submit.prevent="handleSubmit" class="space-y-5">
+    <div class="min-h-screen bg-gradient-to-bl from-background to-primary flex flex-row p-4 lg:p-0">
+        <div class="w-1/2 hidden lg:block">
+            <img :src="images.registration.hero" :alt="images.registration.alt" class="w-full h-full object-cover" />
+        </div>
+        <div class="w-full lg:w-1/2 flex items-center justify-center">
+            <Card :variant="'elevated'" :padding="'lg'" :rounded="'xl'">
+                <template #header>
+                    <div class="flex items-center gap-3">
+                        <LogoCCPP class="w-10 h-10" />
                         <div>
-                            <label for="newPassword" class="block text-sm font-medium text-gray-300 mb-1">
-                                Nueva contraseña
-                            </label>
-                            <input type="newPassword" id="newPassword" v-model="newPassword" required
-                                class="w-full py-2 px-3 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="******">
+                            <p class="text-sm text-text-secondary">Panel Administrativo</p>
+                            <h2 class="text-xl font-semibold text-white">Restablecer contraseña</h2>
                         </div>
+                    </div>
+                </template>
 
-                        <div>
-                            <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-1">
-                                Confirmar contraseña
-                            </label>
-                            <input type="newPassword" id="confirmPassword" v-model="confirmPassword" required
-                                class="w-full py-2 px-3 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="******">
-                        </div>
+                <div class="items-center">
+                    <div>
+                        <form @submit.prevent="handleSubmit" class="space-y-5">
+                            <Input
+                                :labelProps="{ id: 'newPassword', label: 'Nueva contraseña', icon: 'icon-[lucide--lock]', class: 'text-white' }"
+                                :inputProps="{ type: 'password', required: true }" v-model="newPassword" />
 
-                        <button type="submit"
-                            class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors duration-200"
-                            :disabled="isLoading">
-                            {{ isLoading ? 'Restableciendo...' : 'Restablecer contraseña' }}
-                        </button>
-                    </form>
+                            <Input
+                                :labelProps="{ id: 'confirmPassword', label: 'Confirmar contraseña', icon: 'icon-[lucide--lock]', class: 'text-white' }"
+                                :inputProps="{ type: 'password', required: true }" v-model="confirmPassword" />
 
-                    <div class="mt-6 text-center text-sm text-gray-400">
-                        <p>Centro Cívico por la Paz de Pococí, Limón, Costa Rica</p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-xs text-warning/90">Asegúrese de usar una contraseña segura.</p>
+                            </div>
+                            <Button
+                                :buttonProps="{ variant: 'primary', type: 'submit', text: isLoading ? 'Restableciendo...' : 'Restablecer contraseña', loading: isLoading, icon: 'icon-[lucide--key-round] text-white' }" />
+                        </form>
                     </div>
                 </div>
-            </div>
+
+                <template #footer>
+                    <div class="mt-6 text-center text-sm text-text-secondary">
+                        <p>Centro Cívico por la Paz de Pococí, Limón, Costa Rica</p>
+                    </div>
+                </template>
+            </Card>
         </div>
     </div>
 </template>
