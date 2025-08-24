@@ -7,11 +7,13 @@ import Card from '@/components/features/AppCard.vue';
 import LogoCCPP from '@/assets/icons/LogoCCPP.vue';
 import { useRouter } from 'vue-router';
 import { images } from '@/config/images.config';
+import { useModal } from '@/composables/useModal';
 
 const router = useRouter();
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
+const modal = useModal();
 
 async function handleLogin() {
     isLoading.value = true;
@@ -21,7 +23,7 @@ async function handleLogin() {
         router.push('/admin/overview');
     } catch (error) {
         console.error('Inicio de sesión fallido:', error);
-        alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
+        modal.showToast('error', 'Error al iniciar sesión. Por favor, verifica tus credenciales.');
     } finally {
         isLoading.value = false;
     }
@@ -60,9 +62,10 @@ async function handleLogin() {
 
                             <div class="flex flex-col items-start justify-between">
                                 <p class="text-xs text-warning/90">Acceso restringido solo a personal autorizado</p>
-                                <a href="/admin/forgot" class="text-sm font-medium text-success hover:underline">
+                                <div class="text-sm font-medium text-success hover:underline cursor-pointer"
+                                    @click="router.push('/admin/forgot')">
                                     ¿Olvidó su contraseña?
-                                </a>
+                                </div>
                             </div>
                             <Button
                                 :buttonProps="{ variant: 'primary', text: 'Iniciar sesión', loading: isLoading, icon: 'icon-[lucide--user] text-white', onClick: handleLogin }" />
