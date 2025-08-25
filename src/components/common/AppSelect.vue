@@ -19,8 +19,8 @@
                 :value="$attrs.modelValue" :class="[baseStyles, errorStyles, iconStyles, disabledStyles]"
                 @focus="setIsOpen(true)" @blur="setIsOpen(false)" @change="selectProps.onChange">
                 <option v-if="selectProps.placeholder" value="" disabled>{{ selectProps.placeholder }}</option>
-                <option v-for="option in selectProps.options" :key="option" :value="option">
-                    {{ option }}
+                <option v-for="option in normalizedOptions" :key="option.id" :value="option.id">
+                    {{ option.name }}
                 </option>
             </select>
 
@@ -76,4 +76,12 @@ const disabledStyles = computed(() =>
         ? 'opacity-50 cursor-not-allowed'
         : ''
 )
+const normalizedOptions = computed(() => {
+    return props.selectProps.options.map((opt) => {
+        if (typeof opt === 'string') {
+            return { id: opt, name: opt }
+        }
+        return opt
+    })
+})
 </script>

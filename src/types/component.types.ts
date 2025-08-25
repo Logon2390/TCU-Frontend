@@ -20,7 +20,7 @@ export type InputProps = {
 }
 
 export type SelectProps = Omit<InputProps, 'type'> & {
-  options: string[]
+  options: Array<string | { id: string | number; name: string }>
   onChange?: (event: Event) => void
 }
 
@@ -41,6 +41,7 @@ export type ChartProps = {
   width?: number
   height?: number
   responsive?: boolean
+  plugins?: any[]
 }
 
 export type PaginationProps = {

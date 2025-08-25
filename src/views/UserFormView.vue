@@ -82,7 +82,7 @@
                                         placeholder: 'Selecciona una opción',
                                         options: visitPurposes.map(module => module.name),
                                         onChange: handlePurposeChange
-                                    }" :error-props="{ onError: false }" v-model="selectedModuleName" />
+                                    }" :error-props="{ onError: false }" v-model="userRecord.moduleId" />
 
 
                                 <div class="flex flex-col items-start justify-center gap-2 text-gray-400 text-sm mt-4">
@@ -146,9 +146,8 @@ import { useFetching } from '@/composables/useFetching'
 //types & config
 import { images } from '@/config/images.config'
 import type { StepperStep } from '@/types/component.types'
-import type { Registration } from '@/types/form.types'
-import { GENDER_OPTIONS } from '@/types/form.types'
-import type { Module } from '@/types/modules.types'
+import type { Registration } from '@/types/user.types'
+import { GENDER_OPTIONS, VISIT_PURPOSES, type GenderOption, type VisitPurpose } from '@/types/form.types'
 
 //services
 import RecordService from '@/service/Record.service'
@@ -165,12 +164,11 @@ const userRecord = ref<Registration>({
     user: {
         document: '',
         name: '',
-        birthday: '',
+        birthDate: '',
         gender: '',
-        lastRecord: new Date().toISOString().split('T')[0]
     },
-    date: new Date().toISOString().split('T')[0],
-    moduleId: 0
+    date: '',
+    moduleId: '',
 });
 
 const { isLoading, execute } = useFetching(userService.getUserByDocument)
@@ -219,11 +217,9 @@ const steps = computed<StepperStep[]>(() => [
 const isCurrentStepValid = computed(() => {
     switch (currentStep.value) {
         case 1:
-            return userRecord.value.user.document?.trim() && userRecord.value.user.document.length > 1
+            return userRecord.value.user.name.trim() && userRecord.value.user.birthDate && userRecord.value.user.gender && userRecord.value.user.document && userRecord.value.user.document.trim()
         case 2:
-            return userRecord.value.user.name?.trim() && userRecord.value.user.birthday && userRecord.value.user.gender
-        case 3:
-            return selectedModuleName.value.trim() !== '' && userRecord.value.moduleId > 0
+            return userRecord.value.moduleId
         default:
             return false
     }
@@ -250,16 +246,12 @@ const previousStep = (event?: Event) => {
 
 const handleGenderChange = (event: Event) => {
     const target = event.target as HTMLSelectElement
-    const selectedLabel = target.value
-    userRecord.value.user.gender = selectedLabel
+    userRecord.value.user.gender = target.value as GenderOption['id']
 }
 
 const handlePurposeChange = (event: Event) => {
     const target = event.target as HTMLSelectElement
-    const moduleName = target.value
-    selectedModuleName.value = moduleName
-    const selectedModule = visitPurposes.value.find(module => module.name === moduleName)
-    userRecord.value.moduleId = selectedModule?.id || 0
+    userRecord.value.moduleId = (target.value ? parseInt(target.value) : '') as VisitPurpose['id']
 }
 
 const submitForm = async (event?: Event) => {

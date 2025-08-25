@@ -1,7 +1,12 @@
 export type User = {
   document: string
   name: string
-  birthday: string
-  gender: string
-  lastRecord: string
+  birthDate: string
+  gender: '' | 'F' | 'M' | 'O'
+}
+
+export type Registration = {
+  user: User
+  date: string
+  moduleId: number | ''
 }

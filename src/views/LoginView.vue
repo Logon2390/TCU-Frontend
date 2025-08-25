@@ -15,7 +15,8 @@ async function handleLogin() {
 
     try {
         await AuthService.login(email.value, password.value);
-        router.push('/admin/overview');
+        const redirect = (router.currentRoute.value.query.redirect as string) || '/admin/overview'
+        router.push(redirect);
     } catch (error) {
         console.error('Inicio de sesión fallido:', error);
         alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
@@ -45,7 +46,7 @@ async function handleLogin() {
 
                         <div class="flex items-center justify-between">
                             <div class="text-sm">
-                             
+
                                 <a href="/admin/forgot" class="font-medium text-green-400 hover:text-green-300">
                                     ¿Olvidó su contraseña?
                                 </a>
