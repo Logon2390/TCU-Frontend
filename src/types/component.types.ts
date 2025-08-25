@@ -6,6 +6,7 @@ export type LoaderProps = {
 
 export type LabelProps = {
   id: string
+  class?: string
   label?: string
   icon?: string
   for?: string
@@ -102,4 +103,12 @@ export type StepperProps = {
 export type ErrorProps = {
   onError: boolean
   message?: string
+}
+
+export type AppCardProps = {
+  variant?: 'default' | 'elevated' | 'outlined' | 'gradient'
+  padding?: 'sm' | 'md' | 'lg' | 'xl'
+  rounded?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+  clickable?: boolean
+  hover?: boolean
 }
