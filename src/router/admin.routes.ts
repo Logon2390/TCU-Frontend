@@ -6,7 +6,7 @@ const adminRoutes: RouteRecordRaw[] = [
     path: '/admin/stats',
     name: 'admin-stats',
     component: StatsView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: false },
   },
 ]
 

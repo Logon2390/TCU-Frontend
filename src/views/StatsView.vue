@@ -455,12 +455,12 @@ onUnmounted(() => {
                     <AppInput :label-props="{ id: 'endDate', label: 'Fecha fin' }"
                         :input-props="{ type: 'date', required: true }" v-model="query.range.end" />
                     <AppSelect :label-props="{ id: 'gender', label: 'Género' }"
-                        :select-props="{ placeholder: 'Todos', options: genderOptions, onChange: handleGenderChange }"
+                        :select-props="{ placeholder: 'Todos', options: genderOptions.map(option => option.name), onChange: handleGenderChange }"
                         :error-props="{ onError: false }" v-model="query.gender" />
                     <AppInput :label-props="{ id: 'exactAge', label: 'Edad exacta (opcional)' }"
                         :input-props="{ type: 'number', placeholder: 'Ej. 27' }" v-model="(query.exactAge as any)" />
                     <AppSelect :label-props="{ id: 'ageBand', label: 'Rango etario' }"
-                        :select-props="{ placeholder: 'Todos', options: ageBandOptions, onChange: handleAgeBandChange }"
+                        :select-props="{ placeholder: 'Todos', options: ageBandOptions.map(option => option.name), onChange: handleAgeBandChange }"
                         :error-props="{ onError: false }" v-model="query.ageBandId" />
                 </div>
 
