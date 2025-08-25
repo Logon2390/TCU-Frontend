@@ -21,7 +21,7 @@ export type InputProps = {
 }
 
 export type SelectProps = Omit<InputProps, 'type'> & {
-  options: Array<string | { id: string | number; name: string }>
+  options: string[]
   onChange?: (event: Event) => void
 }
 
