@@ -13,7 +13,7 @@ const { title, size } = defineProps<{
     size: 'sm' | 'md' | 'lg' | 'xl'
 }>()
 
-const styles = "font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-white to-orange-600 leading-tight"
+const styles = "font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600 leading-tight"
 
 const sizeClass = computed(() => {
     switch (size) {

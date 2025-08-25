@@ -60,7 +60,7 @@ function goToSection(section: string) {
                             class="bg-background-secondary/90 backdrop-blur-sm">
                             <div class="text-center space-y-6">
                                 <div
-                                    class="w-16 h-16 mx-auto bg-gradient-to-r from-primary to-info rounded-full flex items-center justify-center">
+                                    class="w-16 h-16 mx-auto bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
                                     <span class="icon-[lucide--user-plus] size-8 text-white" />
                                 </div>
 
