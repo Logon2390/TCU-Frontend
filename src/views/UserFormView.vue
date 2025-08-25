@@ -23,80 +23,86 @@
                 <div class=" p-0">
                     <form @submit.prevent="handleSubmit">
 
-                        <div v-if="currentStep === 1" :class="[
-                            'transition-all duration-300',
-                            currentStep === 1 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
-                        ]">
-                            <h2 class="text-lg font-medium text-black mb-4">Identificación</h2>
-                            <div class="space-y-4">
-                                <AppInput :label-props="{ id: 'documentNumber', label: 'Número de documento' }"
-                                    :input-props="{
-                                        type: 'text ',
-                                        placeholder: 'Ingrese su número de documento',
-                                        required: true,
-                                        icon: 'icon-[lucide--id-card]'
-                                    }" :error-props="{ onError: false }" v-model="userRecord.user.document" />
-                            </div>
-                        </div>
+                        <Transition :name="transitionName" mode="out-in">
+                            <div :key="currentStep">
+                                <div v-if="currentStep === 1" :class="[
+                                    'transition-all duration-300',
+                                    currentStep === 1 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
+                                ]">
+                                    <h2 class="text-lg font-medium text-black mb-4">Identificación</h2>
+                                    <div class="space-y-4">
+                                        <AppInput :label-props="{ id: 'documentNumber', label: 'Número de documento' }"
+                                            :input-props="{
+                                                type: 'text ',
+                                                placeholder: 'Ingrese su número de documento',
+                                                required: true,
+                                                icon: 'icon-[lucide--id-card]'
+                                            }" :error-props="{ onError: false }" v-model="userRecord.user.document" />
+                                    </div>
+                                </div>
+
+                                <div v-if="currentStep === 2" :class="[
+                                    'transition-all duration-300',
+                                    currentStep === 2 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
+                                ]">
+                                    <h2 class="text-lg font-medium text-black mb-4">Datos Personales</h2>
+
+                                    <div class="space-y-4">
+                                        <AppInput :label-props="{ id: 'fullName', label: 'Nombre completo' }"
+                                            :input-props="{
+                                                type: 'text',
+                                                placeholder: 'Ingrese su nombre completo',
+                                                required: true,
+                                                icon: 'icon-[lucide--user-round]'
+                                            }" :error-props="{ onError: false }" v-model="userRecord.user.name" />
+
+                                        <AppInput :label-props="{ id: 'birthDate', label: 'Fecha de nacimiento' }"
+                                            :input-props="{
+                                                type: 'date',
+                                                required: true
+                                            }" :error-props="{ onError: false }" v-model="userRecord.user.birthday" />
+
+                                        <AppSelect :label-props="{ id: 'gender', label: 'Género' }" :select-props="{
+                                            placeholder: 'Seleccione su género',
+                                            options: genderOptions.map(option => option.label),
+                                            onChange: handleGenderChange
+                                        }" :error-props="{ onError: false }" v-model="userRecord.user.gender" />
+                                    </div>
+                                </div>
+
+                                <div v-if="currentStep === 3" :class="[
+                                    'transition-all duration-300',
+                                    currentStep === 3 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
+                                ]">
+                                    <h2 class="text-lg font-medium text-black mb-4">Propósito de Visita</h2>
+
+                                    <div class="space-y-4">
+                                        <AppSelect
+                                            :label-props="{ id: 'purpose', label: 'Que describe mejor tu propósito de visita', icon: 'icon-[lucide--user-round]' }"
+                                            :select-props="{
+                                                icon: 'icon-[lucide--info]',
+                                                placeholder: 'Selecciona una opción',
+                                                options: visitPurposes.map(module => module.name),
+                                                onChange: handlePurposeChange
+                                            }" :error-props="{ onError: false }" v-model="selectedModuleName" />
 
 
-
-                        <div v-if="currentStep === 2" :class="[
-                            'transition-all duration-300',
-                            currentStep === 2 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
-                        ]">
-                            <h2 class="text-lg font-medium text-black mb-4">Datos Personales</h2>
-
-                            <div class="space-y-4">
-                                <AppInput :label-props="{ id: 'fullName', label: 'Nombre completo' }" :input-props="{
-                                    type: 'text',
-                                    placeholder: 'Ingrese su nombre completo',
-                                    required: true,
-                                    icon: 'icon-[lucide--user-round]'
-                                }" :error-props="{ onError: false }" v-model="userRecord.user.name" />
-
-                                <AppInput :label-props="{ id: 'birthDate', label: 'Fecha de nacimiento' }" :input-props="{
-                                    type: 'date',
-                                    required: true
-                                }" :error-props="{ onError: false }" v-model="userRecord.user.birthday" />
-
-                                <AppSelect :label-props="{ id: 'gender', label: 'Género' }" :select-props="{
-                                    placeholder: 'Seleccione su género',
-                                    options: genderOptions.map(option => option.label),
-                                    onChange: handleGenderChange
-                                }" :error-props="{ onError: false }" v-model="userRecord.user.gender" />
-                            </div>
-                        </div>
-
-                        <div v-if="currentStep === 3" :class="[
-                            'transition-all duration-300',
-                            currentStep === 3 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
-                        ]">
-                            <h2 class="text-lg font-medium text-black mb-4">Propósito de Visita</h2>
-
-                            <div class="space-y-4">
-                                <AppSelect
-                                    :label-props="{ id: 'purpose', label: 'Que describe mejor tu propósito de visita', icon: 'icon-[lucide--user-round]' }"
-                                    :select-props="{
-                                        icon: 'icon-[lucide--info]',
-                                        placeholder: 'Selecciona una opción',
-                                        options: visitPurposes.map(module => module.name),
-                                        onChange: handlePurposeChange
-                                    }" :error-props="{ onError: false }" v-model="selectedModuleName" />
-
-
-                                <div class="flex flex-col items-start justify-center gap-2 text-gray-400 text-sm mt-4">
-                                    <span class="flex items-center gap-2 text-sm text-blue-500 font-medium">
-                                        <span class="icon-[lucide--info] size-4"></span>
-                                        <span>Porque requerimos esta información</span>
-                                    </span>
-                                    <span>
-                                        Los datos que proporciones nos ayudarán a gestionar tu visita de manera más
-                                        eficiente.
-                                    </span>
+                                        <div
+                                            class="flex flex-col items-start justify-center gap-2 text-gray-400 text-sm mt-4">
+                                            <span class="flex items-center gap-2 text-sm text-blue-500 font-medium">
+                                                <span class="icon-[lucide--info] size-4"></span>
+                                                <span>Porque requerimos esta información</span>
+                                            </span>
+                                            <span>
+                                                Los datos que proporciones nos ayudarán a gestionar tu visita de manera
+                                                más
+                                                eficiente.
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </Transition>
                     </form>
                 </div>
 
@@ -161,6 +167,7 @@ const genderOptions = [...GENDER_OPTIONS]
 const visitPurposes = ref<Module[]>([])
 const currentStep = ref(1)
 const selectedModuleName = ref('')
+const transitionName = ref<'slide-left' | 'slide-right'>('slide-left')
 const userRecord = ref<Registration>({
     user: {
         document: '',
@@ -233,6 +240,7 @@ const nextStep = async (event?: Event) => {
     event?.preventDefault()
 
     if (currentStep.value < steps.value.length && isCurrentStepValid.value) {
+        transitionName.value = 'slide-left'
         if (currentStep.value === 1) {
             await getUserByDocument()
         }
@@ -244,6 +252,7 @@ const nextStep = async (event?: Event) => {
 const previousStep = (event?: Event) => {
     event?.preventDefault()
     if (currentStep.value > 1) {
+        transitionName.value = 'slide-right'
         currentStep.value--
     }
 }
@@ -304,3 +313,31 @@ onMounted(async () => {
     }
 })
 </script>
+<style scoped>
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+    transition: all 300ms ease;
+}
+
+.slide-left-enter-from {
+    opacity: 0;
+    transform: translateX(16px);
+}
+
+.slide-left-leave-to {
+    opacity: 0;
+    transform: translateX(-16px);
+}
+
+.slide-right-enter-from {
+    opacity: 0;
+    transform: translateX(-16px);
+}
+
+.slide-right-leave-to {
+    opacity: 0;
+    transform: translateX(16px);
+}
+</style>

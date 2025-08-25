@@ -32,7 +32,6 @@ async function handleSubmit(event: Event) {
     isLoading.value = false
   }
 }
-
 </script>
 
 <template>
@@ -41,7 +40,8 @@ async function handleSubmit(event: Event) {
       <img :src="images.registration.hero" :alt="images.registration.alt" class="w-full h-full object-cover" />
     </div>
     <div class="w-full lg:w-1/2 flex items-center justify-center">
-      <Card :variant="'elevated'" :padding="'lg'" :rounded="'xl'">
+      <Card :variant="'elevated'" :padding="'lg'" :rounded="'xl'" v-motion :initial="{ opacity: 0, y: 16 }"
+        :visibleOnce="{ opacity: 1, y: 0, transition: { duration: 300 } }">
         <template #header>
           <div class="flex items-center gap-3">
             <LogoCCPP class="w-10 h-10" />
