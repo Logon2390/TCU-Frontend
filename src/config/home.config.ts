@@ -1,3 +1,4 @@
+import { footerConfig } from '@/config/footer.config'
 export const homeConfig = {
   hero: {
     title: 'Centro Cívico por la Paz',
@@ -19,18 +20,12 @@ export const homeConfig = {
     title: '¿Quiénes Somos?',
     missionTitle: 'Nuestra Misión',
     mission:
-      'Promover la cultura de paz, la participación ciudadana y el desarrollo sostenible en Pococi, fortaleciendo el tejido social y construyendo espacios de diálogo y convivencia.',
+      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel ea porro quod eaque tempore, illo evenietofficiis doloribus nemo perspiciatis dolorem blanditiis, molestiae molestias repudiandae neque.',
     visionTitle: 'Nuestra Visión',
     vision:
-      'Ser el referente en la construcción de paz y desarrollo comunitario en Pococi, donde cada persona pueda vivir con dignidad, respeto y oportunidades de crecimiento.',
+      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel ea porro quod eaque tempore, illo eveniet officiis doloribus nemo perspiciatis dolorem blanditiis, molestiae molestias repudiandae neque.',
     valuesTitle: 'Nuestros Valores',
-    values: [
-      'Respeto y dignidad humana',
-      'Participación democrática',
-      'Justicia social',
-      'Solidaridad comunitaria',
-      'Transparencia y honestidad',
-    ],
+    values: ['-', '-', '-', '-'],
   },
   programs: {
     id: 'programas',
@@ -39,22 +34,22 @@ export const homeConfig = {
     items: [
       {
         title: 'Educación para la Paz',
-        description: 'Talleres y capacitaciones para promover la cultura de paz en la comunidad.',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         icon: '📚',
       },
       {
         title: 'Mediación Comunitaria',
-        description: 'Resolución pacífica de conflictos entre vecinos y organizaciones.',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         icon: '🤝',
       },
       {
         title: 'Desarrollo Social',
-        description: 'Programas de fortalecimiento del tejido social y participación ciudadana.',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         icon: '🌱',
       },
       {
         title: 'Actividades Culturales',
-        description: 'Eventos y actividades que promueven la identidad y cohesión social.',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         icon: '🎭',
       },
     ],
@@ -62,13 +57,11 @@ export const homeConfig = {
   contact: {
     id: 'contacto',
     title: 'Únete a Nosotros',
-    description:
-      '¿Quieres ser parte del cambio? Contáctanos y descubre cómo puedes contribuir a construir una comunidad más pacífica y próspera.',
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     cards: [
-      { title: 'Ubicación', content: 'Pococi, Limón\nCosta Rica', icon: '📍' },
-      { title: 'Teléfono', content: '+506 XXXX-XXXX', icon: '📞' },
-      { title: 'Email', content: 'info@ccpp-pococi.org', icon: '✉️' },
+      { title: 'Ubicación', content: footerConfig.contact.address, icon: 'icon-[lucide--map-pin]' },
+      { title: 'Teléfono', content: footerConfig.contact.phone, icon: 'icon-[lucide--phone]' },
+      { title: 'Email', content: footerConfig.contact.email, icon: 'icon-[lucide--mail]' },
     ],
-    ctaText: 'Contáctanos Ahora',
   },
 }
