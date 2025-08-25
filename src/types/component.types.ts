@@ -6,6 +6,7 @@ export type LoaderProps = {
 
 export type LabelProps = {
   id: string
+  class?: string
   label?: string
   icon?: string
   for?: string
@@ -20,7 +21,7 @@ export type InputProps = {
 }
 
 export type SelectProps = Omit<InputProps, 'type'> & {
-  options: string[]
+  options: Array<string | { id: string | number; name: string }>
   onChange?: (event: Event) => void
 }
 
@@ -41,6 +42,7 @@ export type ChartProps = {
   width?: number
   height?: number
   responsive?: boolean
+  plugins?: any[]
 }
 
 export type PaginationProps = {
@@ -101,4 +103,12 @@ export type StepperProps = {
 export type ErrorProps = {
   onError: boolean
   message?: string
+}
+
+export type AppCardProps = {
+  variant?: 'default' | 'elevated' | 'outlined' | 'gradient'
+  padding?: 'sm' | 'md' | 'lg' | 'xl'
+  rounded?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+  clickable?: boolean
+  hover?: boolean
 }

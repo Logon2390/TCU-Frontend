@@ -6,7 +6,11 @@ export default {
   login: async (email: string, password: string) => {
     try {
       const response = await api.post(`${AUTH_URL}/login`, { email, password })
-      return response.data
+      const data = response.data
+      if (data?.token) {
+        localStorage.setItem('authToken', data.token)
+      }
+      return data
     } catch (error) {
       console.error(error)
     }

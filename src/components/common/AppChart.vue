@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, toRaw } from 'vue'
 import type { ChartProps } from '@/types/component.types'
 import {
     Chart as ChartJS,
@@ -63,12 +63,13 @@ const createChart = () => {
 
     const config: ChartConfiguration = {
         type: props.type,
-        data: props.data,
+        data: toRaw(props.data),
         options: {
             responsive: props.responsive,
             maintainAspectRatio: false,
-            ...props.options
-        }
+            ...toRaw(props.options)
+        },
+        plugins: props.plugins ? toRaw(props.plugins) : []
     }
 
     chartInstance.value = new ChartJS(chartCanvas.value, config)
@@ -76,23 +77,44 @@ const createChart = () => {
 
 const updateChart = () => {
     if (chartInstance.value) {
-        chartInstance.value.data = props.data
+        chartInstance.value.data = toRaw(props.data)
         if (props.options) {
             chartInstance.value.options = {
                 responsive: props.responsive,
                 maintainAspectRatio: false,
-                ...props.options
+                ...toRaw(props.options)
             }
+        }
+        // Update plugins if provided
+        if (props.plugins) {
+            chartInstance.value.config.plugins = toRaw(props.plugins)
         }
         chartInstance.value.update()
     }
 }
 
-watch(() => props.data, updateChart, { deep: true })
-watch(() => props.options, updateChart, { deep: true })
+// Watch for changes and recreate chart instead of deep watching
+watch(() => [props.data, props.options], () => {
+    createChart()
+}, { flush: 'post' })
 
 onMounted(() => {
     createChart()
+    // Ensure proper sizing for print
+    const handleBeforeAfterPrint = () => {
+        if (chartInstance.value) {
+            try {
+                chartInstance.value.resize()
+            } catch { }
+        }
+    }
+    window.addEventListener('beforeprint', handleBeforeAfterPrint)
+    window.addEventListener('afterprint', handleBeforeAfterPrint)
+        // store to remove later
+        ; (onBeforeUnmount as any)(() => {
+            window.removeEventListener('beforeprint', handleBeforeAfterPrint)
+            window.removeEventListener('afterprint', handleBeforeAfterPrint)
+        })
 })
 
 onBeforeUnmount(() => {
