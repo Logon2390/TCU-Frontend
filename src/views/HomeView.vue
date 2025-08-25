@@ -57,7 +57,7 @@ function scrollToContact() {
       </div>
     </section>
 
-    <section :id="homeConfig.programs.id" class="py-20 px-4 bg-background-secondary">
+    <section :id="homeConfig.programs.id" class="py-20 px-4 bg-primary/20">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-16">
           <AppTitle :title="homeConfig.programs.title" size="md" />

@@ -35,7 +35,7 @@ async function handleSubmit(event: Event) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-bl from-background to-primary flex flex-row p-4 lg:p-0">
+  <div class="min-h-screen bg-gradient-to-bl from-background to-primary/40 flex flex-row p-4 lg:p-0">
     <div class="w-1/2 hidden lg:block">
       <img :src="images.registration.hero" :alt="images.registration.alt" class="w-full h-full object-cover" />
     </div>
