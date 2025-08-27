@@ -54,49 +54,72 @@ const props = withDefaults(defineProps<ChartProps>(), {
 const chartCanvas = ref<HTMLCanvasElement | null>(null)
 const chartInstance = ref<ChartJS | null>(null)
 
+const clone = (val: any) => {
+    try {
+        return val == null ? val : JSON.parse(JSON.stringify(val))
+    } catch {
+        return val
+    }
+}
+
 const createChart = () => {
-    if (!chartCanvas.value) return
+    if (!chartCanvas.value) {
+        return
+    }
 
     if (chartInstance.value) {
+        try { (chartInstance.value as any).stop?.() } catch {}
         chartInstance.value.destroy()
+        chartInstance.value = null
     }
 
     const config: ChartConfiguration = {
         type: props.type,
-        data: toRaw(props.data),
+        data: clone(props.data) as any,
         options: {
             responsive: props.responsive,
             maintainAspectRatio: false,
-            ...toRaw(props.options)
+            ...(clone(props.options) as any)
         },
-        plugins: props.plugins ? toRaw(props.plugins) : []
+        plugins: props.plugins ? (Array.isArray(props.plugins) ? [...props.plugins] : [props.plugins]) : []
     }
 
-    chartInstance.value = new ChartJS(chartCanvas.value, config)
+    const ctx = (chartCanvas.value as HTMLCanvasElement).getContext?.('2d')
+    if (!ctx) {
+        return
+    }
+    chartInstance.value = new ChartJS(ctx as any, config)
 }
 
 const updateChart = () => {
     if (chartInstance.value) {
-        chartInstance.value.data = toRaw(props.data)
+        chartInstance.value.data = clone(props.data) as any
         if (props.options) {
             chartInstance.value.options = {
                 responsive: props.responsive,
                 maintainAspectRatio: false,
-                ...toRaw(props.options)
+                ...(clone(props.options) as any)
             }
         }
-        // Update plugins if provided
-        if (props.plugins) {
-            chartInstance.value.config.plugins = toRaw(props.plugins)
-        }
-        chartInstance.value.update()
+        // Plugins are not safely mutable at runtime; handled via separate recreate watcher
+        try {
+            // Update without animations to avoid timing issues with ctx
+            ;(chartInstance.value as any).update('none')
+        } catch (err) { }
     }
 }
 
-// Watch for changes and recreate chart instead of deep watching
+// Recreate on data/options changes to avoid Chart.js resolver recursion issues
 watch(() => [props.data, props.options], () => {
     createChart()
 }, { flush: 'post' })
+
+// Recreate only if the chart type changes
+watch(() => props.type, () => {
+    createChart()
+})
+
+// Note: Avoid watching plugins to prevent unnecessary re-creations.
 
 onMounted(() => {
     createChart()
@@ -119,6 +142,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     if (chartInstance.value) {
+        try { (chartInstance.value as any).stop?.() } catch {}
         chartInstance.value.destroy()
     }
 })
@@ -147,3 +171,4 @@ defineExpose({
     height: 100% !important;
 }
 </style>
+
