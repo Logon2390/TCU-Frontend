@@ -267,7 +267,7 @@ const ageBandChartOptions = computed<ChartOptions<'bar'>>(() => markRaw({
 
 const timeSeriesChartType: ChartType = 'line'
 const timeSeriesChartData = computed<ChartData<'line'>>(() => ({
-    labels: (stats.value?.visitsByDate || []).map((p) => p.date),
+    labels: (stats.value?.visitsByDate || []).map((p) => p.hour ? `${p.hour}:00` : p.date),
     datasets: [
         {
             label: 'Visitas por día',

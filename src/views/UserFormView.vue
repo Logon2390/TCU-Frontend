@@ -174,9 +174,9 @@ const userRecord = ref<Registration>({
         name: '',
         birthday: '',
         gender: '',
-        lastRecord: new Date().toISOString().split('T')[0]
+        lastRecord: new Date()
     },
-    date: new Date().toISOString().split('T')[0],
+    date: new Date(),
     moduleId: 0
 });
 
@@ -193,9 +193,9 @@ const getUserByDocument = async () => {
         userRecord.value.user = {
             document: apiUser.document,
             name: apiUser.name || '',
-            birthday: apiUser.birthday || new Date().toISOString().split('T')[0],
+            birthday: apiUser.birthday || new Date(),
             gender: genderLabel,
-            lastRecord: new Date().toISOString().split('T')[0]
+            lastRecord: new Date()
         }
     } else {
     }

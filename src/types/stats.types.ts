@@ -16,6 +16,7 @@ export type AgeRangeDistribution = {
 
 export type VisitByDate = {
   date: string
+  hour: number
   count: number
 }
 
