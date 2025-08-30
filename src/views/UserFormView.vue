@@ -176,7 +176,7 @@ const userRecord = ref<Registration>({
         gender: '',
         lastRecord: new Date()
     },
-    date: new Date(),
+    visitedAt: new Date(),
     moduleId: 0
 });
 

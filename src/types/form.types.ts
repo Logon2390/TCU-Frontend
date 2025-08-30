@@ -17,7 +17,7 @@ export const GENDER_OPTIONS = [
 
 export type Registration = {
   user: User
-  date: Date
+  visitedAt: Date
   moduleId: number
 }
 
