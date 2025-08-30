@@ -3,19 +3,141 @@ import { ref, computed, onMounted, onUnmounted, markRaw } from 'vue'
 import AppButton from '@/components/common/AppButton.vue'
 import AppChart from '@/components/common/AppChart.vue'
 import AppTooltip from '@/components/common/AppTooltip.vue'
+import AppInput from '@/components/common/AppInput.vue'
+import AppSelect from '@/components/common/AppSelect.vue'
 import type { ChartData, ChartOptions, ChartType } from 'chart.js'
 import { statsService } from '@/service/Stats.service'
 import type { StatsPeriod, Statistic } from '@/types/stats.types'
+import { GENDER_OPTIONS } from '@/types/form.types'
 import useFetching from '@/composables/useFetching'
 import AppLoader from '@/components/features/AppLoader.vue'
 import AppTable from '@/components/common/AppTable.vue'
+import modulesService from '@/service/Modules.service'
+import { useModal } from '@/composables/useModal'
 
+const modal = useModal()
 const selectedPeriod = ref<StatsPeriod>('today')
 const { isLoading, error, data, execute } = useFetching(statsService.getStatsByPeriod)
-const stats = computed<Statistic | null>(() => (data.value ? (data.value as any).data : null))
+const { error: modulesError, data: modulesData, execute: executeModules } = useFetching(modulesService.getModules)
+const { isLoading: isCustomLoading, error: customError, data: customApiData, execute: executeCustom, reset: resetCustom } = useFetching(statsService.getCustomStats)
+const stats = computed<Statistic | null>(() => {
+    const custom = customApiData.value ? (customApiData.value as any).data : null
+    if (custom) return custom
+    return data.value ? (data.value as any).data : null
+})
 const isFirstLoad = ref(true)
 const windowWidth = ref(window.innerWidth)
 const windowHeight = ref(window.innerHeight)
+
+// Custom report form state
+const startDate = ref<string>('')
+const endDate = ref<string>('')
+const gender = ref<string>('')
+const genderLabel = ref<string>('')
+const moduleLabel = ref<string>('')
+const minAge = ref<string>('')
+const maxAge = ref<string>('')
+const userId = ref<string>('')
+const ageRange = ref<string>('')
+const ageRangeLabel = ref<string>('')
+const moduleId = ref<string>('')
+
+const AGE_BAND_LABEL_MAP: Record<string, string> = {
+    infancia: 'infancia (0-14 años)',
+    juventud: 'juventud (15-24 años)',
+    adultez_joven: 'adultez joven (25-44 años)',
+    adultez_media: 'adultez media (45-64 años)',
+    vejez: 'vejez (65+ años)'
+}
+const ageRangeOptions = Object.values(AGE_BAND_LABEL_MAP)
+
+const onGenderChange = (e: Event) => {
+    const selectedLabel = (e.target as HTMLSelectElement).value
+    genderLabel.value = selectedLabel
+    gender.value = (GENDER_OPTIONS.find(option => option.label === selectedLabel)?.value || '')
+}
+const onAgeRangeChange = (e: Event) => {
+    const selectedLabel = (e.target as HTMLSelectElement).value
+    ageRangeLabel.value = selectedLabel
+    ageRange.value = (Object.entries(AGE_BAND_LABEL_MAP).find(([key, label]) => label === selectedLabel)?.[0] || '')
+}
+
+const onModuleChange = (event: Event) => {
+    const moduleName = (event.target as HTMLSelectElement).value
+    moduleLabel.value = moduleName
+    const selectedModule = modulesData.value?.data.find(module => module.name === moduleName)
+    moduleId.value = selectedModule?.id.toString() || ''
+}
+
+const onNumberChange = (event: Event) => {
+    const age = Number((event.target as HTMLInputElement).value)
+
+    switch ((event.target as HTMLInputElement).id) {
+        case 'minAge':
+            minAge.value = age > 0 ? age : "" as any
+            break
+        case 'maxAge':
+            maxAge.value = age > 0 ? age : "" as any
+            break
+
+        case 'userId':
+            userId.value = age > 0 ? age : "" as any
+            break
+    }
+}
+
+const mapPeriodToLabel = (period: StatsPeriod) => {
+    switch (period) {
+        case 'today':
+            return 'Hoy'
+        case 'month':
+            return 'Mes'
+        case 'year':
+            return 'Año'
+        case 'custom':
+            return 'Período personalizado'
+    }
+}
+
+const clearCustomResults = () => {
+    resetCustom()
+}
+
+const validateForm = (): boolean => {
+    if (!startDate.value || !endDate.value) {
+        modal.showToast('error', 'Seleccione fecha de inicio y fin.')
+        return false
+    }
+    const sd = new Date(startDate.value)
+    const ed = new Date(endDate.value)
+    if (sd > ed) {
+        modal.showToast('error', 'La fecha de inicio no puede ser mayor a la fecha fin.')
+        return false
+    }
+    return true
+}
+
+const handleGenerateReport = async () => {
+    if (!validateForm()) return
+    const payload: any = {
+        startDate: startDate.value,
+        endDate: endDate.value,
+    }
+    if (gender.value) payload.gender = gender.value
+    if (ageRange.value) payload.ageRange = ageRange.value
+    if (minAge.value) payload.minAge = Number(minAge.value)
+    if (maxAge.value) payload.maxAge = Number(maxAge.value)
+    if (userId.value) payload.userId = Number(userId.value)
+    if (moduleId.value) payload.moduleId = Number(moduleId.value)
+
+    await executeCustom(payload)
+
+    if (!customError) {
+        modal.showToast('error', 'Error al generar el reporte')
+    } else {
+        selectedPeriod.value = 'custom'
+    }
+}
 
 const chartDimensions = computed(() => {
     const width = windowWidth.value
@@ -404,6 +526,11 @@ const setPeriod = (type: StatsPeriod) => {
 }
 
 onMounted(async () => {
+    //load modules select
+    if (!modulesData.value) {
+        await executeModules()
+    }
+
     await execute(selectedPeriod.value)
     isFirstLoad.value = false
     window.addEventListener('resize', updateDimensions)
@@ -420,11 +547,14 @@ onUnmounted(() => {
             <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4">
                 <h1 class="text-xl font-semibold text-text-primary">Estadísticas de visitas</h1>
                 <div class="flex gap-2">
-                    <AppButton :button-props="{ variant: 'secondary', text: 'Hoy', onClick: () => setPeriod('today') }"
+                    <AppButton
+                        :button-props="{ variant: 'secondary', text: 'Hoy', onClick: () => { clearCustomResults(); setPeriod('today') } }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
-                    <AppButton :button-props="{ variant: 'secondary', text: 'Mes', onClick: () => setPeriod('month') }"
+                    <AppButton
+                        :button-props="{ variant: 'secondary', text: 'Mes', onClick: () => { clearCustomResults(); setPeriod('month') } }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
-                    <AppButton :button-props="{ variant: 'secondary', text: 'Año', onClick: () => setPeriod('year') }"
+                    <AppButton
+                        :button-props="{ variant: 'secondary', text: 'Año', onClick: () => { clearCustomResults(); setPeriod('year') } }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                     <AppButton
                         :button-props="{ variant: 'primary', text: 'Imprimir/Exportar', icon: 'icon-[lucide--printer] text-white', onClick: handlePrint }"
@@ -443,13 +573,50 @@ onUnmounted(() => {
                     <h2 class="text-lg font-medium text-text-primary">Período</h2>
                 </div>
                 <div class="flex flex-wrap gap-3 items-center text-sm text-gray-600">
-                    <span>Seleccionado: <strong>{{ selectedPeriod }}</strong></span>
+                    <span>Seleccionado: <strong>{{ mapPeriodToLabel(selectedPeriod) }}</strong></span>
                     <span v-if="periodDateRange"
                         class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20">
-                        {{ periodDateRange.start }} – {{ periodDateRange.end }}
+                        {{ new Date(periodDateRange.start || '').toLocaleDateString('es-ES') }} – {{
+                            new Date(periodDateRange.end || '').toLocaleDateString('es-ES') }}
                     </span>
                     <span v-if="!isFirstLoad && isLoading" class="text-gray-500">Actualizando…</span>
                     <span v-if="error" class="text-error">Ocurrió un error al cargar.</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg border border-secondary p-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="icon-[lucide--filter] text-lg text-primary"></span>
+                    <h2 class="text-lg font-medium text-text-primary">Reporte personalizado</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <AppInput v-model="startDate"
+                        :label-props="{ id: 'startDate', label: 'Fecha inicio', icon: 'icon-[lucide--calendar]' }"
+                        :input-props="{ type: 'date', placeholder: 'YYYY-MM-DD' }" />
+                    <AppInput v-model="endDate"
+                        :label-props="{ id: 'endDate', label: 'Fecha fin', icon: 'icon-[lucide--calendar]' }"
+                        :input-props="{ type: 'date', placeholder: 'YYYY-MM-DD' }" />
+                    <AppSelect v-model="genderLabel" :label-props="{ id: 'gender', label: 'Género' }"
+                        :select-props="{ options: GENDER_OPTIONS.map(option => option.label), placeholder: 'Todos', onChange: onGenderChange }" />
+                    <AppSelect v-model="ageRangeLabel" :label-props="{ id: 'ageRange', label: 'Rango etario' }"
+                        :select-props="{ options: ageRangeOptions, placeholder: 'Todos', onChange: onAgeRangeChange }" />
+                    <AppInput v-model="minAge"
+                        :label-props="{ id: 'minAge', label: 'Edad mínima', icon: 'icon-[lucide--gauge]' }"
+                        :input-props="{ type: 'number', placeholder: 'Ej. 18' }" :min="0" :onChange="onNumberChange" />
+                    <AppInput v-model="maxAge"
+                        :label-props="{ id: 'maxAge', label: 'Edad máxima', icon: 'icon-[lucide--gauge]' }"
+                        :input-props="{ type: 'number', placeholder: 'Ej. 99' }" :min="0" :onChange="onNumberChange" />
+                    <AppInput v-model="userId"
+                        :label-props="{ id: 'userId', label: 'Usuario ID', icon: 'icon-[lucide--user]' }"
+                        :input-props="{ type: 'number', placeholder: 'Opcional' }" :min="0"
+                        :onChange="onNumberChange" />
+                    <AppSelect v-model="moduleLabel"
+                        :label-props="{ id: 'moduleId', label: 'Módulo', icon: 'icon-[lucide--component]' }"
+                        :select-props="{ options: modulesData?.data.map(module => module.name) || [], placeholder: 'Todos', onChange: onModuleChange }"
+                        :error-props="{ onError: modulesError, message: 'Error al cargar los módulos' }" />
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
+                    <AppButton
+                        :button-props="{ variant: 'primary', text: isCustomLoading ? 'Generando…' : 'Generar reporte', icon: isCustomLoading ? undefined : 'icon-[lucide--file-bar-chart] text-white', onClick: handleGenerateReport, disabled: isCustomLoading }" />
                 </div>
             </div>
         </div>
@@ -466,7 +633,7 @@ onUnmounted(() => {
                     </p>
                     <p class="mb-3">
                         Durante este período se registraron <strong class="text-primary">{{ statsTextSummary.totalVisits
-                            }} visitas</strong>,
+                        }} visitas</strong>,
                         con un promedio de <strong>{{ statsTextSummary.dailyAverage }} visitas por día</strong>.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -511,8 +678,10 @@ onUnmounted(() => {
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-500">
                         <span class="icon-[lucide--calendar] text-base"></span>
-                        <span class="hidden sm:inline">{{ periodDateRange?.start || '-' }} - {{ periodDateRange?.end ||
-                            '-' }}</span>
+                        <span class="hidden sm:inline">{{ new Date(periodDateRange?.start ||
+                            '').toLocaleDateString('es-ES') }} - {{ new Date(periodDateRange?.end ||
+                                '').toLocaleDateString('es-ES') }}
+                        </span>
                     </div>
                 </div>
             </div>
