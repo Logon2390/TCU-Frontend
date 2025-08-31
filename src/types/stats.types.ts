@@ -1,0 +1,63 @@
+export type StatsPeriod = 'today' | 'month' | 'year' | 'custom'
+
+export type Gender = 'F' | 'M' | 'O'
+
+export type AgeRange =
+  | 'infancia'
+  | 'juventud'
+  | 'adultez_joven'
+  | 'adultez_media'
+  | 'vejez'
+
+export type GenderDistribution = {
+  F: number
+  M: number
+  O: number
+}
+
+export type AgeRangeDistribution = {
+  infancia: number
+  juventud: number
+  adultez_joven: number
+  adultez_media: number
+  vejez: number
+}
+
+export type VisitByDate = {
+  date?: string
+  hour?: number
+  count: number
+}
+
+export type TopUser = {
+  userId: number
+  userName: string
+  visitCount: number
+}
+
+export type TopModule = {
+  name: string
+  visitCount: number
+}
+
+export type Statistic = {
+  totalVisits: number
+  totalUsers: number
+  genderDistribution: GenderDistribution
+  ageRangeDistribution: AgeRangeDistribution
+  averageAge: number
+  visitsByDate: VisitByDate[]
+  topUsers: TopUser[]
+  topModules: TopModule[]
+}
+
+export type GenerateReportBody = {
+  startDate: string
+  endDate: string
+  gender?: Gender
+  minAge?: number
+  maxAge?: number
+  userId?: number
+  ageRange?: AgeRange
+  moduleId?: number
+}

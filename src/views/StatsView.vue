@@ -1,87 +1,192 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, markRaw, watch } from 'vue'
-import AppInput from '@/components/common/AppInput.vue'
-import AppSelect from '@/components/common/AppSelect.vue'
+import { ref, computed, onMounted, onUnmounted, markRaw } from 'vue'
 import AppButton from '@/components/common/AppButton.vue'
 import AppChart from '@/components/common/AppChart.vue'
 import AppTooltip from '@/components/common/AppTooltip.vue'
-import type { StatsQuery } from '@/types/admin.types'
-import { AGE_BANDS, type AgeBandId, type GenderId } from '@/types/admin.types'
-import { generateMockVisits, filterRecords, aggregateStats } from '@/mocks/stats.mock'
+import AppInput from '@/components/common/AppInput.vue'
+import AppSelect from '@/components/common/AppSelect.vue'
 import type { ChartData, ChartOptions, ChartType } from 'chart.js'
+import {
+    valueLabelPlugin,
+    getGenderChartData,
+    getGenderChartOptions,
+    getAgeBandChartData,
+    getAgeBandChartOptions,
+    getTimeSeriesChartData,
+    getTimeSeriesChartOptions,
+    getTopModulesChartData,
+    getTopModulesChartOptions,
+    topUsersColumns,
+} from '@/config/charts.config'
+import { statsService } from '@/service/Stats.service'
+import type { StatsPeriod, Statistic } from '@/types/stats.types'
+import { GENDER_OPTIONS } from '@/types/form.types'
+import useFetching from '@/composables/useFetching'
+import AppLoader from '@/components/features/AppLoader.vue'
+import AppTable from '@/components/common/AppTable.vue'
+import modulesService from '@/service/Modules.service'
+import { useModal } from '@/composables/useModal'
 
-const todayISO = new Date().toISOString().slice(0, 10)
-const firstOfMonth = (() => {
-    const d = new Date()
-    d.setDate(1)
-    return d.toISOString().slice(0, 10)
-})()
+const modal = useModal()
+const selectedPeriod = ref<StatsPeriod | 'custom'>('today')
+const isPeriodChanging = ref(false)
+const lastPeriodChangeTime = ref(0)
+const { isLoading, error, data, execute } = useFetching(statsService.getStatsByPeriod)
+const { error: modulesError, data: modulesData, execute: executeModules } = useFetching(modulesService.getModules)
+const { isLoading: isCustomLoading, error: customError, data: customApiData, execute: executeCustom, reset: resetCustom } = useFetching(statsService.getCustomStats)
+const periodCache = ref<Record<'today' | 'month' | 'year' | 'custom', Statistic | null>>({ today: null, month: null, year: null, custom: null })
 
-const query = ref<StatsQuery>({
-    range: { start: firstOfMonth, end: todayISO },
-    gender: '',
-    exactAge: null,
-    ageBandId: '',
+const stats = computed<Statistic | null>(() => {
+    const custom = customApiData.value ? (customApiData.value as any).data : null
+    if (custom) return custom
+    return periodCache.value[selectedPeriod.value] || (data.value ? (data.value as any).data : null)
 })
-
-const genderOptions = [
-    { id: '', name: 'Todos' },
-    { id: 'F', name: 'Femenino' },
-    { id: 'M', name: 'Masculino' },
-    { id: 'O', name: 'Otro' },
-]
-
-const ageBandOptions = [{ id: '', name: 'Todos' }, ...AGE_BANDS.map((b) => ({ id: b.id, name: b.name }))]
-
-const allRecords = ref(generateMockVisits(query.value.range, 600))
-
-// Debounce de filtros para evitar recálculos excesivos
-const debouncedQuery = ref<StatsQuery>({ ...query.value })
-let debounceTimer: number | null = null
-watch(query, (val) => {
-    if (debounceTimer) window.clearTimeout(debounceTimer)
-    debounceTimer = window.setTimeout(() => {
-        debouncedQuery.value = { ...val }
-    }, 350)
-}, { deep: true })
-
-const filteredRecords = computed(() => filterRecords(allRecords.value, debouncedQuery.value))
-const stats = computed(() => aggregateStats(filteredRecords.value))
-
-// Reactive viewport dimensions
+const isFirstLoad = ref(true)
 const windowWidth = ref(window.innerWidth)
 const windowHeight = ref(window.innerHeight)
 
-// Chart dimensions based on viewport - para charts en grid (2 columnas en lg+)
+// Custom report form state
+const startDate = ref<string>('')
+const endDate = ref<string>('')
+const gender = ref<string>('')
+const genderLabel = ref<string>('')
+const moduleLabel = ref<string>('')
+const minAge = ref<string>('')
+const maxAge = ref<string>('')
+const userId = ref<string>('')
+const ageRange = ref<string>('')
+const ageRangeLabel = ref<string>('')
+const moduleId = ref<string>('')
+
+const AGE_BAND_LABEL_MAP: Record<string, string> = {
+    infancia: 'infancia (0-14 años)',
+    juventud: 'juventud (15-24 años)',
+    adultez_joven: 'adultez joven (25-44 años)',
+    adultez_media: 'adultez media (45-64 años)',
+    vejez: 'vejez (65+ años)'
+}
+const ageRangeOptions = Object.values(AGE_BAND_LABEL_MAP)
+
+const onGenderChange = (e: Event) => {
+    const selectedLabel = (e.target as HTMLSelectElement).value
+    genderLabel.value = selectedLabel
+    gender.value = (GENDER_OPTIONS.find(option => option.label === selectedLabel)?.value || '')
+}
+const onAgeRangeChange = (e: Event) => {
+    const selectedLabel = (e.target as HTMLSelectElement).value
+    ageRangeLabel.value = selectedLabel
+    ageRange.value = (Object.entries(AGE_BAND_LABEL_MAP).find(([key, label]) => label === selectedLabel)?.[0] || '')
+}
+
+const onModuleChange = (event: Event) => {
+    const moduleName = (event.target as HTMLSelectElement).value
+    moduleLabel.value = moduleName
+    const selectedModule = modulesData.value?.data.find(module => module.name === moduleName)
+    moduleId.value = selectedModule?.id.toString() || ''
+}
+
+const onNumberChange = (event: Event) => {
+    const age = Number((event.target as HTMLInputElement).value)
+
+    switch ((event.target as HTMLInputElement).id) {
+        case 'minAge':
+            minAge.value = age > 0 ? age : "" as any
+            break
+        case 'maxAge':
+            maxAge.value = age > 0 ? age : "" as any
+            break
+
+        case 'userId':
+            userId.value = age > 0 ? age : "" as any
+            break
+    }
+}
+
+const mapPeriodToLabel = (period: StatsPeriod) => {
+    switch (period) {
+        case 'today':
+            return 'Hoy'
+        case 'month':
+            return 'Mes'
+        case 'year':
+            return 'Año'
+        case 'custom':
+            return 'Período personalizado'
+    }
+}
+
+const clearCustomResults = () => {
+    resetCustom()
+}
+
+const validateForm = (): boolean => {
+    if (!startDate.value || !endDate.value) {
+        modal.showToast('error', 'Seleccione fecha de inicio y fin.')
+        return false
+    }
+    const sd = new Date(startDate.value)
+    const ed = new Date(endDate.value)
+    if (sd > ed) {
+        modal.showToast('error', 'La fecha de inicio no puede ser mayor a la fecha fin.')
+        return false
+    }
+    return true
+}
+
+const handleGenerateReport = async () => {
+    if (!validateForm()) return
+    const payload: any = {
+        startDate: startDate.value,
+        endDate: endDate.value,
+    }
+    if (gender.value) payload.gender = gender.value
+    if (ageRange.value) payload.ageRange = ageRange.value
+    if (minAge.value) payload.minAge = Number(minAge.value)
+    if (maxAge.value) payload.maxAge = Number(maxAge.value)
+    if (userId.value) payload.userId = Number(userId.value)
+    if (moduleId.value) payload.moduleId = Number(moduleId.value)
+
+    await executeCustom(payload)
+
+    if (customError.value) {
+        modal.showToast('error', 'Error al generar el reporte')
+    } else {
+        selectedPeriod.value = 'custom'
+        const payloadData = (customApiData.value as any)?.data as Statistic | undefined
+        if (payloadData) {
+            periodCache.value.custom = payloadData
+        }
+    }
+}
+
 const chartDimensions = computed(() => {
     const width = windowWidth.value
 
-    if (width < 640) { // mobile
+    if (width < 640) {
         return { width: width - 80, height: 280 }
-    } else if (width < 768) { // sm
+    } else if (width < 768) {
         return { width: width - 100, height: 320 }
-    } else if (width < 1024) { // md
+    } else if (width < 1024) {
         return { width: width - 120, height: 380 }
-    } else if (width < 1280) { // lg - 2 columnas, necesita menos ancho por chart
+    } else if (width < 1280) {
         return { width: Math.min(600, (width - 200) / 2), height: 400 }
-    } else { // xl - 2 columnas, más espacio
+    } else {
         return { width: Math.min(700, (width - 250) / 2), height: 450 }
     }
 })
 
-// Chart de time series - usa todo el ancho disponible
 const timeSeriesChartDimensions = computed(() => {
     const width = windowWidth.value
 
-    if (width < 640) { // mobile
+    if (width < 640) {
         return { width: width - 80, height: 280 }
-    } else if (width < 768) { // sm
+    } else if (width < 768) {
         return { width: width - 100, height: 320 }
-    } else if (width < 1024) { // md
+    } else if (width < 1024) {
         return { width: width - 120, height: 380 }
-    } else if (width < 1280) { // lg
+    } else if (width < 1280) {
         return { width: width - 200, height: 400 }
-    } else { // xl
+    } else {
         return { width: width - 250, height: 500 }
     }
 })
@@ -91,317 +196,148 @@ const updateDimensions = () => {
     windowHeight.value = window.innerHeight
 }
 
-// Resumen textual de estadísticas
+const periodDateRange = computed(() => {
+    const dates = stats.value?.visitsByDate?.map(p => p.date) || []
+    if (!dates.length) return null
+    const sorted = [...dates].sort()
+    return { start: sorted[0], end: sorted[sorted.length - 1] }
+})
+
 const statsTextSummary = computed(() => {
-    const { gender, ageBands, total } = stats.value
-
-    // Género predominante
-    const maxGender = Object.entries(gender).reduce((a, b) => a[1] > b[1] ? a : b)
-    const genderNames = { F: 'femenino', M: 'masculino', O: 'otro' }
-    const genderPercentage = ((maxGender[1] / total) * 100).toFixed(1)
-
-    // Rango etario predominante
-    const maxAgeBand = Object.entries(ageBands).reduce((a, b) => a[1] > b[1] ? a : b)
-    const ageBandNames = {
-        '0-14': 'infancia (0-14 años)',
-        '15-24': 'juventud (15-24 años)',
-        '25-44': 'adultez joven (25-44 años)',
-        '45-64': 'adultez media (45-64 años)',
-        '65+': 'vejez (65+ años)'
+    const s = stats.value
+    if (!s) {
+        return {
+            period: '', totalVisits: 0, dailyAverage: '0',
+            predominantGender: { name: '-', percentage: '0', count: 0 },
+            predominantAgeBand: { name: '-', percentage: '0', count: 0 }
+        }
     }
-    const ageBandPercentage = ((maxAgeBand[1] / total) * 100).toFixed(1)
 
-    // Período de análisis
-    const startDate = new Date(query.value.range.start).toLocaleDateString('es-ES', {
-        day: 'numeric', month: 'long', year: 'numeric'
-    })
-    const endDate = new Date(query.value.range.end).toLocaleDateString('es-ES', {
-        day: 'numeric', month: 'long', year: 'numeric'
-    })
+    const total = s.totalVisits || 0
 
-    // Promedio diario
-    const days = Math.max(1, Math.ceil((new Date(query.value.range.end).getTime() - new Date(query.value.range.start).getTime()) / (1000 * 60 * 60 * 24)) + 1)
+    const entriesG = Object.entries(s.genderDistribution)
+    const maxGender = entriesG.reduce((a, b) => a[1] > b[1] ? a : b)
+    const genderNames: Record<string, string> = { F: 'femenino', M: 'masculino', O: 'otro' }
+    const genderPercentage = total > 0 ? ((maxGender[1] / total) * 100).toFixed(1) : '0.0'
+
+    const entriesA = Object.entries(s.ageRangeDistribution)
+    const maxAgeBand = entriesA.reduce((a, b) => a[1] > b[1] ? a : b)
+    const ageBandLabelMap: Record<string, string> = {
+        infancia: 'infancia (0-14 años)',
+        juventud: 'juventud (15-24 años)',
+        adultez_joven: 'adultez joven (25-44 años)',
+        adultez_media: 'adultez media (45-64 años)',
+        vejez: 'vejez (65+ años)'
+    }
+    const ageBandPercentage = total > 0 ? ((maxAgeBand[1] / total) * 100).toFixed(1) : '0.0'
+
+    const startDate = periodDateRange.value?.start
+        ? new Date(periodDateRange.value.start).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+        : ''
+    const endDate = periodDateRange.value?.end
+        ? new Date(periodDateRange.value.end).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+        : ''
+
+    const days = Math.max(1, s.visitsByDate?.length || 1)
     const dailyAverage = (total / days).toFixed(1)
 
     return {
-        period: `${startDate} al ${endDate}`,
+        period: startDate && endDate ? `${startDate} al ${endDate}` : '',
         totalVisits: total,
         dailyAverage,
         predominantGender: {
-            name: genderNames[maxGender[0] as keyof typeof genderNames],
+            name: genderNames[maxGender[0]] || '-',
             percentage: genderPercentage,
             count: maxGender[1]
         },
         predominantAgeBand: {
-            name: ageBandNames[maxAgeBand[0] as keyof typeof ageBandNames],
+            name: ageBandLabelMap[maxAgeBand[0]] || '-',
             percentage: ageBandPercentage,
             count: maxAgeBand[1]
         }
     }
 })
 
-// Plugin sencillo de data labels para Chart.js (porcentaje/valor)
-const valueLabelPlugin = markRaw({
-    id: 'valueLabelPlugin',
-    afterDatasetsDraw(chart: any) {
-        const { ctx } = chart
-        ctx.save()
-        chart.data.datasets.forEach((dataset: any, i: number) => {
-            const meta = chart.getDatasetMeta(i)
-            if (!meta || meta.hidden) return
-            meta.data.forEach((element: any, index: number) => {
-                const value = dataset.data[index]
-                if (value == null) return
-                const pos = element.tooltipPosition()
-                ctx.font = '12px Montserrat, sans-serif'
-                ctx.fillStyle = '#111827'
-                ctx.textAlign = 'center'
-                ctx.textBaseline = 'middle'
-                ctx.fillText(String(value), pos.x, pos.y - 12)
-            })
-        })
-        ctx.restore()
-    }
-})
-
 const genderChartType: ChartType = 'pie'
-const genderChartData = computed<ChartData<'pie'>>(() => ({
-    labels: ['Femenino', 'Masculino', 'Otro'],
-    datasets: [
-        {
-            label: 'Por género',
-            data: [stats.value.gender.F, stats.value.gender.M, stats.value.gender.O],
-            backgroundColor: ['#3b82f6', '#64748b', '#0ea5e9'],
-            borderColor: ['#2563eb', '#475569', '#0284c7'],
-            borderWidth: 2,
-        },
-    ],
-}))
-const genderChartOptions = computed<ChartOptions<'pie'>>(() => markRaw({
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-        animateRotate: true,
-        animateScale: true,
-        duration: 1000,
-    },
-    layout: {
-        padding: 10
-    },
-    plugins: {
-        legend: {
-            position: 'bottom',
-            labels: {
-                padding: 15,
-                usePointStyle: true,
-                boxWidth: 12,
-            }
-        },
-        tooltip: {
-            backgroundColor: '#1f2937',
-            titleColor: '#ffffff',
-            bodyColor: '#ffffff',
-            borderColor: '#374151',
-            borderWidth: 1,
-        }
-    }
-}))
+const genderChartData = computed<ChartData<'pie'>>(() => {
+    return getGenderChartData(stats.value)
+})
+const genderChartOptions = computed<ChartOptions<'pie'>>(() => getGenderChartOptions())
+const chartPlugins = markRaw([valueLabelPlugin])
 
 const ageBandChartType: ChartType = 'bar'
-const ageBandChartData = computed<ChartData<'bar'>>(() => ({
-    labels: ['0-14', '15-24', '25-44', '45-64', '65+'],
-    datasets: [
-        {
-            label: 'Por rango etario',
-            data: [
-                stats.value.ageBands['0-14'],
-                stats.value.ageBands['15-24'],
-                stats.value.ageBands['25-44'],
-                stats.value.ageBands['45-64'],
-                stats.value.ageBands['65+'],
-            ],
-            backgroundColor: ['#059669', '#3b82f6', '#0ea5e9', '#f59e0b', '#dc2626'],
-            borderColor: ['#047857', '#2563eb', '#0284c7', '#d97706', '#b91c1c'],
-            borderWidth: 2,
-            borderRadius: 4,
-        },
-    ],
-}))
-const ageBandChartOptions = computed<ChartOptions<'bar'>>(() => markRaw({
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-        duration: 1200,
-        easing: 'easeOutQuart',
-    },
-    layout: {
-        padding: {
-            top: 10,
-            bottom: 10,
-            left: 10,
-            right: 10
-        }
-    },
-    scales: {
-        y: {
-            beginAtZero: true,
-            grid: {
-                color: '#f3f4f6',
-            },
-            ticks: {
-                color: '#6b7280',
-                maxTicksLimit: 6
-            }
-        },
-        x: {
-            grid: {
-                display: false,
-            },
-            ticks: {
-                color: '#6b7280',
-                maxRotation: 0
-            }
-        }
-    },
-    plugins: {
-        legend: {
-            display: false,
-        },
-        tooltip: {
-            backgroundColor: '#1f2937',
-            titleColor: '#ffffff',
-            bodyColor: '#ffffff',
-            borderColor: '#374151',
-            borderWidth: 1,
-        }
-    }
-}))
+const ageBandChartData = computed<ChartData<'bar'>>(() => {
+    return getAgeBandChartData(stats.value)
+})
+const ageBandChartOptions = computed<ChartOptions<'bar'>>(() => getAgeBandChartOptions())
 
 const timeSeriesChartType: ChartType = 'line'
-const timeSeriesChartData = computed<ChartData<'line'>>(() => ({
-    labels: stats.value.timeSeries.map((p) => p.date),
-    datasets: [
-        {
-            label: 'Visitas por día',
-            data: stats.value.timeSeries.map((p) => p.count),
-            borderColor: '#0ea5e9',
-            backgroundColor: 'rgba(14,165,233,0.2)',
-            fill: true,
-            tension: 0.4,
-            borderWidth: 3,
-            pointBackgroundColor: '#0ea5e9',
-            pointBorderColor: '#ffffff',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-        },
-    ],
-}))
-const timeSeriesChartOptions = computed<ChartOptions<'line'>>(() => markRaw({
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-        duration: 1500,
-        easing: 'easeInOutCubic',
-    },
-    layout: {
-        padding: {
-            top: 10,
-            bottom: 10,
-            left: 10,
-            right: 10
-        }
-    },
-    scales: {
-        y: {
-            beginAtZero: true,
-            grid: {
-                color: '#f3f4f6',
-            },
-            ticks: {
-                color: '#6b7280',
-                maxTicksLimit: 6
-            }
-        },
-        x: {
-            grid: {
-                color: '#f3f4f6',
-            },
-            ticks: {
-                color: '#6b7280',
-                maxRotation: 45,
-                maxTicksLimit: 8
-            }
-        }
-    },
-    plugins: {
-        legend: {
-            display: false,
-        },
-        tooltip: {
-            backgroundColor: '#1f2937',
-            titleColor: '#ffffff',
-            bodyColor: '#ffffff',
-            borderColor: '#374151',
-            borderWidth: 1,
-        }
-    }
-}))
+const timeSeriesChartData = computed<ChartData<'line'>>(() => {
+    return getTimeSeriesChartData(stats.value)
+})
+const timeSeriesChartOptions = computed<ChartOptions<'line'>>(() => getTimeSeriesChartOptions())
 
-const handleGenderChange = (e: Event) => {
-    const target = e.target as HTMLSelectElement
-    query.value.gender = target.value as '' | GenderId
-}
+const topModulesChartType: ChartType = 'bar'
+const topModulesChartData = computed<ChartData<'bar'>>(() => {
+    return getTopModulesChartData(stats.value)
+})
+const topModulesChartOptions = computed<ChartOptions<'bar'>>(() => getTopModulesChartOptions())
 
-const handleAgeBandChange = (e: Event) => {
-    const target = e.target as HTMLSelectElement
-    query.value.ageBandId = target.value as '' | AgeBandId
-}
+const topUsersData = computed(() => (stats.value?.topUsers || []))
 
 const handlePrint = () => {
-    // Pequeño delay para asegurar que los charts estén completamente renderizados
     setTimeout(() => {
         window.print()
     }, 100)
 }
 
-const setDateRange = (type: 'day' | 'week' | 'month' | 'semester') => {
-    const today = new Date()
-    const start = new Date(today)
+const setPeriod = async (type: StatsPeriod) => {
+    // Prevenir cambios múltiples rápidos con debounce
+    const now = Date.now()
+    if (isPeriodChanging.value || (now - lastPeriodChangeTime.value) < 200) {
+        return
+    }
+    lastPeriodChangeTime.value = now
 
-    switch (type) {
-        case 'day':
-            break // start = today
-        case 'week':
-            start.setDate(today.getDate() - 7)
-            break
-        case 'month':
-            start.setMonth(today.getMonth() - 1)
-            break
-        case 'semester':
-            start.setMonth(today.getMonth() - 6)
-            break
+    if (periodCache.value[type]) {
+        // Agregar un pequeño delay incluso para datos cacheados para dar tiempo a Chart.js
+        isPeriodChanging.value = true
+        await new Promise(resolve => setTimeout(resolve, 100))
+        selectedPeriod.value = type
+        await new Promise(resolve => setTimeout(resolve, 50)) // Delay adicional después del cambio
+        isPeriodChanging.value = false
+        return
     }
 
-    query.value.range = {
-        start: start.toISOString().slice(0, 10),
-        end: today.toISOString().slice(0, 10)
+    isPeriodChanging.value = true
+    try {
+        const resp = await execute(type)
+        const payload = (resp as any)?.data as Statistic | undefined
+        if (payload) {
+            periodCache.value[type] = payload
+            // Solo cambiar el período DESPUÉS de que los datos estén listos
+            selectedPeriod.value = type
+        }
+    } catch (error) {
+        // Silent error handling
+    } finally {
+        isPeriodChanging.value = false
     }
-    allRecords.value = generateMockVisits(query.value.range, 600)
 }
 
-const resetFilters = () => {
-    query.value = {
-        range: { start: firstOfMonth, end: todayISO },
-        gender: '',
-        exactAge: null,
-        ageBandId: '',
+onMounted(async () => {
+    // load modules select
+    if (!modulesData.value) {
+        await executeModules()
     }
-    allRecords.value = generateMockVisits(query.value.range, 600)
-}
-
-onMounted(() => {
-    // Regenerate data if date range changes across months
+    if (!periodCache.value[selectedPeriod.value]) {
+        const resp = await execute(selectedPeriod.value)
+        const payload = (resp as any)?.data as Statistic | undefined
+        if (payload) {
+            periodCache.value[selectedPeriod.value] = payload
+        }
+    }
+    isFirstLoad.value = false
     window.addEventListener('resize', updateDimensions)
 })
 
@@ -412,91 +348,86 @@ onUnmounted(() => {
 
 <template>
     <div class="min-h-screen bg-background flex flex-col">
-        <!-- Header -->
-        <div class="bg-white border-b border-secondary">
+        <div class="bg-background backdrop-blur supports-[backdrop-filter]:bg-background/70 sticky top-16 z-10">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4">
                 <h1 class="text-xl font-semibold text-text-primary">Estadísticas de visitas</h1>
-                <div class="flex flex-col sm:flex-row gap-2">
+                <div class="flex gap-2">
+                    <AppButton
+                        :button-props="{ variant: 'secondary', text: 'Hoy', onClick: () => { clearCustomResults(); setPeriod('today') }, disabled: isPeriodChanging || selectedPeriod === 'today' }"
+                        customStyle="w-1/4 md:w-full text-xs sm:text-base" />
+                    <AppButton
+                        :button-props="{ variant: 'secondary', text: 'Mes', onClick: () => { clearCustomResults(); setPeriod('month') }, disabled: isPeriodChanging || selectedPeriod === 'month' }"
+                        customStyle="w-1/4 md:w-full text-xs sm:text-base" />
+                    <AppButton
+                        :button-props="{ variant: 'secondary', text: 'Año', onClick: () => { clearCustomResults(); setPeriod('year') }, disabled: isPeriodChanging || selectedPeriod === 'year' }"
+                        customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                     <AppButton
                         :button-props="{ variant: 'primary', text: 'Imprimir/Exportar', icon: 'icon-[lucide--printer] text-white', onClick: handlePrint }"
-                        customStyle="w-full sm:w-auto px-3 py-2" />
+                        customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                 </div>
             </div>
         </div>
 
-        <!-- Filters -->
         <div class="bg-background p-4 space-y-4">
+            <div v-if="isFirstLoad && isLoading" class="bg-white rounded-lg border border-secondary">
+                <AppLoader message="Cargando estadísticas..." />
+            </div>
             <div class="bg-white rounded-lg border border-secondary p-4">
-                <h2 class="text-lg font-medium text-text-primary mb-4">Filtros</h2>
-
-                <!-- Quick Date Range Buttons -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-text-primary mb-2">Rango rápido</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        <AppButton
-                            :button-props="{ variant: 'secondary', text: 'Día', onClick: () => setDateRange('day') }"
-                            customStyle="w-full px-3 py-2 text-sm" />
-                        <AppButton
-                            :button-props="{ variant: 'secondary', text: 'Semana', onClick: () => setDateRange('week') }"
-                            customStyle="w-full px-3 py-2 text-sm" />
-                        <AppButton
-                            :button-props="{ variant: 'secondary', text: 'Mes', onClick: () => setDateRange('month') }"
-                            customStyle="w-full px-3 py-2 text-sm" />
-                        <AppButton
-                            :button-props="{ variant: 'secondary', text: 'Semestre', onClick: () => setDateRange('semester') }"
-                            customStyle="w-full px-3 py-2 text-sm" />
-                    </div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="icon-[lucide--settings-2] text-lg text-primary"></span>
+                    <h2 class="text-lg font-medium text-text-primary">Período</h2>
                 </div>
-
-                <!-- Custom Filters -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <AppInput :label-props="{ id: 'startDate', label: 'Fecha inicio' }"
-                        :input-props="{ type: 'date', required: true }" v-model="query.range.start" />
-                    <AppInput :label-props="{ id: 'endDate', label: 'Fecha fin' }"
-                        :input-props="{ type: 'date', required: true }" v-model="query.range.end" />
-                    <AppSelect :label-props="{ id: 'gender', label: 'Género' }"
-                        :select-props="{ placeholder: 'Todos', options: genderOptions.map(option => option.name), onChange: handleGenderChange }"
-                        :error-props="{ onError: false }" v-model="query.gender" />
-                    <AppInput :label-props="{ id: 'exactAge', label: 'Edad exacta (opcional)' }"
-                        :input-props="{ type: 'number', placeholder: 'Ej. 27' }" v-model="(query.exactAge as any)" />
-                    <AppSelect :label-props="{ id: 'ageBand', label: 'Rango etario' }"
-                        :select-props="{ placeholder: 'Todos', options: ageBandOptions.map(option => option.name), onChange: handleAgeBandChange }"
-                        :error-props="{ onError: false }" v-model="query.ageBandId" />
-                </div>
-
-                <!-- Chips de filtros activos -->
-                <div class="flex flex-wrap gap-2 mt-4">
-                    <span
+                <div class="flex flex-wrap gap-3 items-center text-sm text-gray-600">
+                    <span>Seleccionado: <strong>{{ mapPeriodToLabel(selectedPeriod) }}</strong></span>
+                    <span v-if="periodDateRange"
                         class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20">
-                        {{ query.range.start }} – {{ query.range.end }}
+                        {{ new Date(periodDateRange.start || '').toLocaleDateString('es-ES') }} – {{
+                            new Date(periodDateRange.end || '').toLocaleDateString('es-ES') }}
                     </span>
-                    <span v-if="query.gender"
-                        class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs bg-info/10 text-info border border-info/20">
-                        Género: {{ query.gender }}
-                        <button class="ml-1" @click="query.gender = ''" aria-label="Quitar género">✕</button>
-                    </span>
-                    <span v-if="query.exactAge !== null"
-                        class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs bg-success/10 text-success border border-success/20">
-                        Edad: {{ query.exactAge }}
-                        <button class="ml-1" @click="query.exactAge = null" aria-label="Quitar edad">✕</button>
-                    </span>
-                    <span v-if="query.ageBandId"
-                        class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs bg-warning/10 text-warning border border-warning/20">
-                        Rango: {{ query.ageBandId }}
-                        <button class="ml-1" @click="query.ageBandId = ''" aria-label="Quitar rango">✕</button>
-                    </span>
-                    <button
-                        class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
-                        @click="resetFilters">
-                        Limpiar filtros
-                    </button>
+                    <span v-if="!isFirstLoad && (isLoading || isPeriodChanging)"
+                        class="text-gray-500">Actualizando…</span>
+                    <span v-if="error" class="text-error">Ocurrió un error al cargar.</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg border border-secondary p-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="icon-[lucide--filter] text-lg text-primary"></span>
+                    <h2 class="text-lg font-medium text-text-primary">Reporte personalizado</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <AppInput v-model="startDate"
+                        :label-props="{ id: 'startDate', label: 'Fecha inicio', icon: 'icon-[lucide--calendar]' }"
+                        :input-props="{ type: 'date', placeholder: 'YYYY-MM-DD' }" />
+                    <AppInput v-model="endDate"
+                        :label-props="{ id: 'endDate', label: 'Fecha fin', icon: 'icon-[lucide--calendar]' }"
+                        :input-props="{ type: 'date', placeholder: 'YYYY-MM-DD' }" />
+                    <AppSelect v-model="genderLabel" :label-props="{ id: 'gender', label: 'Género' }"
+                        :select-props="{ options: GENDER_OPTIONS.map(option => option.label), placeholder: 'Todos', onChange: onGenderChange }" />
+                    <AppSelect v-model="ageRangeLabel" :label-props="{ id: 'ageRange', label: 'Rango etario' }"
+                        :select-props="{ options: ageRangeOptions, placeholder: 'Todos', onChange: onAgeRangeChange }" />
+                    <AppInput v-model="minAge"
+                        :label-props="{ id: 'minAge', label: 'Edad mínima', icon: 'icon-[lucide--gauge]' }"
+                        :input-props="{ type: 'number', placeholder: 'Ej. 18' }" :min="0" :onChange="onNumberChange" />
+                    <AppInput v-model="maxAge"
+                        :label-props="{ id: 'maxAge', label: 'Edad máxima', icon: 'icon-[lucide--gauge]' }"
+                        :input-props="{ type: 'number', placeholder: 'Ej. 99' }" :min="0" :onChange="onNumberChange" />
+                    <AppInput v-model="userId"
+                        :label-props="{ id: 'userId', label: 'Usuario ID', icon: 'icon-[lucide--user]' }"
+                        :input-props="{ type: 'number', placeholder: 'Opcional' }" :min="0"
+                        :onChange="onNumberChange" />
+                    <AppSelect v-model="moduleLabel"
+                        :label-props="{ id: 'moduleId', label: 'Módulo', icon: 'icon-[lucide--component]' }"
+                        :select-props="{ options: modulesData?.data.map(module => module.name) || [], placeholder: 'Todos', onChange: onModuleChange }"
+                        :error-props="{ onError: modulesError, message: 'Error al cargar los módulos' }" />
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
+                    <AppButton
+                        :button-props="{ variant: 'primary', text: isCustomLoading ? 'Generando…' : 'Generar reporte', icon: isCustomLoading ? undefined : 'icon-[lucide--file-bar-chart] text-white', onClick: handleGenerateReport, disabled: isCustomLoading }" />
                 </div>
             </div>
         </div>
 
-        <!-- Stats Content -->
         <div class="p-4 space-y-4">
-            <!-- Resumen Textual -->
             <div class="bg-white rounded-lg border border-secondary p-4">
                 <div class="flex items-center gap-2 mb-3">
                     <span class="icon-[lucide--file-text] text-lg text-primary"></span>
@@ -508,7 +439,7 @@ onUnmounted(() => {
                     </p>
                     <p class="mb-3">
                         Durante este período se registraron <strong class="text-primary">{{ statsTextSummary.totalVisits
-                        }} visitas</strong>,
+                            }} visitas</strong>,
                         con un promedio de <strong>{{ statsTextSummary.dailyAverage }} visitas por día</strong>.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -532,7 +463,6 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <!-- Total Visits Card -->
             <div class="bg-white rounded-lg border border-secondary p-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -549,17 +479,19 @@ onUnmounted(() => {
                                         class="icon-[lucide--info] text-sm text-gray-400 hover:text-primary transition-colors cursor-help"></span>
                                 </AppTooltip>
                             </div>
-                            <p class="text-3xl font-bold text-primary mt-1">{{ stats.total }}</p>
+                            <p class="text-3xl font-bold text-primary mt-1">{{ stats?.totalVisits || 0 }}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-500">
                         <span class="icon-[lucide--calendar] text-base"></span>
-                        <span class="hidden sm:inline">{{ query.range.start }} - {{ query.range.end }}</span>
+                        <span class="hidden sm:inline">{{ new Date(periodDateRange?.start ||
+                            '').toLocaleDateString('es-ES') }} - {{ new Date(periodDateRange?.end ||
+                                '').toLocaleDateString('es-ES') }}
+                        </span>
                     </div>
                 </div>
             </div>
 
-            <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 print-grid">
                 <div class="bg-white rounded-lg border border-secondary p-4 chart-section">
                     <div class="flex items-center gap-2 mb-4">
@@ -571,9 +503,14 @@ onUnmounted(() => {
                         </AppTooltip>
                     </div>
                     <div class="w-full max-w-full overflow-hidden" :style="{ height: chartDimensions.height + 'px' }">
-                        <AppChart :type="genderChartType" :data="genderChartData" :options="genderChartOptions"
-                            :plugins="[valueLabelPlugin]" :width="chartDimensions.width"
-                            :height="chartDimensions.height" :responsive="true" />
+                        <AppChart
+                            v-if="!isPeriodChanging && stats && Array.isArray(genderChartData?.datasets) && (genderChartData.datasets[0]?.data?.length || 0) > 0"
+                            :key="`gender-${selectedPeriod}-${stats?.totalVisits || 0}`" :type="genderChartType"
+                            :data="genderChartData" :options="genderChartOptions" :plugins="chartPlugins"
+                            :width="chartDimensions.width" :height="chartDimensions.height" :responsive="true" />
+                        <div v-else-if="isPeriodChanging" class="flex items-center justify-center h-full">
+                            <AppLoader message="Cargando datos..." />
+                        </div>
                     </div>
                 </div>
 
@@ -588,15 +525,20 @@ onUnmounted(() => {
                                 class="icon-[lucide--info] text-sm text-gray-400 hover:text-primary transition-colors cursor-help no-print"></span>
                         </AppTooltip>
                     </div>
-                    <div class="w-full max-w-full overflow-hidden" :style="{ height: chartDimensions.height + 'px' }">
-                        <AppChart :type="ageBandChartType" :data="ageBandChartData" :options="ageBandChartOptions"
-                            :plugins="[valueLabelPlugin]" :width="chartDimensions.width"
-                            :height="chartDimensions.height" :responsive="true" />
+                    <div class="w-full max-w-full overflow-hidden"
+                        :style="{ height: (chartDimensions.height + 60) + 'px' }">
+                        <AppChart
+                            v-if="!isPeriodChanging && stats && Array.isArray(ageBandChartData?.datasets) && (ageBandChartData.datasets[0]?.data?.length || 0) > 0"
+                            :key="`ageband-${selectedPeriod}-${stats?.totalVisits || 0}`" :type="ageBandChartType"
+                            :data="ageBandChartData" :options="ageBandChartOptions" :plugins="chartPlugins"
+                            :width="chartDimensions.width" :height="chartDimensions.height + 60" :responsive="true" />
+                        <div v-else-if="isPeriodChanging" class="flex items-center justify-center h-full">
+                            <AppLoader message="Cargando datos..." />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Time Series Chart (Full Width) -->
             <div class="bg-white rounded-lg border border-secondary p-4 chart-section">
                 <div class="flex items-center gap-2 mb-4">
                     <span class="icon-[lucide--trending-up] text-lg text-primary"></span>
@@ -609,17 +551,77 @@ onUnmounted(() => {
                 </div>
                 <div class="w-full max-w-full overflow-hidden"
                     :style="{ height: timeSeriesChartDimensions.height + 'px' }">
-                    <AppChart :type="timeSeriesChartType" :data="timeSeriesChartData" :options="timeSeriesChartOptions"
+                    <AppChart
+                        v-if="!isPeriodChanging && stats && Array.isArray(timeSeriesChartData?.datasets) && (timeSeriesChartData.datasets[0]?.data?.length || 0) > 0"
+                        :key="`timeseries-${selectedPeriod}-${stats?.visitsByDate?.length || 0}`"
+                        :type="timeSeriesChartType" :data="timeSeriesChartData" :options="timeSeriesChartOptions"
                         :width="timeSeriesChartDimensions.width" :height="timeSeriesChartDimensions.height"
                         :responsive="true" />
+                    <div v-else-if="isPeriodChanging" class="flex items-center justify-center h-full">
+                        <AppLoader message="Cargando datos..." />
+                    </div>
                 </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-secondary p-4 chart-section">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="icon-[lucide--list-ordered] text-lg text-primary"></span>
+                    <h3 class="text-lg font-medium text-text-primary">Top módulos</h3>
+                    <AppTooltip content="Módulos más visitados en el período seleccionado" size="xl">
+                        <span
+                            class="icon-[lucide--info] text-sm text-gray-400 hover:text-primary transition-colors cursor-help no-print"></span>
+                    </AppTooltip>
+                </div>
+                <div class="w-full max-w-full overflow-hidden" :style="{ height: chartDimensions.height + 'px' }">
+                    <AppChart
+                        v-if="!isPeriodChanging && stats && Array.isArray(topModulesChartData?.datasets) && (topModulesChartData.datasets[0]?.data?.length || 0) > 0"
+                        :key="`topmodules-${selectedPeriod}-${stats?.topModules?.length || 0}`"
+                        :type="topModulesChartType" :data="topModulesChartData" :options="topModulesChartOptions"
+                        :width="chartDimensions.width" :height="chartDimensions.height" :responsive="true" />
+                    <div v-else-if="isPeriodChanging" class="flex items-center justify-center h-full">
+                        <AppLoader message="Cargando datos..." />
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg border border-secondary p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-primary/10 rounded-full">
+                            <span class="icon-[lucide--user-check] text-2xl text-primary"></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-medium text-text-primary">Total usuarios</h3>
+                            <p class="text-3xl font-bold text-primary mt-1">{{ stats?.totalUsers || 0 }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg border border-secondary p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-primary/10 rounded-full">
+                            <span class="icon-[lucide--gauge] text-2xl text-primary"></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-medium text-text-primary">Edad promedio</h3>
+                            <p class="text-3xl font-bold text-primary mt-1">{{ stats?.averageAge || 0 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-secondary p-4">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="icon-[lucide--users-round] text-lg text-primary"></span>
+                    <h3 class="text-lg font-medium text-text-primary">Top usuarios</h3>
+                </div>
+                <AppTable :columns="topUsersColumns" :data="topUsersData" :loading="false"
+                    :pagination="{ enabled: false }" />
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-/* Encabezado para impresión */
 @media print {
     .report-header {
         display: block !important;
@@ -634,13 +636,11 @@ onUnmounted(() => {
         box-shadow: none !important;
     }
 
-    /* Asegurar que los charts se muestren completos en impresión */
     .chart-section {
         page-break-inside: avoid;
         break-inside: avoid;
     }
 
-    /* Forzar tamaño estable del contenedor del canvas para evitar desbordes */
     .chart-section>div:last-child,
     .chart-container {
         width: 100% !important;
@@ -653,18 +653,15 @@ onUnmounted(() => {
         height: 100% !important;
     }
 
-    /* Ocultar elementos interactivos en impresión */
     .no-print {
         display: none !important;
     }
 
-    /* Asegurar que las secciones no se corten */
     .chart-section {
         page-break-inside: avoid;
         margin-bottom: 1rem;
     }
 
-    /* Grid específico para impresión */
     .print-grid {
         display: block !important;
     }
