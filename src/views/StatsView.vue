@@ -148,7 +148,7 @@ const handleGenerateReport = async () => {
 
     await executeCustom(payload)
 
-    if (customError) {
+    if (customError.value) {
         modal.showToast('error', 'Error al generar el reporte')
     } else {
         selectedPeriod.value = 'custom'
