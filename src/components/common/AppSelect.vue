@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        <p v-if="errorProps.onError" class="mt-1 text-sm text-error" :aria-label="errorProps.message">
+        <p v-if="errorProps?.onError" class="mt-1 text-sm text-error" :aria-label="errorProps.message">
             {{ errorProps.message }}
         </p>
     </div>
@@ -46,7 +46,7 @@ import { computed, ref } from 'vue'
 const props = defineProps<{
     labelProps: LabelProps,
     selectProps: SelectProps,
-    errorProps: ErrorProps,
+    errorProps?: ErrorProps,
     customStyle?: string
 }>()
 
@@ -61,7 +61,7 @@ const baseStyles = computed(() =>
 )
 
 const errorStyles = computed(() =>
-    props.errorProps.onError
+    props.errorProps?.onError
         ? 'border-error placeholder:text-error focus:ring-2 focus:ring-error'
         : 'focus:ring-2 focus:ring-primary focus:border-transparent'
 )
