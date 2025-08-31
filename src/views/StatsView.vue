@@ -6,6 +6,18 @@ import AppTooltip from '@/components/common/AppTooltip.vue'
 import AppInput from '@/components/common/AppInput.vue'
 import AppSelect from '@/components/common/AppSelect.vue'
 import type { ChartData, ChartOptions, ChartType } from 'chart.js'
+import {
+    valueLabelPlugin,
+    getGenderChartData,
+    getGenderChartOptions,
+    getAgeBandChartData,
+    getAgeBandChartOptions,
+    getTimeSeriesChartData,
+    getTimeSeriesChartOptions,
+    getTopModulesChartData,
+    getTopModulesChartOptions,
+    topUsersColumns,
+} from '@/config/charts.config'
 import { statsService } from '@/service/Stats.service'
 import type { StatsPeriod, Statistic } from '@/types/stats.types'
 import { GENDER_OPTIONS } from '@/types/form.types'
@@ -16,14 +28,18 @@ import modulesService from '@/service/Modules.service'
 import { useModal } from '@/composables/useModal'
 
 const modal = useModal()
-const selectedPeriod = ref<StatsPeriod>('today')
+const selectedPeriod = ref<StatsPeriod | 'custom'>('today')
+const isPeriodChanging = ref(false)
+const lastPeriodChangeTime = ref(0)
 const { isLoading, error, data, execute } = useFetching(statsService.getStatsByPeriod)
 const { error: modulesError, data: modulesData, execute: executeModules } = useFetching(modulesService.getModules)
 const { isLoading: isCustomLoading, error: customError, data: customApiData, execute: executeCustom, reset: resetCustom } = useFetching(statsService.getCustomStats)
+const periodCache = ref<Record<'today' | 'month' | 'year' | 'custom', Statistic | null>>({ today: null, month: null, year: null, custom: null })
+
 const stats = computed<Statistic | null>(() => {
     const custom = customApiData.value ? (customApiData.value as any).data : null
     if (custom) return custom
-    return data.value ? (data.value as any).data : null
+    return periodCache.value[selectedPeriod.value] || (data.value ? (data.value as any).data : null)
 })
 const isFirstLoad = ref(true)
 const windowWidth = ref(window.innerWidth)
@@ -132,10 +148,14 @@ const handleGenerateReport = async () => {
 
     await executeCustom(payload)
 
-    if (!customError) {
+    if (customError) {
         modal.showToast('error', 'Error al generar el reporte')
     } else {
         selectedPeriod.value = 'custom'
+        const payloadData = (customApiData.value as any)?.data as Statistic | undefined
+        if (payloadData) {
+            periodCache.value.custom = payloadData
+        }
     }
 }
 
@@ -155,7 +175,6 @@ const chartDimensions = computed(() => {
     }
 })
 
-// Chart de time series - usa todo el ancho disponible
 const timeSeriesChartDimensions = computed(() => {
     const width = windowWidth.value
 
@@ -239,279 +258,31 @@ const statsTextSummary = computed(() => {
     }
 })
 
-const valueLabelPlugin = markRaw({
-    id: 'valueLabelPlugin',
-    afterDatasetsDraw(chart: any) {
-        const ctx = chart?.ctx
-        if (!ctx || typeof ctx.save !== 'function') return
-        try {
-            ctx.save()
-            const datasets = Array.isArray(chart?.data?.datasets) ? chart.data.datasets : []
-            datasets.forEach((dataset: any, i: number) => {
-                const meta = typeof chart.getDatasetMeta === 'function' ? chart.getDatasetMeta(i) : null
-                if (!meta || meta.hidden || !Array.isArray(meta.data)) return
-                meta.data.forEach((element: any, index: number) => {
-                    const value = Array.isArray(dataset?.data) ? dataset.data[index] : null
-                    if (value == null || Number.isNaN(Number(value))) return
-                    if (!element || typeof element.tooltipPosition !== 'function') return
-                    const pos = element.tooltipPosition()
-                    if (!pos) return
-                    ctx.font = '12px Montserrat, sans-serif'
-                    ctx.fillStyle = '#111827'
-                    ctx.textAlign = 'center'
-                    ctx.textBaseline = 'middle'
-                    const safeY = Math.max(14, pos.y - 12)
-                    ctx.fillText(String(value), pos.x, safeY)
-                })
-            })
-        } finally {
-            ctx.restore()
-        }
-    }
-})
-
 const genderChartType: ChartType = 'pie'
-const genderChartData = computed<ChartData<'pie'>>(() => ({
-    labels: ['Femenino', 'Masculino', 'Otro'],
-    datasets: [
-        {
-            label: 'Por género',
-            data: [
-                stats.value?.genderDistribution.F || 0,
-                stats.value?.genderDistribution.M || 0,
-                stats.value?.genderDistribution.O || 0
-            ],
-            backgroundColor: ['#3b82f6', '#64748b', '#0ea5e9'],
-            borderColor: ['#2563eb', '#475569', '#0284c7'],
-            borderWidth: 2,
-        },
-    ],
-}))
-const genderChartOptions = computed<ChartOptions<'pie'>>(() => markRaw({
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-        animateRotate: true,
-        animateScale: true,
-        duration: 1000,
-    },
-    layout: {
-        padding: 10
-    },
-    plugins: {
-        legend: {
-            position: 'bottom',
-            labels: {
-                padding: 15,
-                usePointStyle: true,
-                boxWidth: 12,
-            }
-        },
-        tooltip: {
-            backgroundColor: '#1f2937',
-            titleColor: '#ffffff',
-            bodyColor: '#ffffff',
-            borderColor: '#374151',
-            borderWidth: 1,
-        }
-    }
-}))
+const genderChartData = computed<ChartData<'pie'>>(() => {
+    return getGenderChartData(stats.value)
+})
+const genderChartOptions = computed<ChartOptions<'pie'>>(() => getGenderChartOptions())
+const chartPlugins = markRaw([valueLabelPlugin])
 
 const ageBandChartType: ChartType = 'bar'
-const ageBandChartData = computed<ChartData<'bar'>>(() => ({
-    labels: ['Infancia', 'Juventud', 'Adultez joven', 'Adultez media', 'Vejez'],
-    datasets: [
-        {
-            label: 'Por rango etario',
-            data: [
-                stats.value?.ageRangeDistribution.infancia || 0,
-                stats.value?.ageRangeDistribution.juventud || 0,
-                stats.value?.ageRangeDistribution.adultez_joven || 0,
-                stats.value?.ageRangeDistribution.adultez_media || 0,
-                stats.value?.ageRangeDistribution.vejez || 0,
-            ],
-            backgroundColor: ['#059669', '#3b82f6', '#0ea5e9', '#f59e0b', '#dc2626'],
-            borderColor: ['#047857', '#2563eb', '#0284c7', '#d97706', '#b91c1c'],
-            borderWidth: 2,
-            borderRadius: 4,
-        },
-    ],
-}))
-const ageBandChartOptions = computed<ChartOptions<'bar'>>(() => markRaw({
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-        duration: 1200,
-        easing: 'easeOutQuart',
-    },
-    layout: {
-        padding: {
-            top: 24,
-            bottom: 10,
-            left: 10,
-            right: 10
-        }
-    },
-    scales: {
-        y: {
-            beginAtZero: true,
-            grid: {
-                color: '#f3f4f6',
-            },
-            ticks: {
-                color: '#6b7280',
-                maxTicksLimit: 6
-            }
-        },
-        x: {
-            grid: {
-                display: false,
-            },
-            ticks: {
-                color: '#6b7280',
-                maxRotation: 0
-            }
-        }
-    },
-    plugins: {
-        legend: {
-            display: false,
-        },
-        tooltip: {
-            backgroundColor: '#1f2937',
-            titleColor: '#ffffff',
-            bodyColor: '#ffffff',
-            borderColor: '#374151',
-            borderWidth: 1,
-        }
-    }
-}))
+const ageBandChartData = computed<ChartData<'bar'>>(() => {
+    return getAgeBandChartData(stats.value)
+})
+const ageBandChartOptions = computed<ChartOptions<'bar'>>(() => getAgeBandChartOptions())
 
 const timeSeriesChartType: ChartType = 'line'
-const timeSeriesChartData = computed<ChartData<'line'>>(() => ({
-    labels: (stats.value?.visitsByDate || []).map((p) => p.hour ? `${p.hour}:00` : p.date),
-    datasets: [
-        {
-            label: 'Visitas por día',
-            data: (stats.value?.visitsByDate || []).map((p) => p.count),
-            borderColor: '#0ea5e9',
-            backgroundColor: 'rgba(14,165,233,0.2)',
-            fill: true,
-            tension: 0.4,
-            borderWidth: 3,
-            pointBackgroundColor: '#0ea5e9',
-            pointBorderColor: '#ffffff',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-        },
-    ],
-}))
-const timeSeriesChartOptions = computed<ChartOptions<'line'>>(() => markRaw({
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-        duration: 1500,
-        easing: 'easeInOutCubic',
-    },
-    layout: {
-        padding: {
-            top: 10,
-            bottom: 10,
-            left: 10,
-            right: 10
-        }
-    },
-    scales: {
-        y: {
-            beginAtZero: true,
-            grid: {
-                color: '#f3f4f6',
-            },
-            ticks: {
-                color: '#6b7280',
-                maxTicksLimit: 6
-            }
-        },
-        x: {
-            grid: {
-                color: '#f3f4f6',
-            },
-            ticks: {
-                color: '#6b7280',
-                maxRotation: 45,
-                maxTicksLimit: 8
-            }
-        }
-    },
-    plugins: {
-        legend: {
-            display: false,
-        },
-        tooltip: {
-            backgroundColor: '#1f2937',
-            titleColor: '#ffffff',
-            bodyColor: '#ffffff',
-            borderColor: '#374151',
-            borderWidth: 1,
-        }
-    }
-}))
+const timeSeriesChartData = computed<ChartData<'line'>>(() => {
+    return getTimeSeriesChartData(stats.value)
+})
+const timeSeriesChartOptions = computed<ChartOptions<'line'>>(() => getTimeSeriesChartOptions())
 
 const topModulesChartType: ChartType = 'bar'
 const topModulesChartData = computed<ChartData<'bar'>>(() => {
-    const labels = (stats.value?.topModules || []).map(m => m.name)
-    const data = (stats.value?.topModules || []).map(m => m.visitCount)
-    return {
-        labels,
-        datasets: [
-            {
-                label: 'Top módulos',
-                data,
-                backgroundColor: '#3b82f6',
-                borderColor: '#2563eb',
-                borderWidth: 2,
-                borderRadius: 4,
-            }
-        ]
-    }
+    return getTopModulesChartData(stats.value)
 })
-const topModulesChartOptions = computed<ChartOptions<'bar'>>(() => markRaw({
-    responsive: true,
-    maintainAspectRatio: false,
-    indexAxis: 'y',
-    animation: {
-        duration: 800,
-        easing: 'easeOutCubic',
-    },
-    layout: { padding: { top: 10, bottom: 10, left: 10, right: 10 } },
-    scales: {
-        x: {
-            beginAtZero: true,
-            grid: { color: '#f3f4f6' },
-            ticks: { color: '#6b7280', maxTicksLimit: 6 }
-        },
-        y: {
-            grid: { display: false },
-            ticks: { color: '#6b7280' }
-        }
-    },
-    plugins: {
-        legend: { display: false },
-        tooltip: {
-            backgroundColor: '#1f2937',
-            titleColor: '#ffffff',
-            bodyColor: '#ffffff',
-            borderColor: '#374151',
-            borderWidth: 1,
-        }
-    }
-}))
+const topModulesChartOptions = computed<ChartOptions<'bar'>>(() => getTopModulesChartOptions())
 
-const topUsersColumns: { key: string; label: string; sortable?: boolean; width?: string; align?: 'left' | 'center' | 'right' }[] = [
-    { key: 'userName', label: 'Usuario', sortable: true },
-    { key: 'visitCount', label: 'Visitas', align: 'right', sortable: true },
-]
 const topUsersData = computed(() => (stats.value?.topUsers || []))
 
 const handlePrint = () => {
@@ -520,18 +291,52 @@ const handlePrint = () => {
     }, 100)
 }
 
-const setPeriod = (type: StatsPeriod) => {
-    selectedPeriod.value = type
-    execute(selectedPeriod.value)
+const setPeriod = async (type: StatsPeriod) => {
+    // Prevenir cambios múltiples rápidos con debounce
+    const now = Date.now()
+    if (isPeriodChanging.value || (now - lastPeriodChangeTime.value) < 200) {
+        return
+    }
+    lastPeriodChangeTime.value = now
+
+    if (periodCache.value[type]) {
+        // Agregar un pequeño delay incluso para datos cacheados para dar tiempo a Chart.js
+        isPeriodChanging.value = true
+        await new Promise(resolve => setTimeout(resolve, 100))
+        selectedPeriod.value = type
+        await new Promise(resolve => setTimeout(resolve, 50)) // Delay adicional después del cambio
+        isPeriodChanging.value = false
+        return
+    }
+
+    isPeriodChanging.value = true
+    try {
+        const resp = await execute(type)
+        const payload = (resp as any)?.data as Statistic | undefined
+        if (payload) {
+            periodCache.value[type] = payload
+            // Solo cambiar el período DESPUÉS de que los datos estén listos
+            selectedPeriod.value = type
+        }
+    } catch (error) {
+        // Silent error handling
+    } finally {
+        isPeriodChanging.value = false
+    }
 }
 
 onMounted(async () => {
-    //load modules select
+    // load modules select
     if (!modulesData.value) {
         await executeModules()
     }
-
-    await execute(selectedPeriod.value)
+    if (!periodCache.value[selectedPeriod.value]) {
+        const resp = await execute(selectedPeriod.value)
+        const payload = (resp as any)?.data as Statistic | undefined
+        if (payload) {
+            periodCache.value[selectedPeriod.value] = payload
+        }
+    }
     isFirstLoad.value = false
     window.addEventListener('resize', updateDimensions)
 })
@@ -548,13 +353,13 @@ onUnmounted(() => {
                 <h1 class="text-xl font-semibold text-text-primary">Estadísticas de visitas</h1>
                 <div class="flex gap-2">
                     <AppButton
-                        :button-props="{ variant: 'secondary', text: 'Hoy', onClick: () => { clearCustomResults(); setPeriod('today') } }"
+                        :button-props="{ variant: 'secondary', text: 'Hoy', onClick: () => { clearCustomResults(); setPeriod('today') }, disabled: isPeriodChanging || selectedPeriod === 'today' }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                     <AppButton
-                        :button-props="{ variant: 'secondary', text: 'Mes', onClick: () => { clearCustomResults(); setPeriod('month') } }"
+                        :button-props="{ variant: 'secondary', text: 'Mes', onClick: () => { clearCustomResults(); setPeriod('month') }, disabled: isPeriodChanging || selectedPeriod === 'month' }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                     <AppButton
-                        :button-props="{ variant: 'secondary', text: 'Año', onClick: () => { clearCustomResults(); setPeriod('year') } }"
+                        :button-props="{ variant: 'secondary', text: 'Año', onClick: () => { clearCustomResults(); setPeriod('year') }, disabled: isPeriodChanging || selectedPeriod === 'year' }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                     <AppButton
                         :button-props="{ variant: 'primary', text: 'Imprimir/Exportar', icon: 'icon-[lucide--printer] text-white', onClick: handlePrint }"
@@ -579,7 +384,8 @@ onUnmounted(() => {
                         {{ new Date(periodDateRange.start || '').toLocaleDateString('es-ES') }} – {{
                             new Date(periodDateRange.end || '').toLocaleDateString('es-ES') }}
                     </span>
-                    <span v-if="!isFirstLoad && isLoading" class="text-gray-500">Actualizando…</span>
+                    <span v-if="!isFirstLoad && (isLoading || isPeriodChanging)"
+                        class="text-gray-500">Actualizando…</span>
                     <span v-if="error" class="text-error">Ocurrió un error al cargar.</span>
                 </div>
             </div>
@@ -633,7 +439,7 @@ onUnmounted(() => {
                     </p>
                     <p class="mb-3">
                         Durante este período se registraron <strong class="text-primary">{{ statsTextSummary.totalVisits
-                        }} visitas</strong>,
+                            }} visitas</strong>,
                         con un promedio de <strong>{{ statsTextSummary.dailyAverage }} visitas por día</strong>.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -697,9 +503,14 @@ onUnmounted(() => {
                         </AppTooltip>
                     </div>
                     <div class="w-full max-w-full overflow-hidden" :style="{ height: chartDimensions.height + 'px' }">
-                        <AppChart v-if="stats" :type="genderChartType" :data="genderChartData"
-                            :options="genderChartOptions" :plugins="[valueLabelPlugin]" :width="chartDimensions.width"
-                            :height="chartDimensions.height" :responsive="true" />
+                        <AppChart
+                            v-if="!isPeriodChanging && stats && Array.isArray(genderChartData?.datasets) && (genderChartData.datasets[0]?.data?.length || 0) > 0"
+                            :key="`gender-${selectedPeriod}-${stats?.totalVisits || 0}`" :type="genderChartType"
+                            :data="genderChartData" :options="genderChartOptions" :plugins="chartPlugins"
+                            :width="chartDimensions.width" :height="chartDimensions.height" :responsive="true" />
+                        <div v-else-if="isPeriodChanging" class="flex items-center justify-center h-full">
+                            <AppLoader message="Cargando datos..." />
+                        </div>
                     </div>
                 </div>
 
@@ -716,9 +527,14 @@ onUnmounted(() => {
                     </div>
                     <div class="w-full max-w-full overflow-hidden"
                         :style="{ height: (chartDimensions.height + 60) + 'px' }">
-                        <AppChart v-if="stats" :type="ageBandChartType" :data="ageBandChartData"
-                            :options="ageBandChartOptions" :plugins="[valueLabelPlugin]" :width="chartDimensions.width"
-                            :height="chartDimensions.height + 60" :responsive="true" />
+                        <AppChart
+                            v-if="!isPeriodChanging && stats && Array.isArray(ageBandChartData?.datasets) && (ageBandChartData.datasets[0]?.data?.length || 0) > 0"
+                            :key="`ageband-${selectedPeriod}-${stats?.totalVisits || 0}`" :type="ageBandChartType"
+                            :data="ageBandChartData" :options="ageBandChartOptions" :plugins="chartPlugins"
+                            :width="chartDimensions.width" :height="chartDimensions.height + 60" :responsive="true" />
+                        <div v-else-if="isPeriodChanging" class="flex items-center justify-center h-full">
+                            <AppLoader message="Cargando datos..." />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -735,9 +551,15 @@ onUnmounted(() => {
                 </div>
                 <div class="w-full max-w-full overflow-hidden"
                     :style="{ height: timeSeriesChartDimensions.height + 'px' }">
-                    <AppChart v-if="stats" :type="timeSeriesChartType" :data="timeSeriesChartData"
-                        :options="timeSeriesChartOptions" :width="timeSeriesChartDimensions.width"
-                        :height="timeSeriesChartDimensions.height" :responsive="true" />
+                    <AppChart
+                        v-if="!isPeriodChanging && stats && Array.isArray(timeSeriesChartData?.datasets) && (timeSeriesChartData.datasets[0]?.data?.length || 0) > 0"
+                        :key="`timeseries-${selectedPeriod}-${stats?.visitsByDate?.length || 0}`"
+                        :type="timeSeriesChartType" :data="timeSeriesChartData" :options="timeSeriesChartOptions"
+                        :width="timeSeriesChartDimensions.width" :height="timeSeriesChartDimensions.height"
+                        :responsive="true" />
+                    <div v-else-if="isPeriodChanging" class="flex items-center justify-center h-full">
+                        <AppLoader message="Cargando datos..." />
+                    </div>
                 </div>
             </div>
 
@@ -751,9 +573,14 @@ onUnmounted(() => {
                     </AppTooltip>
                 </div>
                 <div class="w-full max-w-full overflow-hidden" :style="{ height: chartDimensions.height + 'px' }">
-                    <AppChart v-if="stats" :type="topModulesChartType" :data="topModulesChartData"
-                        :options="topModulesChartOptions" :width="chartDimensions.width"
-                        :height="chartDimensions.height" :responsive="true" />
+                    <AppChart
+                        v-if="!isPeriodChanging && stats && Array.isArray(topModulesChartData?.datasets) && (topModulesChartData.datasets[0]?.data?.length || 0) > 0"
+                        :key="`topmodules-${selectedPeriod}-${stats?.topModules?.length || 0}`"
+                        :type="topModulesChartType" :data="topModulesChartData" :options="topModulesChartOptions"
+                        :width="chartDimensions.width" :height="chartDimensions.height" :responsive="true" />
+                    <div v-else-if="isPeriodChanging" class="flex items-center justify-center h-full">
+                        <AppLoader message="Cargando datos..." />
+                    </div>
                 </div>
             </div>
 
