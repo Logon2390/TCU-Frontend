@@ -39,7 +39,7 @@ const emit = defineEmits<{
 }>();
 
 const baseStyle =
-    'w-full py-2 px-3 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-text-secondary';
+    'w-full py-2 px-3 rounded-lg text-black focus:outline-none focus:ring focus:ring-primary focus:border-transparent placeholder:text-text-secondary';
 
 const defaultStyle = 'bg-background';
 const borderStyle = 'border-2 border-secondary';

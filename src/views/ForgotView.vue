@@ -22,7 +22,7 @@ async function handleSubmit(event: Event) {
     const response = await requestPasswordReset(email.value)
     if (response?.success) {
       modal.showToast('success', 'Correo enviado con enlace para restablecer contraseña')
-      router.push('/admin/Login')
+      router.push('/login')
     } else {
       modal.showToast('error', response?.message)
     }
@@ -63,7 +63,7 @@ async function handleSubmit(event: Event) {
 
             <div class="text-center">
               <div class="text-sm font-medium text-success hover:underline cursor-pointer"
-                @click="router.push('/admin/Login')">
+                @click="router.push('/login')">
                 Volver al login
               </div>
             </div>
