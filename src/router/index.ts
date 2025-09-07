@@ -9,13 +9,13 @@ const router = createRouter({
 
 router.beforeEach((to, _from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta?.requiresAuth)
-  const isAuthenticated = Boolean(localStorage.getItem('authToken'))
+  const isAuthenticated = Boolean(localStorage.getItem('user'))
 
   if (requiresAuth && !isAuthenticated) {
     const redirect = encodeURIComponent(to.fullPath)
     next({ name: 'login', query: { redirect } })
   } else if (to.name === 'login' && isAuthenticated) {
-    next({ name: 'admin-overview' })
+    next({ path: '/admin/stats' })
   } else {
     next()
   }

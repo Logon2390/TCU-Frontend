@@ -25,10 +25,11 @@ async function handleSubmit(event: Event) {
     isLoading.value = true
 
     try {
-        const response = await resetPassword(route.query.token as string, newPassword.value)
+        const token = route.params.token as string
+        const response = await resetPassword(token, newPassword.value)
         if (response?.success) {
             modal.showToast('success', 'Contraseña restablecida correctamente')
-            router.push('/admin/Login')
+            router.push('/login')
         } else {
             modal.showToast('error', response?.message)
         }
