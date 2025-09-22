@@ -1,4 +1,4 @@
 export type Module = {
-  id: number
+  id?: number
   name: string
 }
