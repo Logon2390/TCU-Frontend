@@ -82,7 +82,7 @@ const onModuleChange = (event: Event) => {
     const moduleName = (event.target as HTMLSelectElement).value
     moduleLabel.value = moduleName
     const selectedModule = modulesData.value?.data.find(module => module.name === moduleName)
-    moduleId.value = selectedModule?.id.toString() || ''
+    moduleId.value = selectedModule?.id?.toString() || ''
 }
 
 const onNumberChange = (event: Event) => {

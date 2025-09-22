@@ -37,8 +37,14 @@
                                 getAlignment(column.align),
                                 bordered ? 'border-r border-gray-200 last:border-r-0' : ''
                             ]">
-                                <span v-if="column.formatter">
-                                    {{ column.formatter(row[column.key]) }}
+                                <slot 
+                                    v-if="$slots[`cell-${column.key}`]" 
+                                    :name="`cell-${column.key}`" 
+                                    :row="row" 
+                                    :value="row[column.key]"
+                                    :column="column"
+                                />
+                                <span v-else-if="column.formatter" v-html="column.formatter(row[column.key])">
                                 </span>
                                 <span v-else>
                                     {{ row[column.key] || '-' }}
@@ -59,9 +65,15 @@
                         <span class="text-sm font-medium text-gray-500 min-w-0 flex-1">
                             {{ column.label }}:
                         </span>
-                        <span class="text-sm text-gray-900 text-right ml-4 flex-1">
-                            <span v-if="column.formatter">
-                                {{ column.formatter(row[column.key]) }}
+                        <span class="text-sm text-gray-900 text-right ml-4 flex-1" :class="column.key === 'actions' ? 'flex justify-end' : ''">
+                            <slot 
+                                v-if="$slots[`cell-${column.key}`]" 
+                                :name="`cell-${column.key}`" 
+                                :row="row" 
+                                :value="row[column.key]"
+                                :column="column"
+                            />
+                            <span v-else-if="column.formatter" v-html="column.formatter(row[column.key])">
                             </span>
                             <span v-else>
                                 {{ row[column.key] || '-' }}
