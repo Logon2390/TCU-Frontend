@@ -24,7 +24,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'modulos',
       title: 'Módulos',
-      route: '/admin/modulos',
+      route: '/admin/modules',
       icon: 'icon-[lucide--book]',
     },
     {
