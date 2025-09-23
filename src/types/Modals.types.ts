@@ -36,3 +36,31 @@ export type ModalProps = {
   onCancel?: () => void
   onDismiss?: () => void
 }
+
+export type FormFieldType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'select'
+
+export type FormField = {
+  id: string
+  label: string
+  type: FormFieldType
+  placeholder?: string
+  required?: boolean
+  value?: string
+  options?: string[] // Para campos tipo select
+  validation?: (value: string) => string | null
+}
+
+export type FormConfig = {
+  title: string
+  fields: FormField[]
+  confirmButtonText?: string
+  cancelButtonText?: string
+  loading?: boolean
+}
+
+export type FormResult = {
+  isConfirmed: boolean
+  isDenied: boolean
+  isDismissed: boolean
+  values?: Record<string, string>
+}
