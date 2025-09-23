@@ -67,7 +67,7 @@ const router = useRouter()
                     © {{ currentYear }} {{ footerConfig.organization.name }}. Todos los derechos reservados.
                 </div>
 
-                <div @click="router.push('/about')"
+                <div
                     class="text-text-secondary hover:text-primary transition-colors duration-200 text-sm font-medium cursor-pointer">
                     Desarrollado por el TCU-663
                 </div>
