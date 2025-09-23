@@ -5,15 +5,17 @@
       
       <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
         <div class="flex-1 sm:max-w-md">
-          <AppInput
-            v-model="searchValue"
-            :label-props="{ id: 'search', label: '' }"
-            :input-props="{
-              type: 'text',
-              placeholder: config.searchPlaceholder,
-              icon: 'icon-[lucide--search]'
-            }"
-          />
+          <slot name="filters" :search-value="searchValue" :update-search="updateSearchValue">
+            <AppInput
+              v-model="searchValue"
+              :label-props="{ id: 'search', label: '' }"
+              :input-props="{
+                type: 'text',
+                placeholder: config.searchPlaceholder,
+                icon: 'icon-[lucide--search]'
+              }"
+            />
+          </slot>
         </div>
 
         <div class="flex gap-2 justify-center sm:justify-end flex-shrink-0">
@@ -22,7 +24,7 @@
       </div>
     </div>
 
-    <div class="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden min-h-0">
       <slot :search-value="debouncedSearchValue" :loading="loading" />
     </div>
   </div>
@@ -40,4 +42,8 @@ const props = withDefaults(defineProps<LayoutProps>(), {
 
 const searchValue = ref('')
 const debouncedSearchValue = useDebounce(searchValue, 300)
+
+const updateSearchValue = (value: string) => {
+  searchValue.value = value
+}
 </script>

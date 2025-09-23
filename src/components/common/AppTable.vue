@@ -1,8 +1,8 @@
 <template>
-    <div class="w-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <Loader v-if="loading" :message="'Cargando datos...'" />
-        <div v-else-if="data.length > 0">
-            <div v-if="!isMobile" class="overflow-x-auto">
+    <div class="w-full h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+        <Loader v-if="loading" :message="'Cargando dados...'" />
+        <div v-else-if="data.length > 0" class="flex-1 flex flex-col overflow-hidden">
+            <div v-if="!isMobile" class="flex-1 overflow-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead :class="striped ? 'bg-gray-50' : 'bg-white'">
                         <tr>
@@ -55,12 +55,13 @@
                 </table>
             </div>
 
-            <div v-else class="divide-y divide-gray-200">
-                <div v-for="(row, index) in paginatedData" :key="index" :class="[
-                    'p-4 space-y-3',
-                    onRowClick ? 'cursor-pointer hover:bg-gray-50' : '',
-                    'transition-colors duration-150'
-                ]" @click="handleRowClick(row)">
+            <div v-else class="flex-1 overflow-auto">
+                <div class="divide-y divide-gray-200">
+                    <div v-for="(row, index) in paginatedData" :key="index" :class="[
+                        'p-4 space-y-3',
+                        onRowClick ? 'cursor-pointer hover:bg-gray-50' : '',
+                        'transition-colors duration-150'
+                    ]" @click="handleRowClick(row)">
                     <div v-for="column in columns" :key="column.key" class="flex justify-between items-start">
                         <span class="text-sm font-medium text-gray-500 min-w-0 flex-1">
                             {{ column.label }}:
@@ -80,15 +81,16 @@
                             </span>
                         </span>
                     </div>
+                    </div>
                 </div>
             </div>
-
-            <Pagination v-if="pagination?.enabled" :current-page="currentPage" :total-items="sortedData.length"
-                :items-per-page="itemsPerPage" :show-page-numbers="pagination.showPageNumbers"
-                :show-items-per-page-selector="pagination.showItemsPerPageSelector"
-                :page-size-options="pagination.pageSizeOptions || [5, 10, 25, 50]" @page-change="handlePageChange"
-                @items-per-page-change="handleItemsPerPageChange" />
         </div>
+
+        <Pagination v-if="data.length > 0 && pagination?.enabled" :current-page="currentPage" :total-items="sortedData.length"
+            :items-per-page="itemsPerPage" :show-page-numbers="pagination.showPageNumbers"
+            :show-items-per-page-selector="pagination.showItemsPerPageSelector"
+            :page-size-options="pagination.pageSizeOptions || [5, 10, 25, 50]" @page-change="handlePageChange"
+            @items-per-page-change="handleItemsPerPageChange" />
 
         <div v-else class="flex flex-col items-center justify-center py-12 px-4">
             <span class="icon-[lucide--inbox] w-12 h-12 text-gray-400 mb-4" />
