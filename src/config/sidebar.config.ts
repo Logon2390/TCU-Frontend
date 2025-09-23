@@ -18,7 +18,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'usuarios',
       title: 'Usuarios',
-      route: '/admin/usuarios',
+      route: '/admin/users',
       icon: 'icon-[lucide--users]',
     },
     {
