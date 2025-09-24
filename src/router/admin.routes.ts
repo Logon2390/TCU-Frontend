@@ -3,6 +3,7 @@ import StatsView from '@/views/StatsView.vue'
 import ModulesView from '@/views/ModulesView.vue'
 import UsersView from '@/views/UsersView.vue'
 import UserView from '@/views/UserView.vue'
+import AdminView from '@/views/AdminView.vue'
 
 const adminRoutes: RouteRecordRaw[] = [
   {
@@ -27,6 +28,12 @@ const adminRoutes: RouteRecordRaw[] = [
     path: '/admin/users/:id',
     name: 'admin-user-profile',
     component: UserView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/admin/management',
+    name: 'admin-management',
+    component: AdminView,
     meta: { requiresAuth: true },
   },
 ]

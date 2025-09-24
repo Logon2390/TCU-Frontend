@@ -9,4 +9,8 @@ export const modulesLayoutConfig: LayoutConfig = {
     title: 'Gestión de Módulos',
     searchPlaceholder: 'Buscar módulo...',
   }
-  
+
+export const adminsLayoutConfig: LayoutConfig = {
+  title: 'Gestión de Administradores',
+  searchPlaceholder: 'Buscar por email...',
+}
