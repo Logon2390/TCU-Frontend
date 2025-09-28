@@ -1,45 +1,47 @@
 <template>
   <AppLayout :config="layoutConfig" :loading="isLoading">
     <template #actions>
-      <AppButton
-        :button-props="{
-          variant: 'primary',
-          text: 'Nuevo Módulo',
-          icon: 'icon-[lucide--plus] text-white',
-          onClick: handleCreateModule
-        }"
-        custom-style="px-4 py-2 text-sm"
-      />
+      <AppButton :button-props="{
+        variant: 'primary',
+        text: 'Nuevo Módulo',
+        icon: 'icon-[lucide--plus] text-white',
+        onClick: handleCreateModule
+      }" custom-style="px-4 py-2 text-sm" />
     </template>
 
     <template #default="{ searchValue: layoutSearchValue, loading }">
-      <AppTable
-        :columns="tableColumns"
-        :data="getFilteredModules(layoutSearchValue)"
-        :loading="loading || isLoading"
+      <AppTable :columns="tableColumns" :data="getFilteredModules(layoutSearchValue)" :loading="loading || isLoading"
         :pagination="{
           enabled: true,
           itemsPerPage: 10,
           showPageNumbers: true,
           showItemsPerPageSelector: true,
           pageSizeOptions: [5, 10, 25, 50]
-        }"
-        empty-message="No se encontraron módulos"
-      >
+        }" empty-message="No se encontraron módulos">
+        <template #cell-name="{ row }">
+          {{ row.name }}
+        </template>
+        <template #cell-isActive="{ row }">
+          {{ row.isActive ? 'Activo' : 'Inactivo' }}
+        </template>
+        <template #cell-createdAt="{ row }">
+          {{ formatDate(row.createdAt || '') }}
+        </template>
+        <template #cell-updatedAt="{ row }">
+          {{ formatDate(row.updatedAt || '') }}
+        </template>
         <template #cell-actions="{ row }">
           <div class="flex gap-2 justify-center">
-            <button 
-              @click="handleEditModule(row.id)"
-              class="p-1 text-blue-600 hover:text-blue-800 transition-colors"
-              title="Editar"
-            >
+            <button @click="handleViewModule(row.id)" class="p-1 text-green-600 hover:text-green-800 transition-colors"
+              title="Ver visitas">
+              <span class="icon-[lucide--eye] w-4 h-4"></span>
+            </button>
+            <button @click="handleEditModule(row.id)" class="p-1 text-blue-600 hover:text-blue-800 transition-colors"
+              title="Editar">
               <span class="icon-[lucide--edit] w-4 h-4"></span>
             </button>
-            <button 
-              @click="handleDeleteModule(row.id)"
-              class="p-1 text-red-600 hover:text-red-800 transition-colors"
-              title="Eliminar"
-            >
+            <button @click="handleDeleteModule(row.id)" class="p-1 text-red-600 hover:text-red-800 transition-colors"
+              title="Eliminar">
               <span class="icon-[lucide--trash-2] w-4 h-4"></span>
             </button>
           </div>
@@ -51,6 +53,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import AppButton from '@/components/common/AppButton.vue'
 import AppTable from '@/components/common/AppTable.vue'
@@ -62,6 +65,7 @@ import type { TableColumn } from '@/types/component.types'
 
 const { isLoading, data: modules, execute: fetchModules } = useFetching(modulesService.getModules)
 const { showInput, showConfirmation, showToast } = useModal()
+const router = useRouter()
 
 const layoutConfig = modulesLayoutConfig
 
@@ -73,20 +77,38 @@ const tableColumns: TableColumn[] = [
     align: 'left'
   },
   {
+    key: 'isActive',
+    label: 'Activo',
+    sortable: true,
+    align: 'center'
+  },
+  {
+    key: 'createdAt',
+    label: 'Fecha de creación',
+    sortable: true,
+    align: 'center'
+  },
+  {
+    key: 'updatedAt',
+    label: 'Fecha de actualización',
+    sortable: true,
+    align: 'center'
+  },
+  {
     key: 'actions',
     label: 'Acciones',
-    width: '120px',
+    width: '150px',
     align: 'center'
   }
 ]
 
 const getFilteredModules = (searchValue: string) => {
   if (!modules.value?.data) return []
-  
+
   const modulesList = modules.value.data
   if (!searchValue.trim()) return modulesList
-  
-  return modulesList.filter(module => 
+
+  return modulesList.filter(module =>
     module.name.toLowerCase().includes(searchValue.toLowerCase())
   )
 }
@@ -106,7 +128,7 @@ async function handleCreateModule() {
     }
 
     const createResult = await modulesService.createModule({ name: result.value as string })
-    
+
     if (createResult.success) {
       showToast('success', 'Módulo creado exitosamente')
       await fetchModules()
@@ -114,6 +136,10 @@ async function handleCreateModule() {
       showToast('error', createResult.message || 'Error al crear el módulo')
     }
   }
+}
+
+function handleViewModule(id: number) {
+  router.push({ name: 'admin-module-profile', params: { id: id.toString() } })
 }
 
 async function handleEditModule(id: number) {
@@ -134,7 +160,7 @@ async function handleEditModule(id: number) {
     }
 
     const updateResult = await modulesService.updateModule(id, { name: result.value as string })
-    
+
     if (updateResult.success) {
       showToast('success', 'Módulo actualizado exitosamente')
       await fetchModules()
@@ -155,7 +181,7 @@ async function handleDeleteModule(id: number) {
 
   if (result.isConfirmed) {
     const deleteResult = await modulesService.deleteModule(id)
-    
+
     if (deleteResult.success) {
       showToast('success', 'Módulo eliminado exitosamente')
       await fetchModules()
@@ -163,6 +189,12 @@ async function handleDeleteModule(id: number) {
       showToast('error', deleteResult.message || 'Error al eliminar el módulo')
     }
   }
+}
+
+const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A'
+    const date = new Date(dateString)
+    return date.toLocaleDateString('es-ES')
 }
 
 
