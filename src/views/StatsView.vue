@@ -28,7 +28,7 @@ import modulesService from '@/service/Modules.service'
 import { useModal } from '@/composables/useModal'
 
 const modal = useModal()
-const selectedPeriod = ref<StatsPeriod | 'custom'>('today')
+const selectedPeriod = ref<StatsPeriod | 'custom'>('month')
 const isPeriodChanging = ref(false)
 const lastPeriodChangeTime = ref(0)
 const { isLoading, error, data, execute } = useFetching(statsService.getStatsByPeriod)
