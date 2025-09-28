@@ -19,7 +19,7 @@ function goToSection(section: string) {
 </script>
 
 <template>
-    <section class="relative min-h-[calc(100vh-50px)] flex items-center justify-center px-4 overflow-hidden">
+    <section class="relative min-h-[calc(100vh)] flex items-center justify-center px-4 overflow-hidden">
         <div class="absolute inset-0 bg-cover bg-center bg-no-repeat"
             :style="{ backgroundImage: `url('${images.registration.hero}')` }">
             <div class="absolute inset-0 bg-black/60"></div>
