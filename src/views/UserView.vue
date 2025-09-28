@@ -52,7 +52,7 @@
 
             <div>
               <label class="block text-sm font-medium text-gray-600 mb-1">Total de visitas</label>
-              <p class="text-lg font-semibold text-blue-600">{{ records.length }}</p>
+              <p class="text-lg font-semibold text-blue-600">{{ totalVisits }}</p>
             </div>
           </div>
         </div>
@@ -90,13 +90,10 @@
       </div>
 
       <div class="flex-1 overflow-hidden">
-        <AppTable :columns="tableColumns" :data="records" :loading="isLoadingRecords" :pagination="{
-          enabled: true,
-          itemsPerPage: 10,
-          showPageNumbers: true,
-          showItemsPerPageSelector: true,
-          pageSizeOptions: [5, 10, 25, 50]
-        }" empty-message="Este usuario no tiene visitas registradas">
+        <AppTable :columns="tableColumns" :data="pagination.data.value" 
+          :loading="isLoadingRecords || pagination.isLoading.value" 
+          :pagination="pagination.paginationConfig.value"
+          empty-message="Este usuario no tiene visitas registradas">
           <template #cell-module="{ row }">
             <div class="flex items-center gap-2">
               <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
@@ -117,10 +114,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppTable from '@/components/common/AppTable.vue'
 import { useFetching } from '@/composables/useFetching'
+import { usePagination } from '@/composables/usePagination'
 import userService from '@/service/User.service'
 import recordService from '@/service/Record.service'
 import type { User } from '@/types/user.types'
@@ -133,11 +131,16 @@ const router = useRouter()
 
 const userId = parseInt(route.params.id as string)
 const user = ref<User | null>(null)
-const records = ref<Registration[]>([])
+
+const pagination = usePagination<any>({ initialLimit: 10 })
+const { isLoading: isPaginationLoading, execute: fetchRecordsPaginated } = useFetching(
+  (page: number, limit: number) => recordService.getRecordsByUserPaginated(userId, page, limit)
+)
 
 const { isLoading: isLoadingUser, execute: fetchUser } = useFetching(userService.getUserById)
 const { isLoading: isLoadingRecords, execute: fetchRecords } = useFetching(recordService.getRecordsByUser)
 
+const totalVisits = computed(() => pagination.meta.value.totalItems)
 const tableColumns: TableColumn[] = [
   {
     key: 'module',
@@ -213,16 +216,18 @@ const loadUserData = async () => {
 const loadUserRecords = async () => {
   if (!userId || isNaN(userId)) return
 
-  const recordsResult = await fetchRecords(userId)
+  const recordsResult = await fetchRecordsPaginated(pagination.currentPage.value, pagination.itemsPerPage.value)
   if (recordsResult?.success && recordsResult.data) {
-    records.value = recordsResult.data
+    pagination.setData(recordsResult.data)
   }
 }
 
+watch([() => pagination.currentPage.value, () => pagination.itemsPerPage.value], async () => {
+  await loadUserRecords()
+})
+
 onMounted(async () => {
-  await Promise.all([
-    loadUserData(),
-    loadUserRecords()
-  ])
+  await loadUserData()
+  await loadUserRecords()
 })
 </script>

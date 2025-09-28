@@ -1,5 +1,5 @@
 <template>
-    <AppLayout :config="layoutConfig" :loading="isLoading">
+    <AppLayout :config="layoutConfig" :loading="isPaginationLoading || pagination.isLoading.value">
         <template #filters="{ searchValue, updateSearch }">
             <AppInput v-model="documentSearch"
                 :label-props="{ id: 'document-search', label: '' }" :input-props="{
@@ -19,14 +19,10 @@
         </template>
 
         <template #default="{ searchValue: layoutSearchValue, loading }">
-            <AppTable :columns="tableColumns" :data="users || []" :loading="loading || isLoading || isSearching"
-                :pagination="{
-                    enabled: true,
-                    itemsPerPage: 10,
-                    showPageNumbers: true,
-                    showItemsPerPageSelector: true,
-                    pageSizeOptions: [5, 10, 25, 50]
-                }" empty-message="No se encontraron usuarios">
+            <AppTable :columns="tableColumns" :data="displayUsers" 
+                :loading="loading || isPaginationLoading || isSearching || pagination.isLoading.value"
+                :pagination="isSearchMode ? { enabled: false } : pagination.paginationConfig.value" 
+                empty-message="No se encontraron usuarios">
                 <template #cell-document="{ row }">
                     {{ row.document }}
                 </template>
@@ -65,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import AppButton from '@/components/common/AppButton.vue'
@@ -73,6 +69,7 @@ import AppTable from '@/components/common/AppTable.vue'
 import AppInput from '@/components/common/AppInput.vue'
 import { usersLayoutConfig } from '@/config/layout.config'
 import { useFetching } from '@/composables/useFetching'
+import { usePagination } from '@/composables/usePagination'
 import { useModal } from '@/composables/useModal'
 import { useDebounce } from '@/composables/useDebounce'
 import userService from '@/service/User.service'
@@ -80,20 +77,25 @@ import type { TableColumn } from '@/types/component.types'
 import type { User } from '@/types/user.types'
 import { GENDER_OPTIONS } from '@/types/form.types'
 
-const { isLoading, data: usersData, execute: fetchUsers } = useFetching(userService.getUsers)
 const { isLoading: isSearching, data: searchData, execute: searchByDocument } = useFetching(userService.getUserByDocument)
 const { isLoading: isCreating, execute: executeCreateUser } = useFetching(userService.createUser)
 const { isLoading: isUpdating, execute: executeUpdateUser } = useFetching(userService.updateUser)
 const { showConfirmation, showToast, showForm } = useModal()
 const router = useRouter()
 
+const pagination = usePagination<User>({ initialLimit: 10 })
+const { isLoading: isPaginationLoading, execute: fetchUsersPaginated } = useFetching(
+  (page: number, limit: number) => userService.getUsersPaginated(page, limit)
+)
+
 const layoutConfig = usersLayoutConfig
 const genderOptions = [...GENDER_OPTIONS]
 
-const users = ref<User[]>([])
 const documentSearch = ref('')
 const debouncedDocumentSearch = useDebounce(documentSearch, 500)
-
+const isSearchMode = ref(false)
+const searchResults = ref<User[]>([])
+const displayUsers = computed(() => isSearchMode.value ? searchResults.value : pagination.data.value)
 const tableColumns: TableColumn[] = [
     {
         key: 'document',
@@ -145,14 +147,17 @@ const formatDate = (dateString: string) => {
 
 const performSearch = async (searchTerm: string) => {
     if (searchTerm.trim()) {
+        isSearchMode.value = true
         const result = await searchByDocument(searchTerm.trim())
         if (result?.success && result.data) {
-            users.value = [result.data]
+            searchResults.value = [result.data]
         } else {
-            users.value = []
+            searchResults.value = []
         }
     } else {
-        await loadAllUsers()
+        isSearchMode.value = false
+        searchResults.value = []
+        await loadUsers()
     }
 }
 
@@ -160,10 +165,16 @@ watch(debouncedDocumentSearch, (newValue) => {
     performSearch(newValue)
 })
 
-const loadAllUsers = async () => {
-    await fetchUsers()
-    if (usersData.value?.success && usersData.value.data) {
-        users.value = usersData.value.data
+watch([() => pagination.currentPage.value, () => pagination.itemsPerPage.value], async () => {
+    if (!isSearchMode.value) {
+        await loadUsers()
+    }
+})
+
+const loadUsers = async () => {
+    const result = await fetchUsersPaginated(pagination.currentPage.value, pagination.itemsPerPage.value)
+    if (result?.success && result.data) {
+        pagination.setData(result.data)
     }
 }
 
@@ -225,7 +236,7 @@ const handleCreateUser = async () => {
 
         if (createResult?.success) {
             showToast('success', 'Usuario creado exitosamente')
-            await loadAllUsers()
+            await loadUsers()
             return true
         } else {
             showToast('error', createResult?.message || 'Error al crear el usuario')
@@ -241,7 +252,7 @@ const handleViewUser = (id: number) => {
 }
 
 const handleEditUser = async (id: number) => {
-    const user = users.value.find(u => u.id === id)
+    const user = displayUsers.value.find(u => u.id === id)
     if (!user) return
 
     const currentGenderLabel = getGenderLabel(user.gender)
@@ -307,7 +318,7 @@ const handleEditUser = async (id: number) => {
 
         if (updateResult?.success) {
             showToast('success', 'Usuario actualizado exitosamente')
-            await loadAllUsers()
+            await loadUsers()
             return true
         } else {
             showToast('error', updateResult?.message || 'Error al actualizar el usuario')
@@ -319,7 +330,7 @@ const handleEditUser = async (id: number) => {
 }
 
 const handleDeleteUser = async (id: number) => {
-    const user = users.value.find(u => u.id === id)
+    const user = displayUsers.value.find(u => u.id === id)
     if (!user) return
 
     const result = await showConfirmation(
@@ -332,7 +343,7 @@ const handleDeleteUser = async (id: number) => {
 
         if (deleteResult.success) {
             showToast('success', 'Usuario eliminado exitosamente')
-            await loadAllUsers()
+            await loadUsers()
         } else {
             showToast('error', deleteResult.message || 'Error al eliminar el usuario')
         }
@@ -340,6 +351,6 @@ const handleDeleteUser = async (id: number) => {
 }
 
 onMounted(async () => {
-    await loadAllUsers()
+    await loadUsers()
 })
 </script>

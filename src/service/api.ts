@@ -40,8 +40,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       useAuth().logout()
-      useRouter().push('/')
-      useModal().showToast('error', 'Sesión expirada, por favor inicie sesión nuevamente')
+      window.location.href = '/'
     }
     return Promise.reject(error)
   },
