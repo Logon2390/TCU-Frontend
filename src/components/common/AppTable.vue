@@ -86,10 +86,14 @@
             </div>
         </div>
 
-        <Pagination v-if="data.length > 0 && pagination?.enabled" :current-page="currentPage" :total-items="sortedData.length"
-            :items-per-page="itemsPerPage" :show-page-numbers="pagination.showPageNumbers"
+        <Pagination v-if="data.length > 0 && pagination?.enabled" 
+            :current-page="pagination.serverSide ? (pagination.currentPage || 1) : currentPage" 
+            :total-items="pagination.serverSide ? (pagination.totalItems || 0) : sortedData.length"
+            :items-per-page="itemsPerPage" 
+            :show-page-numbers="pagination.showPageNumbers"
             :show-items-per-page-selector="pagination.showItemsPerPageSelector"
-            :page-size-options="pagination.pageSizeOptions || [5, 10, 25, 50]" @page-change="handlePageChange"
+            :page-size-options="pagination.pageSizeOptions || [10, 25, 50, 100]" 
+            @page-change="handlePageChange"
             @items-per-page-change="handleItemsPerPageChange" />
 
         <div v-else class="flex flex-col items-center justify-center py-12 px-4">
@@ -143,7 +147,9 @@ const sortedData = computed(() => {
 
 const paginatedData = computed(() => {
     if (!props.pagination?.enabled) return sortedData.value
+    if (props.pagination.serverSide) return sortedData.value
 
+    // Client-side pagination
     const start = (currentPage.value - 1) * itemsPerPage.value
     const end = start + itemsPerPage.value
     return sortedData.value.slice(start, end)
@@ -176,12 +182,21 @@ const handleRowClick = (row: Record<string, unknown>) => {
 }
 
 const handlePageChange = (page: number) => {
-    currentPage.value = page
+    if (props.pagination?.serverSide) {
+        props.pagination.onPageChange?.(page)
+    } else {
+        currentPage.value = page
+    }
 }
 
 const handleItemsPerPageChange = (newItemsPerPage: number) => {
     itemsPerPage.value = newItemsPerPage
-    currentPage.value = 1
+    
+    if (props.pagination?.serverSide) {
+        props.pagination.onItemsPerPageChange?.(newItemsPerPage)
+    } else {
+        currentPage.value = 1
+    }
 }
 
 const checkMobile = () => {

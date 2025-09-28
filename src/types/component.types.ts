@@ -71,6 +71,11 @@ export type PaginationConfig = {
   showPageNumbers?: boolean
   showItemsPerPageSelector?: boolean
   pageSizeOptions?: number[]
+  serverSide?: boolean
+  totalItems?: number
+  currentPage?: number
+  onPageChange?: (page: number) => void
+  onItemsPerPageChange?: (itemsPerPage: number) => void
 }
 
 export type TableProps = {
