@@ -13,6 +13,17 @@ export const modulesService = {
     }
   },
 
+
+  getPublicModules: async (): Promise<ApiResponse<Module[]>> => {
+    try {
+      const response = await api.get<ApiResponse<Module[]>>('/modules/public')
+      return response.data
+    } catch (error) {
+      console.error(error)
+      return { success: false, data: [] }
+    }
+  },
+
   createModule: async (dto: Module): Promise<ApiResponse<Module>> => {
     try {
       const response = await api.post<ApiResponse<Module>>('/modules', dto)

@@ -22,7 +22,7 @@
           {{ row.name }}
         </template>
         <template #cell-isActive="{ row }">
-          {{ row.isActive ? 'Activo' : 'Inactivo' }}
+          {{ row.isActive ? 'Visible' : 'Oculto' }}
         </template>
         <template #cell-createdAt="{ row }">
           {{ formatDate(row.createdAt || '') }}
@@ -64,7 +64,7 @@ import modulesService from '@/service/Modules.service'
 import type { TableColumn } from '@/types/component.types'
 
 const { isLoading, data: modules, execute: fetchModules } = useFetching(modulesService.getModules)
-const { showInput, showConfirmation, showToast } = useModal()
+const { showInput, showConfirmation, showToast, showForm } = useModal()
 const router = useRouter()
 
 const layoutConfig = modulesLayoutConfig
@@ -114,28 +114,54 @@ const getFilteredModules = (searchValue: string) => {
 }
 
 async function handleCreateModule() {
-  const result = await showInput(
-    'Nuevo Módulo',
-    'text',
-    'Ingrese el nombre del módulo (máximo 100 caracteres)',
-    ''
-  )
+  const formConfig = {
+    title: 'Nuevo Módulo',
+    confirmButtonText: 'Crear Módulo',
+    cancelButtonText: 'Cancelar',
+    fields: [
+      {
+        id: 'name',
+        label: 'Nombre del módulo',
+        type: 'text' as const,
+        placeholder: 'Ingrese el nombre del módulo',
+        required: true,
+        validation: (value: string) => {
+          if (value.length < 2) return 'El nombre debe tener al menos 2 caracteres'
+          if (value.length > 100) return 'El nombre no puede exceder los 100 caracteres'
+          return null
+        }
+      },
+      {
+        id: 'isActive',
+        label: 'Estado',
+        type: 'select' as const,
+        placeholder: 'Seleccione el estado',
+        required: true,
+        value: 'Visible',
+        options: ['Visible', 'Oculto']
+      }
+    ]
+  }
 
-  if (result.isConfirmed && result.value) {
-    if (typeof result.value === 'string' && result.value.length > 100) {
-      showToast('error', 'El nombre del módulo no puede exceder los 100 caracteres')
-      return
+  const onSubmitCreate = async (values: Record<string, string>) => {
+    const moduleData = {
+      name: values.name,
+      isActive: values.isActive === 'Visible'
     }
 
-    const createResult = await modulesService.createModule({ name: result.value as string })
+    const createResult = await modulesService.createModule(moduleData)
 
     if (createResult.success) {
       showToast('success', 'Módulo creado exitosamente')
       await fetchModules()
+      return true
     } else {
       showToast('error', createResult.message || 'Error al crear el módulo')
+      return false
     }
   }
+
+  await showForm(formConfig, onSubmitCreate)
 }
 
 function handleViewModule(id: number) {
@@ -146,28 +172,55 @@ async function handleEditModule(id: number) {
   const module = modules.value?.data?.find(m => m.id === id)
   if (!module) return
 
-  const result = await showInput(
-    'Editar Módulo',
-    'text',
-    'Ingrese el nuevo nombre del módulo (máximo 100 caracteres)',
-    module.name
-  )
+  const formConfig = {
+    title: 'Editar Módulo',
+    confirmButtonText: 'Actualizar Módulo',
+    cancelButtonText: 'Cancelar',
+    fields: [
+      {
+        id: 'name',
+        label: 'Nombre del módulo',
+        type: 'text' as const,
+        placeholder: 'Ingrese el nombre del módulo',
+        required: true,
+        value: module.name,
+        validation: (value: string) => {
+          if (value.length < 2) return 'El nombre debe tener al menos 2 caracteres'
+          if (value.length > 100) return 'El nombre no puede exceder los 100 caracteres'
+          return null
+        }
+      },
+      {
+        id: 'isActive',
+        label: 'Estado',
+        type: 'select' as const,
+        placeholder: 'Seleccione el estado',
+        required: true,
+        value: module.isActive ? 'Visible' : 'Oculto',
+        options: ['Visible', 'Oculto']
+      }
+    ]
+  }
 
-  if (result.isConfirmed && result.value) {
-    if (typeof result.value === 'string' && result.value.length > 100) {
-      showToast('error', 'El nombre del módulo no puede exceder los 100 caracteres')
-      return
+  const onSubmitEdit = async (values: Record<string, string>) => {
+    const moduleData = {
+      name: values.name,
+      isActive: values.isActive === 'Visible'
     }
 
-    const updateResult = await modulesService.updateModule(id, { name: result.value as string })
+    const updateResult = await modulesService.updateModule(id, moduleData)
 
     if (updateResult.success) {
       showToast('success', 'Módulo actualizado exitosamente')
       await fetchModules()
+      return true
     } else {
       showToast('error', updateResult.message || 'Error al actualizar el módulo')
+      return false
     }
   }
+
+  await showForm(formConfig, onSubmitEdit)
 }
 
 async function handleDeleteModule(id: number) {
@@ -192,9 +245,9 @@ async function handleDeleteModule(id: number) {
 }
 
 const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-ES')
+  if (!dateString) return 'N/A'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('es-ES')
 }
 
 

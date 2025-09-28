@@ -307,7 +307,7 @@ const handleSubmit = () => {
 }
 
 onMounted(async () => {
-    const modules = await ModulesService.getModules()
+    const modules = await ModulesService.getPublicModules()
     if (modules.success) {
         visitPurposes.value = modules.data
     }

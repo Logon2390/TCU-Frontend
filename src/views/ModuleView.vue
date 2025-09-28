@@ -47,6 +47,11 @@
               <label class="block text-sm font-medium text-gray-600 mb-1">Total de visitas</label>
               <p class="text-lg font-semibold text-green-600">{{ totalVisits }}</p>
             </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1">Estado</label>
+              <p class="text-lg font-semibold text-gray-900">{{ module.isActive ? 'Visible' : 'Oculto' }}</p>
+            </div>
           </div>
         </div>
       </div>
