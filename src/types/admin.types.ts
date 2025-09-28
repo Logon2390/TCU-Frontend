@@ -3,6 +3,7 @@ export type Admin = {
   name: string
   email: string
   role: 'M' | 'A'
+  code?: string
   createdAt?: string
   updatedAt?: string
 }

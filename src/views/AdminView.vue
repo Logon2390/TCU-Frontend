@@ -79,7 +79,8 @@ const { isLoading, data: adminsData, execute: fetchAdmins } = useFetching(adminS
 const { isLoading: isSearching, data: searchData, execute: searchByEmail } = useFetching(adminService.getAdminById)
 const { isLoading: isCreating, execute: executeCreateAdmin } = useFetching(adminService.createAdmin)
 const { isLoading: isUpdating, execute: executeUpdateAdmin } = useFetching(adminService.updateAdmin)
-const { showConfirmation, showToast, showForm } = useModal()
+const { isLoading: isSendingCode, execute: executeSendCode } = useFetching(adminService.sendVerificationCode)
+const { showConfirmation, showToast, showForm, showFormWithWarning } = useModal()
 
 const layoutConfig = adminsLayoutConfig
 const roleOptions = [...ROLE_OPTIONS]
@@ -144,8 +145,24 @@ const formatDate = (dateString: string) => {
     return date.toLocaleDateString('es-ES')
 }
 
+const sendVerificationCode = async () => {
+    const result = await executeSendCode()
+    if (result?.success) {
+        return {
+            success: true,
+            message: 'Código de verificación enviado exitosamente'
+        }
+    } else {
+        return {
+            success: false,
+            message: result?.message || 'Error al enviar código de verificación'
+        }
+    }
+}
+
+
 const performSearch = async (searchTerm: string) => {
-    if (searchTerm.trim()) {    
+    if (searchTerm.trim()) {
         const filtered = (adminsData.value?.data || []).filter(admin =>
             admin.email.toLowerCase().includes(searchTerm.toLowerCase())
         )
@@ -222,6 +239,25 @@ const handleCreateAdmin = async () => {
                 required: true,
                 value: 'Admin',
                 options: roleOptions.map(option => option.label)
+            },
+            {
+                id: 'code',
+                label: 'Código de verificación',
+                type: 'input-with-action' as const,
+                placeholder: 'Ingrese el código de 6 dígitos',
+                required: true,
+                inputClass: 'flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center text-lg tracking-widest',
+                helperText: 'Haga clic en el botón para recibir el código de verificación',
+                actionButton: {
+                    icon: 'icon-[lucide--send]',
+                    title: 'Enviar código de verificación',
+                    onClick: sendVerificationCode,
+                    loadingIcon: 'icon-[lucide--loader-2] animate-spin'
+                },
+                validation: (value: string) => {
+                    if (!/^\d{6}$/.test(value)) return 'El código debe tener exactamente 6 dígitos numéricos'
+                    return null
+                }
             }
         ]
     }
@@ -240,6 +276,7 @@ const handleCreateAdmin = async () => {
             email: values.email,
             password: values.password,
             role: selectedRole as 'M' | 'A',
+            code: values.code,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         }
@@ -303,6 +340,25 @@ const handleEditAdmin = async (id: number) => {
                 required: true,
                 value: currentRoleLabel,
                 options: roleOptions.map(option => option.label)
+            },
+            {
+                id: 'code',
+                label: 'Código de verificación',
+                type: 'input-with-action' as const,
+                placeholder: 'Ingrese el código de 6 dígitos',
+                required: true,
+                inputClass: 'flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center text-lg tracking-widest',
+                helperText: 'Haga clic en el botón para recibir el código de verificación',
+                actionButton: {
+                    icon: 'icon-[lucide--send]',
+                    title: 'Enviar código de verificación',
+                    onClick: sendVerificationCode,
+                    loadingIcon: 'icon-[lucide--loader-2] animate-spin'
+                },
+                validation: (value: string) => {
+                    if (!/^\d{6}$/.test(value)) return 'El código debe tener exactamente 6 dígitos numéricos'
+                    return null
+                }
             }
         ]
     }
@@ -320,6 +376,7 @@ const handleEditAdmin = async (id: number) => {
             name: values.name,
             email: values.email,
             role: selectedRole as 'M' | 'A',
+            code: values.code,
             updatedAt: new Date().toISOString()
         }
 
@@ -342,21 +399,47 @@ const handleDeleteAdmin = async (id: number) => {
     const admin = admins.value.find(a => a.id === id)
     if (!admin) return
 
-    const result = await showConfirmation(
-        '¿Eliminar administrador?',
-        `¿Está seguro de que desea eliminar al administrador "${admin.name}"? Esta acción no se puede deshacer.`
-    )
+    const deleteFormConfig = {
+        title: `¿Eliminar administrador "${admin.name}"?`,
+        confirmButtonText: 'Eliminar Administrador',
+        cancelButtonText: 'Cancelar',
+        fields: [
+            {
+                id: 'code',
+                label: 'Código de verificación',
+                type: 'input-with-action' as const,
+                placeholder: 'Ingrese el código de 6 dígitos',
+                required: true,
+                inputClass: 'flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center text-lg tracking-widest',
+                helperText: 'Haga clic en el botón para recibir el código de verificación',
+                actionButton: {
+                    icon: 'icon-[lucide--send]',
+                    title: 'Enviar código de verificación',
+                    onClick: sendVerificationCode,
+                    loadingIcon: 'icon-[lucide--loader-2] animate-spin'
+                },
+                validation: (value: string) => {
+                    if (!/^\d{6}$/.test(value)) return 'El código debe tener exactamente 6 dígitos numéricos'
+                    return null
+                }
+            }
+        ]
+    }
 
-    if (result.isConfirmed) {
-        const deleteResult = await adminService.deleteAdmin(id)
+    const onSubmitDelete = async (values: Record<string, string>) => {
+        const deleteResult = await adminService.deleteAdmin(id, values.code)
 
         if (deleteResult.success) {
             showToast('success', 'Administrador eliminado exitosamente')
             await loadAllAdmins()
+            return true
         } else {
             showToast('error', deleteResult.message || 'Error al eliminar el administrador')
+            return false
         }
     }
+
+    await showFormWithWarning(deleteFormConfig, onSubmitDelete)
 }
 
 onMounted(async () => {

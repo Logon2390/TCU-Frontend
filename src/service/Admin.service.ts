@@ -44,13 +44,23 @@ export const adminService = {
     }
   },
 
-  deleteAdmin: async (id: number) => {
+  deleteAdmin: async (id: number, code: string) => {
     try {
-      const response = await api.delete<ApiResponse<void>>(`/admins/${id}`)
+      const response = await api.delete<ApiResponse<void>>(`/admins/${id}/${code}`)
       return response.data
     } catch (error) {
       console.error(error)
       return { success: false, message: 'Error al eliminar administrador' }
+    }
+  },
+
+  sendVerificationCode: async () => {
+    try {
+      const response = await api.get<ApiResponse<void>>('/admins/verify')
+      return response.data
+    } catch (error) {
+      console.error(error)
+      return { success: false, message: 'Error al enviar código de verificación' }
     }
   },
 }

@@ -37,7 +37,19 @@ export type ModalProps = {
   onDismiss?: () => void
 }
 
-export type FormFieldType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'select'
+export type FormFieldType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'select' | 'input-with-action'
+
+export type ActionButtonResult = {
+  success: boolean
+  message: string
+}
+
+export type FormFieldActionButton = {
+  icon: string
+  title: string
+  onClick: () => Promise<void | boolean | ActionButtonResult> | void | boolean | ActionButtonResult
+  loadingIcon?: string
+}
 
 export type FormField = {
   id: string
@@ -46,8 +58,11 @@ export type FormField = {
   placeholder?: string
   required?: boolean
   value?: string
-  options?: string[] // Para campos tipo select
+  options?: string[]
   validation?: (value: string) => string | null
+  actionButton?: FormFieldActionButton
+  inputClass?: string
+  helperText?: string
 }
 
 export type FormConfig = {
