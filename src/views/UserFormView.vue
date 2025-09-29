@@ -31,10 +31,10 @@
                                 ]">
                                     <h2 class="text-lg font-medium text-black mb-4">Identificación</h2>
                                     <div class="space-y-4">
-                                        <AppInput :label-props="{ id: 'documentNumber', label: 'Número de documento' }"
+                                        <AppInput :label-props="{ id: 'documentNumber', label: 'Número de cedula o documento de identificación' }"
                                             :input-props="{
                                                 type: 'text ',
-                                                placeholder: 'Ingrese su número de documento',
+                                                placeholder: 'Ingrese su número de identificación',
                                                 required: true,
                                                 icon: 'icon-[lucide--id-card]'
                                             }" :error-props="{ onError: false }" v-model="userRecord.user.document" />

@@ -42,15 +42,6 @@ function goToSection(section: string) {
                     <p class="text-lg md:text-xl text-white/80 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                         {{ homeConfig.hero.description }}
                     </p>
-
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-8">
-                        <AppButton
-                            :buttonProps="{ text: homeConfig.hero.primaryCtaLabel, variant: 'primary', onClick: () => goToSection('quienes-somos') }"
-                            class="w-auto" />
-                        <AppButton
-                            :buttonProps="{ text: homeConfig.hero.secondaryCtaLabel, variant: 'secondary', onClick: () => goToSection(homeConfig.hero.secondaryCtaTarget) }"
-                            class="w-auto" />
-                    </div>
                 </div>
 
                 <div class="flex justify-center items-end lg:justify-end">
@@ -71,16 +62,12 @@ function goToSection(section: string) {
                                 </div>
 
                                 <AppButton
-                                    :buttonProps="{ text: homeConfig.hero.ctaCard.buttonText, variant: 'primary', onClick: registrarVisita }" />
+                                    :buttonProps="{ text: homeConfig.hero.ctaCard.buttonText, variant: 'primary', icon: 'icon-[lucide--user-plus] size-5 text-white', onClick: registrarVisita }" />
                             </div>
                         </AppCard>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
-            <span class="icon-[lucide--arrow-down] size-6  text-white/80" />
         </div>
     </section>
 </template>
