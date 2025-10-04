@@ -12,28 +12,6 @@ export const footerConfig = {
     address: 'Pococí, Limón, Costa Rica',
     schedule: 'Lunes a Sábado: 8:00 AM - 4  :00 PM',
   } as ContactInfo,
-  links: [
-    {
-      label: 'Inicio',
-      url: '/',
-    },
-    {
-      label: 'Acerca de',
-      url: '/about',
-    },
-    {
-      label: 'Servicios',
-      url: '/services',
-    },
-    {
-      label: 'Contacto',
-      url: '/contact',
-    },
-    {
-      label: 'Política de Privacidad',
-      url: '/privacy',
-    },
-  ] as FooterLink[],
 
   socialMedia: [
     {
