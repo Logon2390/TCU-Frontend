@@ -1,4 +1,4 @@
-import type { ContactInfo, FooterLink, SocialMedia } from '@/types/layout.types'
+import type { ContactInfo, SocialMedia } from '@/types/layout.types'
 
 export const footerConfig = {
   organization: {
@@ -17,7 +17,7 @@ export const footerConfig = {
     {
       name: 'Facebook',
       icon: 'icon-[lucide--facebook]',
-      url: 'https://facebook.com',
+      url: 'https://www.facebook.com/CentroCivicoporlaPazPococi',
     },
     {
       name: 'Twitter',

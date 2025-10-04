@@ -30,7 +30,7 @@ function goToSection(section: string) {
 
                 <div class="text-center lg:text-left space-y-2" v-motion :initial="{ opacity: 0, y: 24 }"
                     :visibleOnce="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-                    <LogoCCPP :width="80" :height="80" class="hidden lg:block" />
+                    <LogoCCPP class="hidden lg:block" />
 
                     <div class="space-y-2">
                         <AppTitle :title="homeConfig.hero.title" size="md" />

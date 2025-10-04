@@ -11,7 +11,7 @@
                 </div>
 
                 <RouterLink to="/" class="cursor-pointer flex items-center gap-2 group">
-                    <LogoCCPP :width="40" :height="40" />
+                    <LogoCCPP :width="10" :height="10" />
                     <span
                         class="hidden md:block text-text-primary text-base font-bold group-hover:text-primary transition-colors">
                         Centro Cívico por la Paz - Pococi

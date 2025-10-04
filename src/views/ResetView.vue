@@ -50,7 +50,7 @@ async function handleSubmit(event: Event) {
             <Card :variant="'elevated'" :padding="'lg'" :rounded="'xl'">
                 <template #header>
                     <div class="flex items-center gap-3">
-                        <LogoCCPP class="w-10 h-10" />
+                        <LogoCCPP :width="10" :height="10" />
                         <div>
                             <p class="text-sm text-text-secondary">Panel Administrativo</p>
                             <h2 class="text-xl font-semibold text-white">Restablecer contraseña</h2>
