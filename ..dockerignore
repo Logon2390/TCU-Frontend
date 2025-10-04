@@ -1,0 +1,17 @@
+# Excluir dependencias locales (¡clave!)
+node_modules
+**/node_modules
+
+# Artefactos de build
+dist
+
+# VCS / IDE / logs
+.git
+.gitignore
+.vscode
+.idea
+*.log
+
+# Otros
+Dockerfile*
+docker-compose.yml
