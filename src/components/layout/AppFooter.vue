@@ -22,21 +22,21 @@ const router = useRouter()
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <span class="icon-[lucide--phone] text-primary size-4"></span>
+                            <span class="icon-[lucide--phone] text-primary size-4 p-2"></span>
                             <span class="text-text-secondary text-sm">{{ footerConfig.contact.phone }}</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="icon-[lucide--mail] text-primary size-4"></span>
+                            <span class="icon-[lucide--mail] text-primary size-4 p-2"></span>
                             <span class="text-text-secondary text-sm">{{ footerConfig.contact.email }}</span>
                         </div>
                     </div>
                     <div class="space-y-3">
                         <div class="flex items-center space-x-2">
-                            <span class="icon-[lucide--map-pin] text-primary size-4"></span>
+                            <span class="icon-[lucide--map-pin] text-primary size-4 p-2"></span>
                             <span class="text-text-secondary text-sm">{{ footerConfig.contact.address }}</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="icon-[lucide--clock] text-primary size-4"></span>
+                            <span class="icon-[lucide--clock] text-primary size-4 p-2"></span>
                             <span class="text-text-secondary text-sm">{{ footerConfig.contact.schedule }}</span>
                         </div>
                     </div>

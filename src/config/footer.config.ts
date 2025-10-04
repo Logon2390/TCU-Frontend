@@ -9,7 +9,7 @@ export const footerConfig = {
   contact: {
     phone: '2710 1244',
     email: 'ccppococi@mj.go.cr',
-    address: 'Pococí, Limón, Costa Rica',
+    address: '200m norte del Colegio Técnico de Pococí, en el Polideportivo de Pococí',
     schedule: 'Lunes a Sábado: 8:00 AM - 4  :00 PM',
   } as ContactInfo,
 
