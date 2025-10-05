@@ -10,7 +10,7 @@ export const footerConfig = {
     phone: '2710 1244',
     email: 'ccppococi@mj.go.cr',
     address: '200m norte del Colegio Técnico de Pococí, en el Polideportivo de Pococí',
-    schedule: 'Lunes a Sábado: 8:00 AM - 4  :00 PM',
+    schedule: 'Lunes a Viernes: 8:00 AM - 4:00 PM | Sábado: 9:00 AM - 5:00 PM',
   } as ContactInfo,
 
   socialMedia: [
