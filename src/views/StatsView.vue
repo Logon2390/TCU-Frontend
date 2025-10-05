@@ -45,7 +45,6 @@ const isFirstLoad = ref(true)
 const windowWidth = ref(window.innerWidth)
 const windowHeight = ref(window.innerHeight)
 
-// Custom report form state
 const startDate = ref<string>('')
 const endDate = ref<string>('')
 const gender = ref<string>('')
@@ -113,6 +112,29 @@ const mapPeriodToLabel = (period: StatsPeriod) => {
         case 'custom':
             return 'Período personalizado'
     }
+}
+
+const formatDate = (dateString: string, options?: Intl.DateTimeFormatOptions) => {
+    if (!dateString) return ''
+
+    const dateParts = dateString.split('T')[0].split('-')
+    if (dateParts.length === 3) {
+        const year = parseInt(dateParts[0])
+        const month = parseInt(dateParts[1]) - 1
+        const day = parseInt(dateParts[2])
+        const date = new Date(year, month, day, 12, 0, 0)
+
+        return date.toLocaleDateString('es-ES', {
+            timeZone: 'America/Costa_Rica',
+            ...options
+        })
+    }
+
+    const date = new Date(dateString)
+    return date.toLocaleDateString('es-ES', {
+        timeZone: 'America/Costa_Rica',
+        ...options
+    })
 }
 
 const clearCustomResults = () => {
@@ -232,10 +254,10 @@ const statsTextSummary = computed(() => {
     const ageBandPercentage = total > 0 ? ((maxAgeBand[1] / total) * 100).toFixed(1) : '0.0'
 
     const startDate = periodDateRange.value?.start
-        ? new Date(periodDateRange.value.start).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+        ? formatDate(periodDateRange.value.start, { day: 'numeric', month: 'long', year: 'numeric' })
         : ''
     const endDate = periodDateRange.value?.end
-        ? new Date(periodDateRange.value.end).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+        ? formatDate(periodDateRange.value.end, { day: 'numeric', month: 'long', year: 'numeric' })
         : ''
 
     const days = Math.max(1, s.visitsByDate?.length || 1)
@@ -292,7 +314,6 @@ const handlePrint = () => {
 }
 
 const setPeriod = async (type: StatsPeriod) => {
-    // Prevenir cambios múltiples rápidos con debounce
     const now = Date.now()
     if (isPeriodChanging.value || (now - lastPeriodChangeTime.value) < 200) {
         return
@@ -300,11 +321,10 @@ const setPeriod = async (type: StatsPeriod) => {
     lastPeriodChangeTime.value = now
 
     if (periodCache.value[type]) {
-        // Agregar un pequeño delay incluso para datos cacheados para dar tiempo a Chart.js
         isPeriodChanging.value = true
         await new Promise(resolve => setTimeout(resolve, 100))
         selectedPeriod.value = type
-        await new Promise(resolve => setTimeout(resolve, 50)) // Delay adicional después del cambio
+        await new Promise(resolve => setTimeout(resolve, 50))
         isPeriodChanging.value = false
         return
     }
@@ -315,18 +335,16 @@ const setPeriod = async (type: StatsPeriod) => {
         const payload = (resp as any)?.data as Statistic | undefined
         if (payload) {
             periodCache.value[type] = payload
-            // Solo cambiar el período DESPUÉS de que los datos estén listos
             selectedPeriod.value = type
         }
     } catch (error) {
-        // Silent error handling
+        console.error(error)
     } finally {
         isPeriodChanging.value = false
     }
 }
 
 onMounted(async () => {
-    // load modules select
     if (!modulesData.value) {
         await executeModules()
     }
@@ -381,8 +399,8 @@ onUnmounted(() => {
                     <span>Seleccionado: <strong>{{ mapPeriodToLabel(selectedPeriod) }}</strong></span>
                     <span v-if="periodDateRange"
                         class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20">
-                        {{ new Date(periodDateRange.start || '').toLocaleDateString('es-ES') }} – {{
-                            new Date(periodDateRange.end || '').toLocaleDateString('es-ES') }}
+                        {{ formatDate(periodDateRange.start || '') }} – {{
+                            formatDate(periodDateRange.end || '') }}
                     </span>
                     <span v-if="!isFirstLoad && (isLoading || isPeriodChanging)"
                         class="text-gray-500">Actualizando…</span>
@@ -401,9 +419,11 @@ onUnmounted(() => {
                     <AppInput v-model="endDate"
                         :label-props="{ id: 'endDate', label: 'Fecha fin', icon: 'icon-[lucide--calendar]' }"
                         :input-props="{ type: 'date', placeholder: 'YYYY-MM-DD' }" />
-                    <AppSelect v-model="genderLabel" :label-props="{ id: 'gender', label: 'Género' }"
+                    <AppSelect v-model="genderLabel"
+                        :label-props="{ id: 'gender', label: 'Género', icon: 'icon-[lucide--user]' }"
                         :select-props="{ options: GENDER_OPTIONS.map(option => option.label), placeholder: 'Todos', onChange: onGenderChange }" />
-                    <AppSelect v-model="ageRangeLabel" :label-props="{ id: 'ageRange', label: 'Rango etario' }"
+                    <AppSelect v-model="ageRangeLabel"
+                        :label-props="{ id: 'ageRange', label: 'Rango etario', icon: 'icon-[lucide--gauge]' }"
                         :select-props="{ options: ageRangeOptions, placeholder: 'Todos', onChange: onAgeRangeChange }" />
                     <AppInput v-model="minAge"
                         :label-props="{ id: 'minAge', label: 'Edad mínima', icon: 'icon-[lucide--gauge]' }"
@@ -439,7 +459,7 @@ onUnmounted(() => {
                     </p>
                     <p class="mb-3">
                         Durante este período se registraron <strong class="text-primary">{{ statsTextSummary.totalVisits
-                            }} visitas</strong>,
+                        }} visitas</strong>,
                         con un promedio de <strong>{{ statsTextSummary.dailyAverage }} visitas por día</strong>.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -484,9 +504,9 @@ onUnmounted(() => {
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-500">
                         <span class="icon-[lucide--calendar] text-base"></span>
-                        <span class="hidden sm:inline">{{ new Date(periodDateRange?.start ||
-                            '').toLocaleDateString('es-ES') }} - {{ new Date(periodDateRange?.end ||
-                                '').toLocaleDateString('es-ES') }}
+                        <span class="hidden sm:inline">{{ formatDate(periodDateRange?.start ||
+                            '') }} - {{ formatDate(periodDateRange?.end ||
+                                '') }}
                         </span>
                     </div>
                 </div>
