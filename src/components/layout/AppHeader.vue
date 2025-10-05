@@ -14,7 +14,7 @@
                     <LogoCCPP :width="10" :height="10" />
                     <span
                         class="hidden md:block text-text-primary text-base font-bold group-hover:text-primary transition-colors">
-                        Centro Cívico por la Paz - Pococi
+                        Centro Cívico por la Paz - Pococí
                     </span>
                 </RouterLink>
             </div>
