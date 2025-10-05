@@ -26,8 +26,10 @@ import AppLoader from '@/components/features/AppLoader.vue'
 import AppTable from '@/components/common/AppTable.vue'
 import modulesService from '@/service/Modules.service'
 import { useModal } from '@/composables/useModal'
+import { usePdfReport } from '@/composables/usePdfReport'
 
 const modal = useModal()
+const { generatePdfReport } = usePdfReport()
 const selectedPeriod = ref<StatsPeriod | 'custom'>('month')
 const isPeriodChanging = ref(false)
 const lastPeriodChangeTime = ref(0)
@@ -307,10 +309,40 @@ const topModulesChartOptions = computed<ChartOptions<'bar'>>(() => getTopModules
 
 const topUsersData = computed(() => (stats.value?.topUsers || []))
 
-const handlePrint = () => {
-    setTimeout(() => {
-        window.print()
-    }, 100)
+const handleExportPdf = async () => {
+    if (!stats.value) {
+        modal.showToast('error', 'No hay datos disponibles para exportar')
+        return
+    }
+
+    try {
+        // Preparar filtros aplicados si es un reporte personalizado
+        const appliedFilters = selectedPeriod.value === 'custom' ? {
+            gender: gender.value,
+            ageRange: ageRange.value,
+            minAge: minAge.value ? Number(minAge.value) : undefined,
+            maxAge: maxAge.value ? Number(maxAge.value) : undefined,
+            userId: userId.value ? Number(userId.value) : undefined,
+            moduleId: moduleId.value ? Number(moduleId.value) : undefined,
+            moduleName: moduleLabel.value || undefined
+        } : undefined
+
+        // Generar el PDF
+        await generatePdfReport({
+            stats: stats.value,
+            period: selectedPeriod.value === 'custom' ? 'custom' : selectedPeriod.value,
+            dateRange: periodDateRange.value && periodDateRange.value.start && periodDateRange.value.end ? {
+                start: periodDateRange.value.start,
+                end: periodDateRange.value.end
+            } : undefined,
+            appliedFilters
+        })
+
+        modal.showToast('success', 'PDF generado exitosamente')
+    } catch (error) {
+        console.error('Error al generar PDF:', error)
+        modal.showToast('error', 'Error al generar el PDF')
+    }
 }
 
 const setPeriod = async (type: StatsPeriod) => {
@@ -380,7 +412,7 @@ onUnmounted(() => {
                         :button-props="{ variant: 'secondary', text: 'Año', onClick: () => { clearCustomResults(); setPeriod('year') }, disabled: isPeriodChanging || selectedPeriod === 'year' }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                     <AppButton
-                        :button-props="{ variant: 'primary', text: 'Imprimir/Exportar', icon: 'icon-[lucide--printer] text-white', onClick: handlePrint }"
+                        :button-props="{ variant: 'primary', text: 'Exportar', icon: 'icon-[lucide--file-down] text-white', onClick: handleExportPdf }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                 </div>
             </div>
