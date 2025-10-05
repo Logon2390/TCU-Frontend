@@ -71,19 +71,31 @@ const ageRangeOptions = Object.values(AGE_BAND_LABEL_MAP)
 const onGenderChange = (e: Event) => {
     const selectedLabel = (e.target as HTMLSelectElement).value
     genderLabel.value = selectedLabel
-    gender.value = (GENDER_OPTIONS.find(option => option.label === selectedLabel)?.value || '')
+    if (selectedLabel === 'Todos') {
+        gender.value = ''
+    } else {
+        gender.value = (GENDER_OPTIONS.find(option => option.label === selectedLabel)?.value || '')
+    }
 }
 const onAgeRangeChange = (e: Event) => {
     const selectedLabel = (e.target as HTMLSelectElement).value
     ageRangeLabel.value = selectedLabel
-    ageRange.value = (Object.entries(AGE_BAND_LABEL_MAP).find(([key, label]) => label === selectedLabel)?.[0] || '')
+    if (selectedLabel === 'Todos') {
+        ageRange.value = ''
+    } else {
+        ageRange.value = (Object.entries(AGE_BAND_LABEL_MAP).find(([key, label]) => label === selectedLabel)?.[0] || '')
+    }
 }
 
 const onModuleChange = (event: Event) => {
     const moduleName = (event.target as HTMLSelectElement).value
     moduleLabel.value = moduleName
-    const selectedModule = modulesData.value?.data.find(module => module.name === moduleName)
-    moduleId.value = selectedModule?.id?.toString() || ''
+    if (moduleName === 'Todos') {
+        moduleId.value = ''
+    } else {
+        const selectedModule = modulesData.value?.data.find(module => module.name === moduleName)
+        moduleId.value = selectedModule?.id?.toString() || ''
+    }
 }
 
 const onNumberChange = (event: Event) => {
@@ -453,10 +465,10 @@ onUnmounted(() => {
                         :input-props="{ type: 'date', placeholder: 'YYYY-MM-DD' }" />
                     <AppSelect v-model="genderLabel"
                         :label-props="{ id: 'gender', label: 'Género', icon: 'icon-[lucide--user]' }"
-                        :select-props="{ options: GENDER_OPTIONS.map(option => option.label), placeholder: 'Todos', onChange: onGenderChange }" />
+                        :select-props="{ options: ['Todos', ...GENDER_OPTIONS.map(option => option.label)], placeholder: 'Seleccione', onChange: onGenderChange }" />
                     <AppSelect v-model="ageRangeLabel"
                         :label-props="{ id: 'ageRange', label: 'Rango etario', icon: 'icon-[lucide--gauge]' }"
-                        :select-props="{ options: ageRangeOptions, placeholder: 'Todos', onChange: onAgeRangeChange }" />
+                        :select-props="{ options: ['Todos', ...ageRangeOptions], placeholder: 'Seleccione', onChange: onAgeRangeChange }" />
                     <AppInput v-model="minAge"
                         :label-props="{ id: 'minAge', label: 'Edad mínima', icon: 'icon-[lucide--gauge]' }"
                         :input-props="{ type: 'number', placeholder: 'Ej. 18' }" :min="0" :onChange="onNumberChange" />
@@ -469,7 +481,7 @@ onUnmounted(() => {
                         :onChange="onNumberChange" />
                     <AppSelect v-model="moduleLabel"
                         :label-props="{ id: 'moduleId', label: 'Módulo', icon: 'icon-[lucide--component]' }"
-                        :select-props="{ options: modulesData?.data.map(module => module.name) || [], placeholder: 'Todos', onChange: onModuleChange }"
+                        :select-props="{ options: ['Todos', ...(modulesData?.data.map(module => module.name) || [])], placeholder: 'Seleccione', onChange: onModuleChange }"
                         :error-props="{ onError: modulesError, message: 'Error al cargar los módulos' }" />
                 </div>
                 <div class="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
