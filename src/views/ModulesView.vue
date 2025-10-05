@@ -229,7 +229,8 @@ async function handleDeleteModule(id: number) {
 
   const result = await showConfirmation(
     '¿Eliminar módulo?',
-    `¿Está seguro de que desea eliminar el módulo "${module.name}"? Esta acción no se puede deshacer.`
+    `¿Está seguro de que desea eliminar el módulo "${module.name}"? Esta acción no se puede deshacer.
+    Al eliminar el módulo, se eliminarán todas las visitas asociadas a él.`
   )
 
   if (result.isConfirmed) {

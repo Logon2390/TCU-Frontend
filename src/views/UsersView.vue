@@ -335,7 +335,8 @@ const handleDeleteUser = async (id: number) => {
 
     const result = await showConfirmation(
         '¿Eliminar usuario?',
-        `¿Está seguro de que desea eliminar al usuario "${user.name}"? Esta acción no se puede deshacer.`
+        `¿Está seguro de que desea eliminar al usuario "${user.name}"? Esta acción no se puede deshacer.
+        Al eliminar el usuario, se eliminarán todas las visitas asociadas a él.`
     )
 
     if (result.isConfirmed) {
