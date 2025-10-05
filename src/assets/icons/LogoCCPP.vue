@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import logo from '@/../public/logo.webp'
+import logo from '/logo.webp'
 defineProps({
     width: {
         type: Number,
