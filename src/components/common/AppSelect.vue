@@ -17,7 +17,7 @@
 
             <select v-bind="$attrs" :disabled="selectProps.disabled" :aria-disabled="selectProps.disabled"
                 :value="$attrs.modelValue" :class="[baseStyles, errorStyles, iconStyles, disabledStyles]"
-                @focus="setIsOpen(true)" @blur="setIsOpen(false)" @change="selectProps.onChange">
+                @focus="setIsOpen(true)" @blur="setIsOpen(false)" @change="handleChange">
                 <option v-if="selectProps.placeholder" value="" disabled>{{ selectProps.placeholder }}</option>
                 <option v-for="option in selectProps.options" :key="option" :value="option">
                     {{ option }}
@@ -26,7 +26,7 @@
 
             <div class="pointer-events-none absolute inset-y-0 right-0 z-10 flex items-center pr-3">
                 <span :class="[
-                    'icon-[lucide--chevron-down] h-4 w-4 flex-shrink-0 text-    primary transition-transform duration-200',
+                    'icon-[lucide--chevron-down] h-4 w-4 flex-shrink-0 text-primary transition-transform duration-200',
                     selectProps.disabled ? 'opacity-50' : '',
                     isOpen ? 'rotate-180' : ''
                 ]" />
@@ -50,10 +50,23 @@ const props = defineProps<{
     customStyle?: string
 }>()
 
+const emit = defineEmits<{
+    'update:modelValue': [value: string]
+}>()
+
 const isOpen = ref(false)
 
 const setIsOpen = (value: boolean) => {
     isOpen.value = value
+}
+
+const handleChange = (event: Event) => {
+    const target = event.target as HTMLSelectElement
+    emit('update:modelValue', target.value)
+    
+    if (props.selectProps.onChange) {
+        props.selectProps.onChange(event)
+    }
 }
 
 const baseStyles = computed(() =>

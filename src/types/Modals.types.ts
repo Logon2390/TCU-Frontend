@@ -36,3 +36,46 @@ export type ModalProps = {
   onCancel?: () => void
   onDismiss?: () => void
 }
+
+export type FormFieldType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'select' | 'input-with-action'
+
+export type ActionButtonResult = {
+  success: boolean
+  message: string
+}
+
+export type FormFieldActionButton = {
+  icon: string
+  title: string
+  onClick: () => Promise<void | boolean | ActionButtonResult> | void | boolean | ActionButtonResult
+  loadingIcon?: string
+}
+
+export type FormField = {
+  id: string
+  label: string
+  type: FormFieldType
+  placeholder?: string
+  required?: boolean
+  value?: string
+  options?: string[]
+  validation?: (value: string) => string | null
+  actionButton?: FormFieldActionButton
+  inputClass?: string
+  helperText?: string
+}
+
+export type FormConfig = {
+  title: string
+  fields: FormField[]
+  confirmButtonText?: string
+  cancelButtonText?: string
+  loading?: boolean
+}
+
+export type FormResult = {
+  isConfirmed: boolean
+  isDenied: boolean
+  isDismissed: boolean
+  values?: Record<string, string>
+}

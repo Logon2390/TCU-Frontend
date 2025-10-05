@@ -12,16 +12,12 @@ const router = useRouter()
 function registrarVisita() {
     router.push('/registro')
 }
-
-function goToSection(section: string) {
-    document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' })
-}
 </script>
 
 <template>
-    <section class="relative min-h-[calc(100vh-50px)] flex items-center justify-center px-4 overflow-hidden">
+    <section class="relative min-h-[calc(100vh)] flex items-center justify-center px-4 overflow-hidden">
         <div class="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            :style="{ backgroundImage: `url('${images.registration.hero}')` }">
+            :style="{ backgroundImage: `url('${homeConfig.hero.image}')` }">
             <div class="absolute inset-0 bg-black/60"></div>
         </div>
 
@@ -30,7 +26,7 @@ function goToSection(section: string) {
 
                 <div class="text-center lg:text-left space-y-2" v-motion :initial="{ opacity: 0, y: 24 }"
                     :visibleOnce="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-                    <LogoCCPP :width="80" :height="80" class="hidden lg:block" />
+                    <LogoCCPP :width="20" :height="20" class="hidden lg:block" />
 
                     <div class="space-y-2">
                         <AppTitle :title="homeConfig.hero.title" size="md" />
@@ -42,15 +38,6 @@ function goToSection(section: string) {
                     <p class="text-lg md:text-xl text-white/80 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                         {{ homeConfig.hero.description }}
                     </p>
-
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-8">
-                        <AppButton
-                            :buttonProps="{ text: homeConfig.hero.primaryCtaLabel, variant: 'primary', onClick: () => goToSection('quienes-somos') }"
-                            class="w-auto" />
-                        <AppButton
-                            :buttonProps="{ text: homeConfig.hero.secondaryCtaLabel, variant: 'secondary', onClick: () => goToSection(homeConfig.hero.secondaryCtaTarget) }"
-                            class="w-auto" />
-                    </div>
                 </div>
 
                 <div class="flex justify-center items-end lg:justify-end">
@@ -71,16 +58,12 @@ function goToSection(section: string) {
                                 </div>
 
                                 <AppButton
-                                    :buttonProps="{ text: homeConfig.hero.ctaCard.buttonText, variant: 'primary', onClick: registrarVisita }" />
+                                    :buttonProps="{ text: homeConfig.hero.ctaCard.buttonText, variant: 'primary', icon: 'icon-[lucide--user-plus] size-5 text-white', onClick: registrarVisita }" />
                             </div>
                         </AppCard>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
-            <span class="icon-[lucide--arrow-down] size-6  text-white/80" />
         </div>
     </section>
 </template>

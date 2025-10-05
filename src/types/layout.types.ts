@@ -38,3 +38,13 @@ export interface ContactInfo {
   address: string
   schedule: string
 }
+
+export type LayoutConfig = {
+  title: string
+  searchPlaceholder: string
+}
+
+export type LayoutProps = {
+  config: LayoutConfig
+  loading?: boolean
+}

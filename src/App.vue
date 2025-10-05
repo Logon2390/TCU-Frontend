@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { Accessibility, type IAccessibilityIconPositionOptions } from 'accessibility';
+import { Accessibility } from 'accessibility';
 import Header from './components/layout/AppHeader.vue'
 import Footer from './components/layout/AppFooter.vue'
 import Sidebar from './components/layout/AppSidebar.vue'
 import { onMounted } from 'vue';
 
 onMounted(() => {
-  let accessibility = new Accessibility({
+  new Accessibility({
     labels: {
       resetTitle: "Reiniciar",
       closeTitle: "Cerrar",

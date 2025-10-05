@@ -12,26 +12,20 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'admin',
       title: 'Admin',
-      route: '/admin/admin',
+      route: '/admin/management',
       icon: 'icon-[lucide--shield]',
     },
     {
       id: 'usuarios',
       title: 'Usuarios',
-      route: '/admin/usuarios',
+      route: '/admin/users',
       icon: 'icon-[lucide--users]',
     },
     {
       id: 'modulos',
       title: 'Módulos',
-      route: '/admin/modulos',
+      route: '/admin/modules',
       icon: 'icon-[lucide--book]',
-    },
-    {
-      id: 'visitas',
-      title: 'Visitas',
-      route: '/admin/visitas',
-      icon: 'icon-[lucide--map-pinned]',
     },
   ],
 }
