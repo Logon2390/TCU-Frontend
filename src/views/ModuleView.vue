@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-[calc(100vh-15px)] bg-gray-50 p-6">
+  <div class="flex flex-col bg-gray-50 p-6">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
@@ -12,45 +12,47 @@
         </div>
       </div>
 
-      <div v-if="module" class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200">
-        <div class="flex items-start gap-6">
+      <div v-if="module"
+        class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 md:p-6 border border-green-200">
+        <div class="flex items-start gap-4 md:gap-6">
           <div class="flex-shrink-0">
-            <div class="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center">
-              <span class="text-2xl font-bold text-white">
+            <div class="w-14 h-14 md:w-20 md:h-20 bg-green-600 rounded-full flex items-center justify-center">
+              <span class="text-xl md:text-2xl font-bold text-white">
                 {{ getInitials(module.name) }}
               </span>
             </div>
           </div>
 
-          <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Nombre del módulo</label>
-              <p class="text-lg font-semibold text-gray-900">{{ module.name }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Nombre del módulo</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900 break-words">{{ module.name }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">ID del módulo</label>
-              <p class="text-lg font-semibold text-gray-900">#{{ module.id }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">ID del módulo</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900">#{{ module.id }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Fecha de creación</label>
-              <p class="text-lg font-semibold text-gray-900">{{ formatDate(module.createdAt || '') }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Fecha de creación</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDate(module.createdAt || '') }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Última actualización</label>
-              <p class="text-lg font-semibold text-gray-900">{{ formatDate(module.updatedAt || '') }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Última actualización</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDate(module.updatedAt || '') }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Total de visitas</label>
-              <p class="text-lg font-semibold text-green-600">{{ totalVisits }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Total de visitas</label>
+              <p class="text-base md:text-lg font-semibold text-green-600">{{ totalVisits }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Estado</label>
-              <p class="text-lg font-semibold text-gray-900">{{ module.isActive ? 'Visible' : 'Oculto' }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Estado</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{ module.isActive ? 'Visible' : 'Oculto' }}
+              </p>
             </div>
           </div>
         </div>
@@ -81,20 +83,20 @@
       </div>
     </div>
 
-    <div class="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden min-h-0">
-      <div class="p-6 border-b border-gray-200">
+    <div
+      class="flex-1 bg-white rounded-lg shadow-sm border h-full border-gray-200 overflow-visible md:overflow-hidden min-h-0">
+      <div class="p-6 border-b border-gray-200 flex-shrink-0">
         <h2 class="text-xl font-semibold text-gray-900">Historial de Visitas</h2>
         <p class="text-gray-600 mt-1">Registro completo de las visitas realizadas a este módulo</p>
       </div>
 
-      <div class="flex-1 overflow-hidden">
-        <AppTable :columns="tableColumns" :data="pagination.data.value" 
-          :loading="isLoadingRecords || pagination.isLoading.value" 
-          :pagination="pagination.paginationConfig.value"
+      <div class="flex-1 flex flex-col overflow-visible md:overflow-hidden min-h-0">
+        <AppTable :columns="tableColumns" :data="pagination.data.value"
+          :loading="isLoadingRecords || pagination.isLoading.value" :pagination="pagination.paginationConfig.value"
           empty-message="Este módulo no tiene visitas registradas">
           <template #cell-user="{ row }">
             <div class="flex items-center gap-2">
-              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+              <div class=" hidden md:flex w-8 h-8 bg-blue-600 rounded-full items-center justify-center">
                 <span class="text-xs font-bold text-white">
                   {{ getUserInitials(row.user?.name || 'Usuario') }}
                 </span>
@@ -134,6 +136,7 @@ const router = useRouter()
 
 const moduleId = parseInt(route.params.id as string)
 const module = ref<Module | null>(null)
+const isInitialLoad = ref(true)
 
 const pagination = usePagination<any>({ initialLimit: 10 })
 const { isLoading: isPaginationLoading, execute: fetchRecordsPaginated } = useFetching(
@@ -219,11 +222,14 @@ const loadModuleRecords = async () => {
 }
 
 watch([() => pagination.currentPage.value, () => pagination.itemsPerPage.value], async () => {
-  await loadModuleRecords()
+  if (!isInitialLoad.value) {
+    await loadModuleRecords()
+  }
 })
 
 onMounted(async () => {
   await loadModuleData()
   await loadModuleRecords()
+  isInitialLoad.value = false
 })
 </script>
