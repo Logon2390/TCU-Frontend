@@ -47,7 +47,7 @@ async function handleVerification() {
         verificationPhase.value = false;
         verificationCode.value = '';
 
-        authLogin(response.data)
+        authLogin(response.data.admin)
         router.push('/admin/stats');
     } else {
         verificationError.value = true;

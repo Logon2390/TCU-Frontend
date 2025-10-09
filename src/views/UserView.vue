@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-[calc(100vh-15px)] bg-gray-50 p-6">
+  <div class="flex flex-col bg-gray-50 p-6">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
@@ -12,47 +12,47 @@
         </div>
       </div>
 
-      <div v-if="user" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
-        <div class="flex items-start gap-6">
+      <div v-if="user" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 md:p-6 border border-blue-200">
+        <div class="flex items-start gap-4 md:gap-6">
           <div class="flex-shrink-0">
-            <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
-              <span class="text-2xl font-bold text-white">
+            <div class="w-14 h-14 md:w-20 md:h-20 bg-blue-600 rounded-full flex items-center justify-center">
+              <span class="text-xl md:text-2xl font-bold text-white">
                 {{ getInitials(user.name) }}
               </span>
             </div>
           </div>
 
-          <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Nombre completo</label>
-              <p class="text-lg font-semibold text-gray-900">{{ user.name }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Nombre completo</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900 break-words">{{ user.name }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Documento</label>
-              <p class="text-lg font-semibold text-gray-900">{{ user.document }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Documento</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900 break-words">{{ user.document }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Género</label>
-              <p class="text-lg font-semibold text-gray-900">{{ getGenderLabel(user.gender) }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Género</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{ getGenderLabel(user.gender) }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Fecha de nacimiento</label>
-              <p class="text-lg font-semibold text-gray-900">{{ formatDate(user.birthday) }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Fecha de nacimiento</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDate(user.birthday) }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Última visita</label>
-              <p class="text-lg font-semibold text-gray-900">
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Última visita</label>
+              <p class="text-base md:text-lg font-semibold text-gray-900">
                 {{ user.lastRecord ? formatDateTime(user.lastRecord) : 'Sin visitas' }}
               </p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">Total de visitas</label>
-              <p class="text-lg font-semibold text-blue-600">{{ totalVisits }}</p>
+              <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Total de visitas</label>
+              <p class="text-base md:text-lg font-semibold text-blue-600">{{ totalVisits }}</p>
             </div>
           </div>
         </div>
@@ -83,20 +83,20 @@
       </div>
     </div>
 
-    <div class="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden min-h-0">
-      <div class="p-6 border-b border-gray-200">
+    <div
+      class="flex-1 flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 overflow-visible md:overflow-hidden min-h-0">
+      <div class="p-6 border-b border-gray-200 flex-shrink-0">
         <h2 class="text-xl font-semibold text-gray-900">Historial de Visitas</h2>
         <p class="text-gray-600 mt-1">Registro completo de las visitas realizadas por este usuario</p>
       </div>
 
-      <div class="flex-1 overflow-hidden">
-        <AppTable :columns="tableColumns" :data="pagination.data.value" 
-          :loading="isLoadingRecords || pagination.isLoading.value" 
-          :pagination="pagination.paginationConfig.value"
+      <div class="flex-1 flex flex-col overflow-visible md:overflow-hidden min-h-0">
+        <AppTable :columns="tableColumns" :data="pagination.data.value"
+          :loading="isLoadingRecords || pagination.isLoading.value" :pagination="pagination.paginationConfig.value"
           empty-message="Este usuario no tiene visitas registradas">
           <template #cell-module="{ row }">
-            <div class="flex items-center gap-2">
-              <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+            <div class="flex items-center justify-end gap-2">
+              <div class=" hidden md:block w-2 h-2 bg-blue-600 rounded-full"></div>
               <span class="font-medium text-gray-900">{{ row.module.name }}</span>
             </div>
           </template>
