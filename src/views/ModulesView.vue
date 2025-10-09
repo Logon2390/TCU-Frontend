@@ -40,8 +40,8 @@
               title="Editar">
               <span class="icon-[lucide--edit] w-4 h-4"></span>
             </button>
-            <button @click="handleDeleteModule(row.id)" class="p-1 text-red-600 hover:text-red-800 transition-colors"
-              title="Eliminar">
+            <button v-if="getUser()?.role === 'M'" @click="handleDeleteModule(row.id)"
+              class="p-1 text-red-600 hover:text-red-800 transition-colors" title="Eliminar">
               <span class="icon-[lucide--trash-2] w-4 h-4"></span>
             </button>
           </div>
@@ -62,10 +62,12 @@ import { useFetching } from '@/composables/useFetching'
 import { useModal } from '@/composables/useModal'
 import modulesService from '@/service/Modules.service'
 import type { TableColumn } from '@/types/component.types'
+import { useAuth } from '@/composables/useAuth'
 
 const { isLoading, data: modules, execute: fetchModules } = useFetching(modulesService.getModules)
 const { showInput, showConfirmation, showToast, showForm } = useModal()
 const router = useRouter()
+const { getUser } = useAuth()
 
 const layoutConfig = modulesLayoutConfig
 

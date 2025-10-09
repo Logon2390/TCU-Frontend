@@ -1,12 +1,11 @@
 <template>
     <AppLayout :config="layoutConfig" :loading="isPaginationLoading || pagination.isLoading.value">
         <template #filters="{ searchValue, updateSearch }">
-            <AppInput v-model="documentSearch"
-                :label-props="{ id: 'document-search', label: '' }" :input-props="{
-                    type: 'text',
-                    placeholder: 'Buscar por documento...',
-                    icon: 'icon-[lucide--search]'
-                }" />
+            <AppInput v-model="documentSearch" :label-props="{ id: 'document-search', label: '' }" :input-props="{
+                type: 'text',
+                placeholder: 'Buscar por documento...',
+                icon: 'icon-[lucide--search]'
+            }" />
         </template>
 
         <template #actions>
@@ -19,9 +18,9 @@
         </template>
 
         <template #default="{ searchValue: layoutSearchValue, loading }">
-            <AppTable :columns="tableColumns" :data="displayUsers" 
+            <AppTable :columns="tableColumns" :data="displayUsers"
                 :loading="loading || isPaginationLoading || isSearching || pagination.isLoading.value"
-                :pagination="isSearchMode ? { enabled: false } : pagination.paginationConfig.value" 
+                :pagination="isSearchMode ? { enabled: false } : pagination.paginationConfig.value"
                 empty-message="No se encontraron usuarios">
                 <template #cell-document="{ row }">
                     {{ row.document }}
@@ -49,7 +48,7 @@
                             class="p-1 text-blue-600 hover:text-blue-800 transition-colors" title="Editar">
                             <span class="icon-[lucide--edit] w-4 h-4"></span>
                         </button>
-                        <button @click="handleDeleteUser(row.id)"
+                        <button v-if="getUser()?.role === 'M'" @click="handleDeleteUser(row.id)"
                             class="p-1 text-red-600 hover:text-red-800 transition-colors" title="Eliminar">
                             <span class="icon-[lucide--trash-2] w-4 h-4"></span>
                         </button>
@@ -76,16 +75,18 @@ import userService from '@/service/User.service'
 import type { TableColumn } from '@/types/component.types'
 import type { User } from '@/types/user.types'
 import { GENDER_OPTIONS } from '@/types/form.types'
+import { useAuth } from '@/composables/useAuth'
 
 const { isLoading: isSearching, data: searchData, execute: searchByDocument } = useFetching(userService.getUserByDocument)
 const { isLoading: isCreating, execute: executeCreateUser } = useFetching(userService.createUser)
 const { isLoading: isUpdating, execute: executeUpdateUser } = useFetching(userService.updateUser)
 const { showConfirmation, showToast, showForm } = useModal()
 const router = useRouter()
+const { getUser } = useAuth()
 
 const pagination = usePagination<User>({ initialLimit: 10 })
 const { isLoading: isPaginationLoading, execute: fetchUsersPaginated } = useFetching(
-  (page: number, limit: number) => userService.getUsersPaginated(page, limit)
+    (page: number, limit: number) => userService.getUsersPaginated(page, limit)
 )
 
 const layoutConfig = usersLayoutConfig

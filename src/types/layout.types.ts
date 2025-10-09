@@ -3,6 +3,7 @@ export interface SidebarItem {
   title: string
   route: string
   icon?: string
+  requiereMaster: boolean
 }
 
 export interface SidebarConfig {
