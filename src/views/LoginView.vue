@@ -4,12 +4,13 @@ import AuthService from '@/service/Auth.service';
 import Input from '@/components/common/AppInput.vue';
 import Button from '@/components/common/AppButton.vue';
 import Card from '@/components/features/AppCard.vue';
-import LogoCCPP from '@/assets/icons/LogoCCPP.vue';
+import LogoCCPP from '/logo.webp';
 import { useRouter } from 'vue-router';
 import useFetching from '@/composables/useFetching';
 import { images } from '@/config/images.config';
 import { useModal } from '@/composables/useModal';
 import { useAuth } from '@/composables/useAuth';
+import AppIcon from '@/components/features/AppIcon.vue';
 
 const router = useRouter();
 const { login: authLogin } = useAuth();
@@ -65,7 +66,7 @@ async function handleVerification() {
                 :visibleOnce="{ opacity: 1, y: 0, transition: { duration: 300 } }">
                 <template #header>
                     <div class="flex items-center gap-3">
-                        <LogoCCPP :width="10" :height="10" />
+                        <AppIcon :src='LogoCCPP' :width="10" :height="10" />
                         <div>
                             <p class="text-sm text-text-secondary">Panel Administrativo</p>
                             <h2 class="text-xl font-semibold text-white">Iniciar sesión</h2>

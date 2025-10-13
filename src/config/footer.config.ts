@@ -3,7 +3,7 @@ import type { ContactInfo, SocialMedia } from '@/types/layout.types'
 export const footerConfig = {
   organization: {
     name: 'Centro Cívico por la Paz - Pococí',
-    logo: '@/assets/icons/LogoCCPP.vue',
+    logo: '/logo.webp',
   },
 
   contact: {
