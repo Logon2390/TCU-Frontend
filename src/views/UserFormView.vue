@@ -31,7 +31,7 @@
                                 ]">
                                     <h2 class="text-lg font-medium text-black mb-4">Identificación</h2>
                                     <div class="space-y-4">
-                                        <AppInput :label-props="{ id: 'documentNumber', label: 'Número de cedula o documento de identificación' }"
+                                        <AppInput :label-props="{ id: 'documentNumber', label: 'Número de cédula o documento de identificación' }"
                                             :input-props="{
                                                 type: 'text ',
                                                 placeholder: 'Ingrese su número de identificación',
