@@ -47,7 +47,7 @@ async function handleVerification() {
         verificationPhase.value = false;
         verificationCode.value = '';
 
-        authLogin(response.data)
+        authLogin(response.data.admin)
         router.push('/admin/stats');
     } else {
         verificationError.value = true;
@@ -65,7 +65,7 @@ async function handleVerification() {
                 :visibleOnce="{ opacity: 1, y: 0, transition: { duration: 300 } }">
                 <template #header>
                     <div class="flex items-center gap-3">
-                        <LogoCCPP class="w-10 h-10" />
+                        <LogoCCPP :width="10" :height="10" />
                         <div>
                             <p class="text-sm text-text-secondary">Panel Administrativo</p>
                             <h2 class="text-xl font-semibold text-white">Iniciar sesión</h2>

@@ -6,7 +6,7 @@
             }}</span>
         </div>
 
-        <div class="w-full bg-secondary rounded-full h-2">
+        <div class="w-full bg-gray-300 rounded-full h-2">
             <div class="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
                 :style="{ width: `${(stepperProps.currentStep / stepperProps.steps.length) * 100}%` }"></div>
         </div>

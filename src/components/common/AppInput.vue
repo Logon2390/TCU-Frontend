@@ -2,7 +2,7 @@
     <div class="relative">
         <label v-if="labelProps.label" :for="labelProps.id"
             :class="['flex items-center gap-2 text-sm font-medium mb-1', labelProps.class]">
-            <span v-if="labelProps.icon" :class="labelProps.icon" class="text-text-secondary"></span>
+            <span v-if="labelProps.icon" :class="labelProps.icon" class="text-primary"></span>
             {{ labelProps.label }}
         </label>
         <div class="relative">

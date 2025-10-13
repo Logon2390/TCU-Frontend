@@ -7,12 +7,16 @@
             </span>
 
             <div v-if="showItemsPerPageSelector" class="flex items-center gap-2">
-                <Select :label-props="{ id: 'itemsPerPage' }" :select-props="{
-                    options: pageSizeOptions.map(size => size.toString()),
-                    onChange: handleItemsPerPageChange,
-                    placeholder: ''
-                }" :error-props="{ onError: false }" :model-value="itemsPerPage.toString()"
-                    custom-style="min-w-[80px]" />
+                <Select 
+                    v-model="currentItemsPerPage"
+                    :label-props="{ id: 'itemsPerPage', label: '' }" 
+                    :select-props="{
+                        options: availablePageSizes.map(size => size.toString()),
+                        placeholder: ''
+                    }" 
+                    :error-props="{ onError: false }"
+                    custom-style="min-w-[80px]" 
+                />
                 <span class="text-sm text-gray-600">por página</span>
             </div>
         </div>
@@ -66,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Select from '@/components/common/AppSelect.vue'
 import Button from '@/components/common/AppButton.vue'
 import type { PaginationProps } from '@/types/component.types'
@@ -81,6 +85,28 @@ const emit = defineEmits<{
     pageChange: [page: number]
     itemsPerPageChange: [itemsPerPage: number]
 }>()
+
+const currentItemsPerPage = ref(props.itemsPerPage.toString())
+
+const availablePageSizes = computed(() => {
+    const sizes = [...props.pageSizeOptions]
+    if (!sizes.includes(props.itemsPerPage)) {
+        sizes.push(props.itemsPerPage)
+        sizes.sort((a, b) => a - b)
+    }
+    return sizes
+})
+
+watch(() => props.itemsPerPage, (newValue) => {
+    currentItemsPerPage.value = newValue.toString()
+}, { immediate: true })
+
+watch(currentItemsPerPage, (newValue) => {
+    const numValue = parseInt(newValue)
+    if (numValue !== props.itemsPerPage) {
+        emit('itemsPerPageChange', numValue)
+    }
+})
 
 const paginationBaseStyle = 'px-3 py-2 text-sm font-medium rounded-md border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
 const paginationButtonStyle = `${paginationBaseStyle} text-gray-500 bg-white border-gray-300 hover:bg-gray-50`
@@ -117,9 +143,4 @@ const visiblePages = computed(() => {
     return pages
 })
 
-const handleItemsPerPageChange = (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    const newItemsPerPage = parseInt(target.value)
-    emit('itemsPerPageChange', newItemsPerPage)
-}
 </script>

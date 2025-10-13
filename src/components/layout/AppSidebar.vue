@@ -21,7 +21,7 @@
             <nav class="flex-1 px-4 py-6">
                 <ul class="space-y-2">
                     <li v-for="item in config.items" :key="item.id">
-                        <RouterLink :to="item.route" :class="[
+                        <RouterLink v-if="!item.requiereMaster || getUser()?.role === 'M'" :to="item.route" :class="[
                             'flex items-center px-4 py-3 rounded-lg transition-colors duration-200',
                             'hover:bg-secondary focus:bg-secondary focus:outline-none',
                             'text-text-secondary hover:text-white',
@@ -43,7 +43,9 @@
 import { RouterLink, useRoute } from 'vue-router'
 import { sidebarConfig } from '../../config/sidebar.config'
 import { useSidebar } from '../../composables/useSidebar'
+import { useAuth } from '../../composables/useAuth'
 
+const { getUser } = useAuth()
 const { isSidebarOpen, toggleSidebar, closeSidebar } = useSidebar()
 const route = useRoute()
 const config = sidebarConfig

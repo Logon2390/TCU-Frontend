@@ -3,6 +3,7 @@ export interface SidebarItem {
   title: string
   route: string
   icon?: string
+  requiereMaster: boolean
 }
 
 export interface SidebarConfig {
@@ -37,4 +38,14 @@ export interface ContactInfo {
   email: string
   address: string
   schedule: string
+}
+
+export type LayoutConfig = {
+  title: string
+  searchPlaceholder: string
+}
+
+export type LayoutProps = {
+  config: LayoutConfig
+  loading?: boolean
 }

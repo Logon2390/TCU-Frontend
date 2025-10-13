@@ -26,9 +26,11 @@ import AppLoader from '@/components/features/AppLoader.vue'
 import AppTable from '@/components/common/AppTable.vue'
 import modulesService from '@/service/Modules.service'
 import { useModal } from '@/composables/useModal'
+import { usePdfReport } from '@/composables/usePdfReport'
 
 const modal = useModal()
-const selectedPeriod = ref<StatsPeriod | 'custom'>('today')
+const { generatePdfReport } = usePdfReport()
+const selectedPeriod = ref<StatsPeriod | 'custom'>('month')
 const isPeriodChanging = ref(false)
 const lastPeriodChangeTime = ref(0)
 const { isLoading, error, data, execute } = useFetching(statsService.getStatsByPeriod)
@@ -45,7 +47,6 @@ const isFirstLoad = ref(true)
 const windowWidth = ref(window.innerWidth)
 const windowHeight = ref(window.innerHeight)
 
-// Custom report form state
 const startDate = ref<string>('')
 const endDate = ref<string>('')
 const gender = ref<string>('')
@@ -70,19 +71,31 @@ const ageRangeOptions = Object.values(AGE_BAND_LABEL_MAP)
 const onGenderChange = (e: Event) => {
     const selectedLabel = (e.target as HTMLSelectElement).value
     genderLabel.value = selectedLabel
-    gender.value = (GENDER_OPTIONS.find(option => option.label === selectedLabel)?.value || '')
+    if (selectedLabel === 'Todos') {
+        gender.value = ''
+    } else {
+        gender.value = (GENDER_OPTIONS.find(option => option.label === selectedLabel)?.value || '')
+    }
 }
 const onAgeRangeChange = (e: Event) => {
     const selectedLabel = (e.target as HTMLSelectElement).value
     ageRangeLabel.value = selectedLabel
-    ageRange.value = (Object.entries(AGE_BAND_LABEL_MAP).find(([key, label]) => label === selectedLabel)?.[0] || '')
+    if (selectedLabel === 'Todos') {
+        ageRange.value = ''
+    } else {
+        ageRange.value = (Object.entries(AGE_BAND_LABEL_MAP).find(([key, label]) => label === selectedLabel)?.[0] || '')
+    }
 }
 
 const onModuleChange = (event: Event) => {
     const moduleName = (event.target as HTMLSelectElement).value
     moduleLabel.value = moduleName
-    const selectedModule = modulesData.value?.data.find(module => module.name === moduleName)
-    moduleId.value = selectedModule?.id.toString() || ''
+    if (moduleName === 'Todos') {
+        moduleId.value = ''
+    } else {
+        const selectedModule = modulesData.value?.data.find(module => module.name === moduleName)
+        moduleId.value = selectedModule?.id?.toString() || ''
+    }
 }
 
 const onNumberChange = (event: Event) => {
@@ -113,6 +126,29 @@ const mapPeriodToLabel = (period: StatsPeriod) => {
         case 'custom':
             return 'Período personalizado'
     }
+}
+
+const formatDate = (dateString: string, options?: Intl.DateTimeFormatOptions) => {
+    if (!dateString) return ''
+
+    const dateParts = dateString.split('T')[0].split('-')
+    if (dateParts.length === 3) {
+        const year = parseInt(dateParts[0])
+        const month = parseInt(dateParts[1]) - 1
+        const day = parseInt(dateParts[2])
+        const date = new Date(year, month, day, 12, 0, 0)
+
+        return date.toLocaleDateString('es-ES', {
+            timeZone: 'America/Costa_Rica',
+            ...options
+        })
+    }
+
+    const date = new Date(dateString)
+    return date.toLocaleDateString('es-ES', {
+        timeZone: 'America/Costa_Rica',
+        ...options
+    })
 }
 
 const clearCustomResults = () => {
@@ -232,10 +268,10 @@ const statsTextSummary = computed(() => {
     const ageBandPercentage = total > 0 ? ((maxAgeBand[1] / total) * 100).toFixed(1) : '0.0'
 
     const startDate = periodDateRange.value?.start
-        ? new Date(periodDateRange.value.start).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+        ? formatDate(periodDateRange.value.start, { day: 'numeric', month: 'long', year: 'numeric' })
         : ''
     const endDate = periodDateRange.value?.end
-        ? new Date(periodDateRange.value.end).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+        ? formatDate(periodDateRange.value.end, { day: 'numeric', month: 'long', year: 'numeric' })
         : ''
 
     const days = Math.max(1, s.visitsByDate?.length || 1)
@@ -285,14 +321,43 @@ const topModulesChartOptions = computed<ChartOptions<'bar'>>(() => getTopModules
 
 const topUsersData = computed(() => (stats.value?.topUsers || []))
 
-const handlePrint = () => {
-    setTimeout(() => {
-        window.print()
-    }, 100)
+const handleExportPdf = async () => {
+    if (!stats.value) {
+        modal.showToast('error', 'No hay datos disponibles para exportar')
+        return
+    }
+
+    try {
+        // Preparar filtros aplicados si es un reporte personalizado
+        const appliedFilters = selectedPeriod.value === 'custom' ? {
+            gender: gender.value,
+            ageRange: ageRange.value,
+            minAge: minAge.value ? Number(minAge.value) : undefined,
+            maxAge: maxAge.value ? Number(maxAge.value) : undefined,
+            userId: userId.value ? Number(userId.value) : undefined,
+            moduleId: moduleId.value ? Number(moduleId.value) : undefined,
+            moduleName: moduleLabel.value || undefined
+        } : undefined
+
+        // Generar el PDF
+        await generatePdfReport({
+            stats: stats.value,
+            period: selectedPeriod.value === 'custom' ? 'custom' : selectedPeriod.value,
+            dateRange: periodDateRange.value && periodDateRange.value.start && periodDateRange.value.end ? {
+                start: periodDateRange.value.start,
+                end: periodDateRange.value.end
+            } : undefined,
+            appliedFilters
+        })
+
+        modal.showToast('success', 'PDF generado exitosamente')
+    } catch (error) {
+        console.error('Error al generar PDF:', error)
+        modal.showToast('error', 'Error al generar el PDF')
+    }
 }
 
 const setPeriod = async (type: StatsPeriod) => {
-    // Prevenir cambios múltiples rápidos con debounce
     const now = Date.now()
     if (isPeriodChanging.value || (now - lastPeriodChangeTime.value) < 200) {
         return
@@ -300,11 +365,10 @@ const setPeriod = async (type: StatsPeriod) => {
     lastPeriodChangeTime.value = now
 
     if (periodCache.value[type]) {
-        // Agregar un pequeño delay incluso para datos cacheados para dar tiempo a Chart.js
         isPeriodChanging.value = true
         await new Promise(resolve => setTimeout(resolve, 100))
         selectedPeriod.value = type
-        await new Promise(resolve => setTimeout(resolve, 50)) // Delay adicional después del cambio
+        await new Promise(resolve => setTimeout(resolve, 50))
         isPeriodChanging.value = false
         return
     }
@@ -315,18 +379,16 @@ const setPeriod = async (type: StatsPeriod) => {
         const payload = (resp as any)?.data as Statistic | undefined
         if (payload) {
             periodCache.value[type] = payload
-            // Solo cambiar el período DESPUÉS de que los datos estén listos
             selectedPeriod.value = type
         }
     } catch (error) {
-        // Silent error handling
+        console.error(error)
     } finally {
         isPeriodChanging.value = false
     }
 }
 
 onMounted(async () => {
-    // load modules select
     if (!modulesData.value) {
         await executeModules()
     }
@@ -362,7 +424,7 @@ onUnmounted(() => {
                         :button-props="{ variant: 'secondary', text: 'Año', onClick: () => { clearCustomResults(); setPeriod('year') }, disabled: isPeriodChanging || selectedPeriod === 'year' }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                     <AppButton
-                        :button-props="{ variant: 'primary', text: 'Imprimir/Exportar', icon: 'icon-[lucide--printer] text-white', onClick: handlePrint }"
+                        :button-props="{ variant: 'primary', text: 'Exportar', icon: 'icon-[lucide--file-down] text-white', onClick: handleExportPdf }"
                         customStyle="w-1/4 md:w-full text-xs sm:text-base" />
                 </div>
             </div>
@@ -381,8 +443,8 @@ onUnmounted(() => {
                     <span>Seleccionado: <strong>{{ mapPeriodToLabel(selectedPeriod) }}</strong></span>
                     <span v-if="periodDateRange"
                         class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs bg-primary/10 text-primary border border-primary/20">
-                        {{ new Date(periodDateRange.start || '').toLocaleDateString('es-ES') }} – {{
-                            new Date(periodDateRange.end || '').toLocaleDateString('es-ES') }}
+                        {{ formatDate(periodDateRange.start || '') }} – {{
+                            formatDate(periodDateRange.end || '') }}
                     </span>
                     <span v-if="!isFirstLoad && (isLoading || isPeriodChanging)"
                         class="text-gray-500">Actualizando…</span>
@@ -401,10 +463,12 @@ onUnmounted(() => {
                     <AppInput v-model="endDate"
                         :label-props="{ id: 'endDate', label: 'Fecha fin', icon: 'icon-[lucide--calendar]' }"
                         :input-props="{ type: 'date', placeholder: 'YYYY-MM-DD' }" />
-                    <AppSelect v-model="genderLabel" :label-props="{ id: 'gender', label: 'Género' }"
-                        :select-props="{ options: GENDER_OPTIONS.map(option => option.label), placeholder: 'Todos', onChange: onGenderChange }" />
-                    <AppSelect v-model="ageRangeLabel" :label-props="{ id: 'ageRange', label: 'Rango etario' }"
-                        :select-props="{ options: ageRangeOptions, placeholder: 'Todos', onChange: onAgeRangeChange }" />
+                    <AppSelect v-model="genderLabel"
+                        :label-props="{ id: 'gender', label: 'Género', icon: 'icon-[lucide--user]' }"
+                        :select-props="{ options: ['Todos', ...GENDER_OPTIONS.map(option => option.label)], placeholder: 'Seleccione', onChange: onGenderChange }" />
+                    <AppSelect v-model="ageRangeLabel"
+                        :label-props="{ id: 'ageRange', label: 'Rango etario', icon: 'icon-[lucide--gauge]' }"
+                        :select-props="{ options: ['Todos', ...ageRangeOptions], placeholder: 'Seleccione', onChange: onAgeRangeChange }" />
                     <AppInput v-model="minAge"
                         :label-props="{ id: 'minAge', label: 'Edad mínima', icon: 'icon-[lucide--gauge]' }"
                         :input-props="{ type: 'number', placeholder: 'Ej. 18' }" :min="0" :onChange="onNumberChange" />
@@ -417,7 +481,7 @@ onUnmounted(() => {
                         :onChange="onNumberChange" />
                     <AppSelect v-model="moduleLabel"
                         :label-props="{ id: 'moduleId', label: 'Módulo', icon: 'icon-[lucide--component]' }"
-                        :select-props="{ options: modulesData?.data.map(module => module.name) || [], placeholder: 'Todos', onChange: onModuleChange }"
+                        :select-props="{ options: ['Todos', ...(modulesData?.data.map(module => module.name) || [])], placeholder: 'Seleccione', onChange: onModuleChange }"
                         :error-props="{ onError: modulesError, message: 'Error al cargar los módulos' }" />
                 </div>
                 <div class="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
@@ -439,7 +503,7 @@ onUnmounted(() => {
                     </p>
                     <p class="mb-3">
                         Durante este período se registraron <strong class="text-primary">{{ statsTextSummary.totalVisits
-                            }} visitas</strong>,
+                        }} visitas</strong>,
                         con un promedio de <strong>{{ statsTextSummary.dailyAverage }} visitas por día</strong>.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -484,9 +548,9 @@ onUnmounted(() => {
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-500">
                         <span class="icon-[lucide--calendar] text-base"></span>
-                        <span class="hidden sm:inline">{{ new Date(periodDateRange?.start ||
-                            '').toLocaleDateString('es-ES') }} - {{ new Date(periodDateRange?.end ||
-                                '').toLocaleDateString('es-ES') }}
+                        <span class="hidden sm:inline">{{ formatDate(periodDateRange?.start ||
+                            '') }} - {{ formatDate(periodDateRange?.end ||
+                                '') }}
                         </span>
                     </div>
                 </div>

@@ -5,7 +5,6 @@ import UserFormView from '@/views/UserFormView.vue'
 import Page404NotFound from '@/views/NotFoundView.vue'
 import Forgot from '@/views/ForgotView.vue'
 import Reset from '@/views/ResetView.vue'
-import AboutView from '@/views/AboutView.vue'
 
 const publicRoutes: RouteRecordRaw[] = [
   {
@@ -32,11 +31,6 @@ const publicRoutes: RouteRecordRaw[] = [
     path: '/reset',
     name: 'reset',
     component: Reset,
-  },
-  {
-    path: '/about',
-    name: 'about',
-    component: AboutView,
   },
   {
     path: '/reset/:token',

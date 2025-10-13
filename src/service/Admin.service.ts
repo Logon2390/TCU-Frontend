@@ -1,14 +1,73 @@
+import type { ApiResponse } from '@/types/api.types'
+import api from './api'
+import type { Admin } from '@/types/admin.types'
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL
+export const adminService = {
+  getAdmins: async () => {
+    try {
+      const response = await api.get<ApiResponse<Admin[]>>('/admins')
+      return response.data
+    } catch (error) {
+      console.error(error)
+      return { success: false, data: null, message: 'Error al obtener administradores' }
+    }
+  },
+
+  getAdminById: async (id: number) => {
+    try {
+      const response = await api.get<ApiResponse<Admin>>(`/admins/${id}`)
+      return response.data
+    } catch (error) {
+      console.error(error)
+      return { success: false, data: null, message: 'Error al obtener administrador' }
+    }
+  },
+
+  createAdmin: async (admin: Admin) => {
+    try {
+      const response = await api.post<ApiResponse<Admin>>('/admins', admin)
+      return response.data
+    } catch (error) {
+      console.error(error)
+      return { success: false, data: null, message: 'Error al crear administrador' }
+    }
+  },
+
+  updateAdmin: async (id: number, admin: Admin) => {
+    try {
+      const response = await api.put<ApiResponse<Admin>>(`/admins/${id}`, admin)
+      return response.data
+    } catch (error) {
+      console.error(error)
+      return { success: false, data: null, message: 'Error al actualizar administrador' }
+    }
+  },
+
+  deleteAdmin: async (id: number, code: string) => {
+    try {
+      const response = await api.delete<ApiResponse<void>>(`/admins/${id}/${code}`)
+      return response.data
+    } catch (error) {
+      console.error(error)
+      return { success: false, message: 'Error al eliminar administrador' }
+    }
+  },
+
+  sendVerificationCode: async () => {
+    try {
+      const response = await api.get<ApiResponse<void>>('/admins/verify')
+      return response.data
+    } catch (error) {
+      console.error(error)
+      return { success: false, message: 'Error al enviar código de verificación' }
+    }
+  },
+}
 
 export const requestPasswordReset = async (email: string) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/admins/requestReset`,
-      { email },
-      { withCredentials: true },
-    )
+    const response = await api.post(`/admins/requestReset`, { email }, { withCredentials: true })
     return response.data
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
@@ -20,8 +79,8 @@ export const requestPasswordReset = async (email: string) => {
 
 export const resetPassword = async (token: string, newPassword: string) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/admins/resetPassword`,
+    const response = await api.post(
+      `/admins/resetPassword`,
       { token, newPassword },
       { withCredentials: true },
     )
@@ -33,3 +92,5 @@ export const resetPassword = async (token: string, newPassword: string) => {
     throw new Error('Error al restablecer contraseña')
   }
 }
+
+export default adminService

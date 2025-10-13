@@ -1,45 +1,23 @@
-import type { ContactInfo, FooterLink, SocialMedia } from '@/types/layout.types'
+import type { ContactInfo, SocialMedia } from '@/types/layout.types'
 
 export const footerConfig = {
   organization: {
-    name: 'Centro Cívico por la Paz - Pococi',
+    name: 'Centro Cívico por la Paz - Pococí',
     logo: '@/assets/icons/LogoCCPP.vue',
   },
 
   contact: {
     phone: '2710 1244',
     email: 'ccppococi@mj.go.cr',
-    address: 'Pococí, Limón, Costa Rica',
-    schedule: 'Lunes a Sábado: 8:00 AM - 4  :00 PM',
+    address: '200m norte del Colegio Técnico de Pococí, en el Polideportivo de Pococí',
+    schedule: 'Lunes a Viernes: 8:00 AM - 4:00 PM | Sábado: 9:00 AM - 5:00 PM',
   } as ContactInfo,
-  links: [
-    {
-      label: 'Inicio',
-      url: '/',
-    },
-    {
-      label: 'Acerca de',
-      url: '/about',
-    },
-    {
-      label: 'Servicios',
-      url: '/services',
-    },
-    {
-      label: 'Contacto',
-      url: '/contact',
-    },
-    {
-      label: 'Política de Privacidad',
-      url: '/privacy',
-    },
-  ] as FooterLink[],
 
   socialMedia: [
     {
       name: 'Facebook',
       icon: 'icon-[lucide--facebook]',
-      url: 'https://facebook.com',
+      url: 'https://www.facebook.com/CentroCivicoporlaPazPococi',
     },
     {
       name: 'Twitter',
