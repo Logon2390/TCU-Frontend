@@ -31,7 +31,8 @@
                                 ]">
                                     <h2 class="text-lg font-medium text-black mb-4">Identificación</h2>
                                     <div class="space-y-4">
-                                        <AppInput :label-props="{ id: 'documentNumber', label: 'Número de cédula o documento de identificación' }"
+                                        <AppInput
+                                            :label-props="{ id: 'documentNumber', label: 'Número de cédula o documento de identificación' }"
                                             :input-props="{
                                                 type: 'text ',
                                                 placeholder: 'Ingrese su número de identificación',
@@ -54,7 +55,8 @@
                                                 placeholder: 'Ingrese su nombre completo',
                                                 required: true,
                                                 icon: 'icon-[lucide--user-round]'
-                                            }" :error-props="{ onError: false }" v-model="userRecord.user.name" />
+                                            }" :error-props="{ onError: false }" v-model="userRecord.user.name"
+                                            @input="userRecord.user.name = userRecord.user.name ? userRecord.user.name.toUpperCase() : ''" />
 
                                         <AppInput :label-props="{ id: 'birthDate', label: 'Fecha de nacimiento' }"
                                             :input-props="{
