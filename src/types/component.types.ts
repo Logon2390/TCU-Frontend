@@ -117,3 +117,23 @@ export type AppCardProps = {
   clickable?: boolean
   hover?: boolean
 }
+
+export type RadioOption = {
+  label: string
+  value: string
+}
+
+export type RadioGroupProps = {
+  options: RadioOption[]
+  name: string
+  required?: boolean
+  disabled?: boolean
+  direction?: 'horizontal' | 'vertical'
+}
+
+export type DateInputProps = {
+  required?: boolean
+  disabled?: boolean
+  minYear?: number
+  maxYear?: number
+}
