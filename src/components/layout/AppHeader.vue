@@ -12,7 +12,7 @@
 
                 <RouterLink to="/" class="cursor-pointer flex items-center gap-2 group">
                     <Icon :src='LogoCCPP' :width="10" :height="10" />
-                    <Icon :src='LogoPococi' :width="10" :height="10" />
+                    <Icon :src='LogoPococi' :width="100" :height="10" />
                     <span
                         class="hidden md:block text-text-primary text-base font-bold group-hover:text-primary transition-colors">
                         Centro Cívico por la Paz - Pococí

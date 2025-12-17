@@ -20,7 +20,7 @@
                     steps
                 }" />
                 <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer"
-                    @click="router.push('/help')">
+                    @click="router.push('/ayuda')">
                     <h3 class="text-sm font-semibold text-blue-700 mb-1 flex items-center gap-2">
                         <span class="icon-[lucide--help-circle] size-4"></span>
                         ¿Necesitas ayuda?
