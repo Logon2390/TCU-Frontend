@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import logo from '/logo.webp'
 defineProps({
+    src: {
+        type: String,
+        default: ''
+    },
     width: {
         type: Number,
         default: 40
@@ -13,5 +16,5 @@ defineProps({
 </script>
 
 <template>
-    <img :src="logo" alt="CCPP Logo" :class="`w-${width} h-${height}`" />
+    <img :src="src" alt="Icon" :class="`w-${width} h-${height}`" />
 </template>

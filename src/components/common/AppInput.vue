@@ -9,7 +9,8 @@
             <input v-bind="$attrs" :type="currentInputType" :placeholder="inputProps.placeholder"
                 :value="$attrs.modelValue" @input="handleInput"
                 :class="[baseStyle, props.customStyle || defaultStyle, errorProps?.onError ? borderErrorStyle : borderStyle]"
-                :id="labelProps.id" :required="inputProps.required" :disabled="inputProps.disabled" />
+                :id="labelProps.id" :required="inputProps.required" :disabled="inputProps.disabled"
+                :min="inputProps.min" :max="inputProps.max" />
 
             <button v-if="isPasswordType" type="button" @click="togglePasswordVisibility"
                 class="absolute text-text-secondary hover:text-text-primary focus:outline-none right-3 top-1/2 -translate-y-1/2 p-0 bg-transparent border-0 h-5 w-5 flex items-center justify-center">

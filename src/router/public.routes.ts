@@ -5,6 +5,7 @@ import UserFormView from '@/views/UserFormView.vue'
 import Page404NotFound from '@/views/NotFoundView.vue'
 import Forgot from '@/views/ForgotView.vue'
 import Reset from '@/views/ResetView.vue'
+import HelpView from '@/views/HelpView.vue'
 
 const publicRoutes: RouteRecordRaw[] = [
   {
@@ -41,6 +42,11 @@ const publicRoutes: RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     name: 'NotFound404',
     component: Page404NotFound,
+  },
+  {
+    path: '/ayuda',
+    name: 'ayuda',
+    component: HelpView,
   },
 ]
 

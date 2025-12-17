@@ -19,6 +19,19 @@
                     currentStep,
                     steps
                 }" />
+                <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer"
+                    @click="router.push('/ayuda')">
+                    <h3 class="text-sm font-semibold text-blue-700 mb-1 flex items-center gap-2">
+                        <span class="icon-[lucide--help-circle] size-4"></span>
+                        ¿Necesitas ayuda?
+                    </h3>
+                    <p class="text-sm text-blue-600">
+                        <span class="font-bold">
+                            Haz clic aquí
+                        </span>
+                        para aprender cómo realizar el proceso de registro de visitante.
+                    </p>
+                </div>
 
                 <div class=" p-0">
                     <form @submit.prevent="handleSubmit">
@@ -31,13 +44,28 @@
                                 ]">
                                     <h2 class="text-lg font-medium text-black mb-4">Identificación</h2>
                                     <div class="space-y-4">
-                                        <AppInput :label-props="{ id: 'documentNumber', label: 'Número de cedula o documento de identificación' }"
-                                            :input-props="{
-                                                type: 'text ',
-                                                placeholder: 'Ingrese su número de identificación',
+                                        <AppRadioGroup :label-props="{ id: 'documentType', label: 'Tipo de documento' }"
+                                            :radio-props="{
+                                                options: documentTypeOptions,
+                                                name: 'documentType',
                                                 required: true,
-                                                icon: 'icon-[lucide--id-card]'
-                                            }" :error-props="{ onError: false }" v-model="userRecord.user.document" />
+                                                direction: 'horizontal'
+                                            }" :error-props="{ onError: false }" v-model="documentType" />
+
+                                        <AppInput :label-props="{
+                                            id: 'documentNumber',
+                                            label: documentType === 'nacional'
+                                                ? 'Número de Cédula física (9 dígitos)'
+                                                : 'Documento de identificación (Pasaporte o DIMEX)'
+                                        }" :input-props="{
+                                            type: 'text',
+                                            placeholder: documentType === 'nacional'
+                                                ? '1-2345-6789'
+                                                : 'Ingrese su documento de identificación',
+                                            required: true,
+                                            icon: 'icon-[lucide--id-card]'
+                                        }" :error-props="{ onError: false }" v-model="userRecord.user.document"
+                                            @input="handleDocumentInput" />
                                     </div>
                                 </div>
 
@@ -54,12 +82,14 @@
                                                 placeholder: 'Ingrese su nombre completo',
                                                 required: true,
                                                 icon: 'icon-[lucide--user-round]'
-                                            }" :error-props="{ onError: false }" v-model="userRecord.user.name" />
+                                            }" :error-props="{ onError: false }" v-model="userRecord.user.name"
+                                            @input="userRecord.user.name = userRecord.user.name ? userRecord.user.name.toUpperCase() : ''" />
 
-                                        <AppInput :label-props="{ id: 'birthDate', label: 'Fecha de nacimiento' }"
-                                            :input-props="{
-                                                type: 'date',
-                                                required: true
+                                        <AppDateInput :label-props="{ id: 'birthDate', label: 'Fecha de nacimiento' }"
+                                            :date-props="{
+                                                required: true,
+                                                minYear: new Date().getFullYear() - 100,
+                                                maxYear: new Date().getFullYear()
                                             }" :error-props="{ onError: false }" v-model="userRecord.user.birthday" />
 
                                         <AppSelect :label-props="{ id: 'gender', label: 'Género' }" :select-props="{
@@ -143,6 +173,8 @@ import AppInput from '@/components/common/AppInput.vue'
 import AppSelect from '@/components/common/AppSelect.vue'
 import AppButton from '@/components/common/AppButton.vue'
 import AppStepper from '@/components/features/AppStepper.vue'
+import AppRadioGroup from '@/components/common/AppRadioGroup.vue'
+import AppDateInput from '@/components/common/AppDateInput.vue'
 
 //hooks
 import { useRouter } from 'vue-router'
@@ -151,7 +183,7 @@ import { useFetching } from '@/composables/useFetching'
 
 //types & config
 import { images } from '@/config/images.config'
-import type { StepperStep } from '@/types/component.types'
+import type { StepperStep, RadioOption } from '@/types/component.types'
 import type { Registration } from '@/types/form.types'
 import { GENDER_OPTIONS } from '@/types/form.types'
 import type { Module } from '@/types/modules.types'
@@ -168,6 +200,7 @@ const visitPurposes = ref<Module[]>([])
 const currentStep = ref(1)
 const selectedModuleName = ref('')
 const transitionName = ref<'slide-left' | 'slide-right'>('slide-left')
+const documentType = ref('nacional')
 const userRecord = ref<Registration>({
     user: {
         document: '',
@@ -179,6 +212,11 @@ const userRecord = ref<Registration>({
     visitedAt: new Date(),
     moduleId: 0
 });
+
+const documentTypeOptions: RadioOption[] = [
+    { label: 'Nacional', value: 'nacional' },
+    { label: 'Extranjero', value: 'extranjero' }
+];
 
 const { isLoading, execute } = useFetching(userService.getUserByDocument)
 const { isLoading: isSubmitting, execute: executeSubmit } = useFetching(RecordService.createRecord)
@@ -226,7 +264,14 @@ const steps = computed<StepperStep[]>(() => [
 const isCurrentStepValid = computed(() => {
     switch (currentStep.value) {
         case 1:
-            return userRecord.value.user.document?.trim() && userRecord.value.user.document.length > 1
+            if (documentType.value === 'nacional') {
+                // Nacional: exactly 9 digits
+                const digitsOnly = userRecord.value.user.document?.replace(/\D/g, '')
+                return digitsOnly?.length === 9
+            } else {
+                // Extranjero: free format, just needs some content
+                return userRecord.value.user.document?.trim().length > 0
+            }
         case 2:
             return userRecord.value.user.name?.trim() && userRecord.value.user.birthday && userRecord.value.user.gender
         case 3:
@@ -312,6 +357,22 @@ onMounted(async () => {
         visitPurposes.value = modules.data
     }
 })
+
+const handleDocumentInput = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    let value = target.value
+
+    if (documentType.value === 'nacional') {
+        // For nacional, only keep digits
+        value = value.replace(/\D/g, '')
+        // Limit to 9 digits
+        if (value.length > 9) {
+            value = value.substring(0, 9)
+        }
+    }
+
+    userRecord.value.user.document = value
+}
 </script>
 <style scoped>
 .slide-left-enter-active,

@@ -18,6 +18,8 @@ export type InputProps = {
   required?: boolean
   disabled?: boolean
   icon?: string
+  min?: number
+  max?: number
 }
 
 export type SelectProps = Omit<InputProps, 'type'> & {
@@ -116,4 +118,24 @@ export type AppCardProps = {
   rounded?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   clickable?: boolean
   hover?: boolean
+}
+
+export type RadioOption = {
+  label: string
+  value: string
+}
+
+export type RadioGroupProps = {
+  options: RadioOption[]
+  name: string
+  required?: boolean
+  disabled?: boolean
+  direction?: 'horizontal' | 'vertical'
+}
+
+export type DateInputProps = {
+  required?: boolean
+  disabled?: boolean
+  minYear?: number
+  maxYear?: number
 }

@@ -5,7 +5,8 @@ import { resetPassword } from '@/service/Admin.service'
 import Card from '@/components/features/AppCard.vue'
 import Input from '@/components/common/AppInput.vue'
 import Button from '@/components/common/AppButton.vue'
-import LogoCCPP from '@/assets/icons/LogoCCPP.vue'
+import LogoCCPP from '/logo.webp'
+import AppIcon from '@/components/features/AppIcon.vue'
 import { images } from '@/config/images.config'
 import { useModal } from '@/composables/useModal'
 
@@ -50,7 +51,7 @@ async function handleSubmit(event: Event) {
             <Card :variant="'elevated'" :padding="'lg'" :rounded="'xl'">
                 <template #header>
                     <div class="flex items-center gap-3">
-                        <LogoCCPP :width="10" :height="10" />
+                        <AppIcon :src='LogoCCPP' :width="10" :height="10" />
                         <div>
                             <p class="text-sm text-text-secondary">Panel Administrativo</p>
                             <h2 class="text-xl font-semibold text-white">Restablecer contraseña</h2>

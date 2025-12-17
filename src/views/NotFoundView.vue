@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import router from '@/router';
 import { ref, onMounted } from 'vue';
-import LogoCCPP from '@/assets/icons/LogoCCPP.vue';
+import LogoCCPP from '/logo.webp';
+import AppIcon from '@/components/features/AppIcon.vue';
 // Función para navegar al inicio
 function goHome() {
   router.push('/');
@@ -35,7 +36,7 @@ onMounted(() => {
         </div>
         <div class="relative z-10 flex items-center justify-center">
 
-          <LogoCCPP :width="200" :height="200" />
+          <AppIcon :src='LogoCCPP' :width="200" :height="200" />
 
         </div>
       </div>

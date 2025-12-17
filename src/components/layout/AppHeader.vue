@@ -11,7 +11,8 @@
                 </div>
 
                 <RouterLink to="/" class="cursor-pointer flex items-center gap-2 group">
-                    <LogoCCPP :width="10" :height="10" />
+                    <Icon :src='LogoCCPP' :width="10" :height="10" />
+                    <Icon :src='LogoPococi' :width="100" :height="10" />
                     <span
                         class="hidden md:block text-text-primary text-base font-bold group-hover:text-primary transition-colors">
                         Centro Cívico por la Paz - Pococí
@@ -23,19 +24,13 @@
                     <RouterLink :to="item.route"
                         :class="[baseStyles, { 'text-primary after:w-full': isActive(item.route) }]">
                         <span :class="item.icon" class="text-xl"></span>
-                        {{ item.title }}
+                        <span class="hidden md:block">{{ item.title }}</span>
                     </RouterLink>
                 </div>
                 <div v-if="isAuthenticated" @click="handleLogout"
                     :class="[baseStyles, { 'text-primary after:w-full': isActive('/') }]" title="Cerrar sesión">
                     <span class="icon-[lucide--log-out] text-xl"></span>
-                    Cerrar sesión
-                </div>
-                <div v-else @click="router.push('/login')"
-                    :class="[baseStyles, { 'text-primary after:w-full': isActive('/login') }]" title="Iniciar sesión">
-                    <span class="icon-[lucide--log-in] text-xl"></span>
-                    Iniciar sesión
-
+                    <span class="hidden lg:block">Cerrar sesión</span>
                 </div>
             </nav>
         </div>
@@ -43,7 +38,9 @@
 </template>
 
 <script setup lang="ts">
-import LogoCCPP from '../../assets/icons/LogoCCPP.vue'
+import LogoCCPP from '/logo.webp'
+import LogoPococi from '/logo-pococi.webp'
+import Icon from '@/components/features/AppIcon.vue'
 import { RouterLink } from 'vue-router'
 import { useSidebar } from '../../composables/useSidebar'
 import { headerConfig } from '../../config/header.config'

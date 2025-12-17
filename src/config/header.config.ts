@@ -8,5 +8,10 @@ export const headerConfig: HeaderConfig = {
       icon: 'icon-[lucide--home]',
       route: '/',
     },
+    {
+      title: 'Registro',
+      icon: 'icon-[lucide--user-plus]',
+      route: '/registro',
+    },
   ],
 }
