@@ -122,7 +122,6 @@ import { usePagination } from '@/composables/usePagination'
 import userService from '@/service/User.service'
 import recordService from '@/service/Record.service'
 import type { User } from '@/types/user.types'
-import type { Registration } from '@/types/form.types'
 import type { TableColumn } from '@/types/component.types'
 import { GENDER_OPTIONS } from '@/types/form.types'
 

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import Logo from '@/assets/icons/LogoCCPP.vue'
+import Icon from '@/components/features/AppIcon.vue'
 import { footerConfig } from '@/config/footer.config'
 import { useRouter } from 'vue-router'
+import AppIcon from '@/components/features/AppIcon.vue'
+import LogoUCR from '/logo-ucr.webp'
 
 const currentYear = new Date().getFullYear()
 const router = useRouter()
@@ -12,7 +14,7 @@ const router = useRouter()
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col lg:flex-row justify-between items-start space-y-8 lg:space-y-0 lg:space-x-8 mb-8">
                 <div class="flex items-center space-x-3">
-                    <Logo :width="10" :height="10" />
+                    <Icon :src="footerConfig.organization.logo" :width="10" :height="10" />
                     <div>
                         <h3 class="text-white font-semibold text-lg">{{ footerConfig.organization.name }}</h3>
                         <p class="text-text-secondary text-sm">Centro de servicios comunitarios</p>
@@ -46,7 +48,8 @@ const router = useRouter()
             <div
                 class="flex flex-col md:flex-row justify-between items-start md:items-center md:space-y-0">
 
-                <div class="flex items-center   ">
+                <div class="flex items-center">
+                    <span class="text-text-secondary text-sm">Síguenos en nuestras redes sociales:</span>
                     <a v-for="social in footerConfig.socialMedia" :key="social.name" :href="social.url"
                         :title="social.name" target="_blank" rel="noopener noreferrer"
                         class="text-text-secondary hover:text-primary transition-colors p-2 duration-200">
@@ -62,8 +65,9 @@ const router = useRouter()
                 </div>
 
                 <div
-                    class="text-text-secondary hover:text-primary transition-colors duration-200 text-sm font-medium cursor-pointer">
+                    class="text-text-secondary hover:text-primary transition-colors duration-200 text-sm font-medium cursor-pointer flex flex-row-reverse items-center gap-2">
                     Desarrollado por el TCU-663
+                    <AppIcon :src='LogoUCR' :width="18" :height="8" />
                 </div>
             </div>
         </div>

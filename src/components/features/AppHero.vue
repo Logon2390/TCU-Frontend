@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import LogoCCPP from '@/assets/icons/LogoCCPP.vue'
+import LogoCCPP from '/logo.webp'
+import AppIcon from '@/components/features/AppIcon.vue'
 import AppTitle from '@/components/features/AppTitle.vue'
 import AppCard from '@/components/features/AppCard.vue'
 import AppButton from '@/components/common/AppButton.vue'
-import { images } from '@/config/images.config'
 import { homeConfig } from '@/config/home.config'
 
 const router = useRouter()
@@ -26,7 +26,7 @@ function registrarVisita() {
 
                 <div class="text-center lg:text-left space-y-2" v-motion :initial="{ opacity: 0, y: 24 }"
                     :visibleOnce="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-                    <LogoCCPP :width="20" :height="20" class="hidden lg:block" />
+                    <AppIcon :src='LogoCCPP' :width="20" :height="20" class="hidden lg:block" />
 
                     <div class="space-y-2">
                         <AppTitle :title="homeConfig.hero.title" size="md" />
