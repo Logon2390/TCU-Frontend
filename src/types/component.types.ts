@@ -18,6 +18,8 @@ export type InputProps = {
   required?: boolean
   disabled?: boolean
   icon?: string
+  min?: number
+  max?: number
 }
 
 export type SelectProps = Omit<InputProps, 'type'> & {

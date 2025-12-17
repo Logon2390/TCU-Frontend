@@ -8,30 +8,29 @@
         <div class="flex gap-2 md:gap-4">
             <div class="flex-1 flex flex-col">
                 <AppInput :label-props="{ id: `${labelProps.id}-day`, label: 'Día' }" :input-props="{
-                    type: 'number',
+                    type: 'text',
                     placeholder: 'DD',
                     required: dateProps.required,
                     disabled: dateProps.disabled
-                }" :error-props="{ onError: false }" :custom-style="'date-input-custom'" v-model="dayString"
-                    @input="handleDayInput" />
+                }" :error-props="{ onError: false }" v-model="dayString" @input="handleDayInput" inputmode="numeric" />
             </div>
             <div class="flex-1 flex flex-col">
                 <AppInput :label-props="{ id: `${labelProps.id}-month`, label: 'Mes' }" :input-props="{
-                    type: 'number',
+                    type: 'text',
                     placeholder: 'MM',
                     required: dateProps.required,
                     disabled: dateProps.disabled
-                }" :error-props="{ onError: false }" :custom-style="'date-input-custom'" v-model="monthString"
-                    @input="handleMonthInput" />
+                }" :error-props="{ onError: false }" v-model="monthString" @input="handleMonthInput"
+                    inputmode="numeric" />
             </div>
             <div class="flex-1 flex flex-col">
                 <AppInput :label-props="{ id: `${labelProps.id}-year`, label: 'Año' }" :input-props="{
-                    type: 'number',
+                    type: 'text',
                     placeholder: 'YYYY',
                     required: dateProps.required,
                     disabled: dateProps.disabled
-                }" :error-props="{ onError: false }" :custom-style="'date-input-custom'" v-model="yearString"
-                    @input="handleYearInput" />
+                }" :error-props="{ onError: false }" v-model="yearString" @input="handleYearInput"
+                    inputmode="numeric" />
             </div>
         </div>
         <p v-if="errorMessage" class="text-error text-sm mt-1">{{ errorMessage }}</p>
@@ -39,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, useAttrs } from 'vue';
+import { ref, computed, watch, useAttrs, nextTick } from 'vue';
 import AppInput from '@/components/common/AppInput.vue';
 import type { LabelProps, DateInputProps, ErrorProps } from '@/types/component.types';
 
@@ -121,27 +120,54 @@ const handleDateChange = () => {
 
     if (dayNum !== null && monthNum !== null && yearNum !== null) {
         if (validateDate()) {
-            // Format as yyyy-mm-dd for backend
             const formattedDate = `${yearNum}-${String(monthNum).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
             emit('update:modelValue', formattedDate);
-        } else {
-            emit('update:modelValue', '');
         }
-    } else {
-        emit('update:modelValue', '');
     }
 };
 
-// Individual input handlers
-const handleDayInput = () => {
+const handleFormatValue = (limit: number, dateString: string) => {
+    let value = dateString.replace(/[^0-9]/g, '').replace(/-/g, '');
+    if (value.length > limit) {
+        value = value.substring(0, limit);
+    }
+    return value;
+};
+
+const handleDayInput = async () => {
+    let value = handleFormatValue(2, dayString.value);
+
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue > 31) {
+        value = '31';
+    }
+    dayString.value = value;
+    await nextTick();
     handleDateChange();
 };
 
-const handleMonthInput = () => {
+const handleMonthInput = async () => {
+    let value = handleFormatValue(2, monthString.value);
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue > 12) {
+        value = '12';
+    }
+    monthString.value = value;
+    await nextTick();
     handleDateChange();
 };
 
-const handleYearInput = () => {
+const handleYearInput = async () => {
+    let value = handleFormatValue(4, yearString.value);
+    if (value.length === 4) {
+        const numValue = parseInt(value, 10);
+        if (!isNaN(numValue) && numValue > maxYear.value) {
+            value = maxYear.value.toString();
+        }
+    }
+
+    yearString.value = value;
+    await nextTick();
     handleDateChange();
 };
 
