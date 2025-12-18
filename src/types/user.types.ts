@@ -4,5 +4,5 @@ export type User = {
   name: string
   birthday: string
   gender: string
-  lastRecord: Date
+  lastRecord?: Date
 }

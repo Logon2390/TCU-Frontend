@@ -207,9 +207,7 @@ const userRecord = ref<Registration>({
         name: '',
         birthday: '',
         gender: '',
-        lastRecord: new Date()
     },
-    visitedAt: new Date(),
     moduleId: 0
 });
 
@@ -233,7 +231,6 @@ const getUserByDocument = async () => {
             name: apiUser.name || '',
             birthday: apiUser.birthday || new Date(),
             gender: genderLabel,
-            lastRecord: new Date()
         }
     } else {
     }

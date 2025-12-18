@@ -22,6 +22,7 @@ import { statsService } from '@/service/Stats.service'
 import type { StatsPeriod, Statistic } from '@/types/stats.types'
 import { GENDER_OPTIONS } from '@/types/form.types'
 import useFetching from '@/composables/useFetching'
+import { useDateFormatter } from '@/composables/useDateFormatter'
 import AppLoader from '@/components/features/AppLoader.vue'
 import AppTable from '@/components/common/AppTable.vue'
 import modulesService from '@/service/Modules.service'
@@ -30,6 +31,7 @@ import { usePdfReport } from '@/composables/usePdfReport'
 
 const modal = useModal()
 const { generatePdfReport } = usePdfReport()
+const { formatDate } = useDateFormatter()
 const selectedPeriod = ref<StatsPeriod | 'custom'>('month')
 const isPeriodChanging = ref(false)
 const lastPeriodChangeTime = ref(0)
@@ -128,28 +130,7 @@ const mapPeriodToLabel = (period: StatsPeriod) => {
     }
 }
 
-const formatDate = (dateString: string, options?: Intl.DateTimeFormatOptions) => {
-    if (!dateString) return ''
 
-    const dateParts = dateString.split('T')[0].split('-')
-    if (dateParts.length === 3) {
-        const year = parseInt(dateParts[0])
-        const month = parseInt(dateParts[1]) - 1
-        const day = parseInt(dateParts[2])
-        const date = new Date(year, month, day, 12, 0, 0)
-
-        return date.toLocaleDateString('es-ES', {
-            timeZone: 'America/Costa_Rica',
-            ...options
-        })
-    }
-
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-ES', {
-        timeZone: 'America/Costa_Rica',
-        ...options
-    })
-}
 
 const clearCustomResults = () => {
     resetCustom()
