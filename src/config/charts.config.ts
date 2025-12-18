@@ -122,19 +122,20 @@ export function getGenderChartOptions(): ChartOptions<'pie'> {
 
 export function getAgeBandChartData(stats: Statistic | null): ChartData<'bar'> {
   return {
-    labels: ['Infancia', 'Juventud', 'Adultez joven', 'Adultez media', 'Vejez'],
+    labels: ['Infancia', 'Preadolescencia', 'Adolescencia', 'Adultez joven', 'Adultez media', 'Vejez'],
     datasets: [
       {
         label: 'Por rango etario',
         data: [
           stats?.ageRangeDistribution.infancia || 0,
-          stats?.ageRangeDistribution.juventud || 0,
+          stats?.ageRangeDistribution.preadolescencia || 0,
+          stats?.ageRangeDistribution.adolescencia || 0,
           stats?.ageRangeDistribution.adultez_joven || 0,
           stats?.ageRangeDistribution.adultez_media || 0,
           stats?.ageRangeDistribution.vejez || 0,
         ],
-        backgroundColor: ['#059669', '#3b82f6', '#0ea5e9', '#f59e0b', '#dc2626'],
-        borderColor: ['#047857', '#2563eb', '#0284c7', '#d97706', '#b91c1c'],
+        backgroundColor: ['#059669', '#3b82f6', '#0ea5e9', '#f5d20bff', '#f59e0b', '#dc2626'],
+        borderColor: ['#047857', '#2563eb', '#0284c7', '#f5d20bff', '#d97706', '#b91c1c'],
         borderWidth: 2,
         borderRadius: 4,
       },

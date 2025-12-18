@@ -62,10 +62,11 @@ const ageRangeLabel = ref<string>('')
 const moduleId = ref<string>('')
 
 const AGE_BAND_LABEL_MAP: Record<string, string> = {
-    infancia: 'infancia (0-14 años)',
-    juventud: 'juventud (15-24 años)',
-    adultez_joven: 'adultez joven (25-44 años)',
-    adultez_media: 'adultez media (45-64 años)',
+    infancia: 'infancia (0-9 años)',
+    preadolescencia: 'preadolescencia (10-12 años)',
+    adolescencia: 'adolescencia (13-17 años)',
+    adultez_joven: 'adultez joven (18-35 años)',
+    adultez_media: 'adultez media (36-64 años)',
     vejez: 'vejez (65+ años)'
 }
 const ageRangeOptions = Object.values(AGE_BAND_LABEL_MAP)
@@ -239,13 +240,7 @@ const statsTextSummary = computed(() => {
 
     const entriesA = Object.entries(s.ageRangeDistribution)
     const maxAgeBand = entriesA.reduce((a, b) => a[1] > b[1] ? a : b)
-    const ageBandLabelMap: Record<string, string> = {
-        infancia: 'infancia (0-14 años)',
-        juventud: 'juventud (15-24 años)',
-        adultez_joven: 'adultez joven (25-44 años)',
-        adultez_media: 'adultez media (45-64 años)',
-        vejez: 'vejez (65+ años)'
-    }
+
     const ageBandPercentage = total > 0 ? ((maxAgeBand[1] / total) * 100).toFixed(1) : '0.0'
 
     const startDate = periodDateRange.value?.start
@@ -268,7 +263,7 @@ const statsTextSummary = computed(() => {
             count: maxGender[1]
         },
         predominantAgeBand: {
-            name: ageBandLabelMap[maxAgeBand[0]] || '-',
+            name: AGE_BAND_LABEL_MAP[maxAgeBand[0]] || '-',
             percentage: ageBandPercentage,
             count: maxAgeBand[1]
         }
