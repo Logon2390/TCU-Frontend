@@ -37,13 +37,8 @@
                                 getAlignment(column.align),
                                 bordered ? 'border-r border-gray-200 last:border-r-0' : ''
                             ]">
-                                <slot 
-                                    v-if="$slots[`cell-${column.key}`]" 
-                                    :name="`cell-${column.key}`" 
-                                    :row="row" 
-                                    :value="row[column.key]"
-                                    :column="column"
-                                />
+                                <slot v-if="$slots[`cell-${column.key}`]" :name="`cell-${column.key}`" :row="row"
+                                    :value="row[column.key]" :column="column" />
                                 <span v-else-if="column.formatter" v-html="column.formatter(row[column.key])">
                                 </span>
                                 <span v-else>
@@ -62,38 +57,32 @@
                         onRowClick ? 'cursor-pointer hover:bg-gray-50' : '',
                         'transition-colors duration-150'
                     ]" @click="handleRowClick(row)">
-                    <div v-for="column in columns" :key="column.key" class="flex justify-between items-start">
-                        <span class="text-sm font-medium text-gray-500 min-w-0 flex-1">
-                            {{ column.label }}:
-                        </span>
-                        <span class="text-sm text-gray-900 text-right ml-4 flex-1" :class="column.key === 'actions' ? 'flex justify-end' : ''">
-                            <slot 
-                                v-if="$slots[`cell-${column.key}`]" 
-                                :name="`cell-${column.key}`" 
-                                :row="row" 
-                                :value="row[column.key]"
-                                :column="column"
-                            />
-                            <span v-else-if="column.formatter" v-html="column.formatter(row[column.key])">
+                        <div v-for="column in columns" :key="column.key" class="flex justify-between items-start">
+                            <span class="text-sm font-medium text-gray-500 min-w-0 flex-1">
+                                {{ column.label }}:
                             </span>
-                            <span v-else>
-                                {{ row[column.key] || '-' }}
+                            <span class="text-sm text-gray-900 text-right ml-4 flex-1"
+                                :class="column.key === 'actions' ? 'flex justify-end' : ''">
+                                <slot v-if="$slots[`cell-${column.key}`]" :name="`cell-${column.key}`" :row="row"
+                                    :value="row[column.key]" :column="column" />
+                                <span v-else-if="column.formatter" v-html="column.formatter(row[column.key])">
+                                </span>
+                                <span v-else>
+                                    {{ row[column.key] || '-' }}
+                                </span>
                             </span>
-                        </span>
-                    </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <Pagination v-if="data.length > 0 && pagination?.enabled" 
-            :current-page="pagination.serverSide ? (pagination.currentPage || 1) : currentPage" 
+        <Pagination v-if="data.length > 0"
+            :current-page="pagination.serverSide ? (pagination.currentPage || 1) : currentPage"
             :total-items="pagination.serverSide ? (pagination.totalItems || 0) : sortedData.length"
-            :items-per-page="itemsPerPage" 
-            :show-page-numbers="pagination.showPageNumbers"
+            :items-per-page="itemsPerPage" :show-page-numbers="pagination.showPageNumbers"
             :show-items-per-page-selector="pagination.showItemsPerPageSelector"
-            :page-size-options="pagination.pageSizeOptions || [10, 25, 50, 100]" 
-            @page-change="handlePageChange"
+            :page-size-options="pagination.pageSizeOptions || [10, 25, 50, 100]" @page-change="handlePageChange"
             @items-per-page-change="handleItemsPerPageChange" />
 
         <div v-else class="flex flex-col items-center justify-center py-12 px-4">
@@ -191,7 +180,7 @@ const handlePageChange = (page: number) => {
 
 const handleItemsPerPageChange = (newItemsPerPage: number) => {
     itemsPerPage.value = newItemsPerPage
-    
+
     if (props.pagination?.serverSide) {
         props.pagination.onItemsPerPageChange?.(newItemsPerPage)
     } else {
