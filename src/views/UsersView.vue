@@ -32,10 +32,10 @@
                     {{ getGenderLabel(row.gender) }}
                 </template>
                 <template #cell-birthday="{ row }">
-                    {{ formatDate(row.birthday) }}
+                    {{ formatDateShort(row.birthday) }}
                 </template>
                 <template #cell-lastRecord="{ row }">
-                    {{ formatDate(row.lastRecord) }}
+                    {{ formatDateShort(row.lastRecord) }}
                 </template>
 
                 <template #cell-actions="{ row }">
@@ -71,6 +71,7 @@ import { useFetching } from '@/composables/useFetching'
 import { usePagination } from '@/composables/usePagination'
 import { useModal } from '@/composables/useModal'
 import { useDebounce } from '@/composables/useDebounce'
+import { useDateFormatter } from '@/composables/useDateFormatter'
 import userService from '@/service/User.service'
 import type { TableColumn } from '@/types/component.types'
 import type { User } from '@/types/user.types'
@@ -81,6 +82,7 @@ const { isLoading: isSearching, data: searchData, execute: searchByDocument } = 
 const { isLoading: isCreating, execute: executeCreateUser } = useFetching(userService.createUser)
 const { isLoading: isUpdating, execute: executeUpdateUser } = useFetching(userService.updateUser)
 const { showConfirmation, showToast, showForm } = useModal()
+const { formatDateShort } = useDateFormatter()
 const router = useRouter()
 const { getUser } = useAuth()
 
@@ -141,10 +143,7 @@ const getGenderLabel = (genderValue: string) => {
     return option ? option.label : genderValue
 }
 
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-ES')
-}
+
 
 const performSearch = async (searchTerm: string) => {
     if (searchTerm.trim()) {

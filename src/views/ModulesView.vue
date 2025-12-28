@@ -25,10 +25,10 @@
           {{ row.isActive ? 'Visible' : 'Oculto' }}
         </template>
         <template #cell-createdAt="{ row }">
-          {{ formatDate(row.createdAt || '') }}
+          {{ formatDateShort(row.createdAt || '') }}
         </template>
         <template #cell-updatedAt="{ row }">
-          {{ formatDate(row.updatedAt || '') }}
+          {{ formatDateShort(row.updatedAt || '') }}
         </template>
         <template #cell-actions="{ row }">
           <div class="flex gap-2 justify-center">
@@ -60,6 +60,7 @@ import AppTable from '@/components/common/AppTable.vue'
 import { modulesLayoutConfig } from '@/config/layout.config'
 import { useFetching } from '@/composables/useFetching'
 import { useModal } from '@/composables/useModal'
+import { useDateFormatter } from '@/composables/useDateFormatter'
 import modulesService from '@/service/Modules.service'
 import type { TableColumn } from '@/types/component.types'
 import { useAuth } from '@/composables/useAuth'
@@ -247,12 +248,7 @@ async function handleDeleteModule(id: number) {
   }
 }
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return 'N/A'
-  const date = new Date(dateString)
-  return date.toLocaleDateString('es-ES')
-}
-
+const { formatDateShort } = useDateFormatter()
 
 onMounted(async () => {
   await fetchModules()

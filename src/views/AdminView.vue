@@ -38,10 +38,10 @@
                     </span>
                 </template>
                 <template #cell-createdAt="{ row }">
-                    {{ formatDate(row.createdAt) }}
+                    {{ formatDateShort(row.createdAt) }}
                 </template>
                 <template #cell-updatedAt="{ row }">
-                    {{ formatDate(row.updatedAt) }}
+                    {{ formatDateShort(row.updatedAt) }}
                 </template>
                 <template #cell-actions="{ row }">
                     <div class="flex gap-2 justify-center">
@@ -70,6 +70,7 @@ import { adminsLayoutConfig } from '@/config/layout.config'
 import { useFetching } from '@/composables/useFetching'
 import { useModal } from '@/composables/useModal'
 import { useDebounce } from '@/composables/useDebounce'
+import { useDateFormatter } from '@/composables/useDateFormatter'
 import adminService from '@/service/Admin.service'
 import type { TableColumn } from '@/types/component.types'
 import type { Admin } from '@/types/admin.types'
@@ -81,6 +82,7 @@ const { isLoading: isCreating, execute: executeCreateAdmin } = useFetching(admin
 const { isLoading: isUpdating, execute: executeUpdateAdmin } = useFetching(adminService.updateAdmin)
 const { isLoading: isSendingCode, execute: executeSendCode } = useFetching(adminService.sendVerificationCode)
 const { showConfirmation, showToast, showForm, showFormWithWarning } = useModal()
+const { formatDateShort } = useDateFormatter()
 
 const layoutConfig = adminsLayoutConfig
 const roleOptions = [...ROLE_OPTIONS]
@@ -137,12 +139,6 @@ const getRoleClass = (roleValue: string) => {
     return roleValue === 'M'
         ? 'px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800'
         : 'px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
-}
-
-const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-ES')
 }
 
 const sendVerificationCode = async () => {

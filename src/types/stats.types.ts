@@ -4,7 +4,8 @@ export type Gender = 'F' | 'M' | 'O'
 
 export type AgeRange =
   | 'infancia'
-  | 'juventud'
+  | 'preadolescencia'
+  | 'adolescencia'
   | 'adultez_joven'
   | 'adultez_media'
   | 'vejez'
@@ -17,7 +18,8 @@ export type GenderDistribution = {
 
 export type AgeRangeDistribution = {
   infancia: number
-  juventud: number
+  preadolescencia: number
+  adolescencia: number
   adultez_joven: number
   adultez_media: number
   vejez: number

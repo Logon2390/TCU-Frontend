@@ -22,6 +22,7 @@ import { statsService } from '@/service/Stats.service'
 import type { StatsPeriod, Statistic } from '@/types/stats.types'
 import { GENDER_OPTIONS } from '@/types/form.types'
 import useFetching from '@/composables/useFetching'
+import { useDateFormatter } from '@/composables/useDateFormatter'
 import AppLoader from '@/components/features/AppLoader.vue'
 import AppTable from '@/components/common/AppTable.vue'
 import modulesService from '@/service/Modules.service'
@@ -30,6 +31,7 @@ import { usePdfReport } from '@/composables/usePdfReport'
 
 const modal = useModal()
 const { generatePdfReport } = usePdfReport()
+const { formatDate } = useDateFormatter()
 const selectedPeriod = ref<StatsPeriod | 'custom'>('month')
 const isPeriodChanging = ref(false)
 const lastPeriodChangeTime = ref(0)
@@ -60,10 +62,11 @@ const ageRangeLabel = ref<string>('')
 const moduleId = ref<string>('')
 
 const AGE_BAND_LABEL_MAP: Record<string, string> = {
-    infancia: 'infancia (0-14 años)',
-    juventud: 'juventud (15-24 años)',
-    adultez_joven: 'adultez joven (25-44 años)',
-    adultez_media: 'adultez media (45-64 años)',
+    infancia: 'infancia (0-9 años)',
+    preadolescencia: 'preadolescencia (10-12 años)',
+    adolescencia: 'adolescencia (13-17 años)',
+    adultez_joven: 'adultez joven (18-35 años)',
+    adultez_media: 'adultez media (36-64 años)',
     vejez: 'vejez (65+ años)'
 }
 const ageRangeOptions = Object.values(AGE_BAND_LABEL_MAP)
@@ -128,28 +131,7 @@ const mapPeriodToLabel = (period: StatsPeriod) => {
     }
 }
 
-const formatDate = (dateString: string, options?: Intl.DateTimeFormatOptions) => {
-    if (!dateString) return ''
 
-    const dateParts = dateString.split('T')[0].split('-')
-    if (dateParts.length === 3) {
-        const year = parseInt(dateParts[0])
-        const month = parseInt(dateParts[1]) - 1
-        const day = parseInt(dateParts[2])
-        const date = new Date(year, month, day, 12, 0, 0)
-
-        return date.toLocaleDateString('es-ES', {
-            timeZone: 'America/Costa_Rica',
-            ...options
-        })
-    }
-
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-ES', {
-        timeZone: 'America/Costa_Rica',
-        ...options
-    })
-}
 
 const clearCustomResults = () => {
     resetCustom()
@@ -258,13 +240,7 @@ const statsTextSummary = computed(() => {
 
     const entriesA = Object.entries(s.ageRangeDistribution)
     const maxAgeBand = entriesA.reduce((a, b) => a[1] > b[1] ? a : b)
-    const ageBandLabelMap: Record<string, string> = {
-        infancia: 'infancia (0-14 años)',
-        juventud: 'juventud (15-24 años)',
-        adultez_joven: 'adultez joven (25-44 años)',
-        adultez_media: 'adultez media (45-64 años)',
-        vejez: 'vejez (65+ años)'
-    }
+
     const ageBandPercentage = total > 0 ? ((maxAgeBand[1] / total) * 100).toFixed(1) : '0.0'
 
     const startDate = periodDateRange.value?.start
@@ -287,7 +263,7 @@ const statsTextSummary = computed(() => {
             count: maxGender[1]
         },
         predominantAgeBand: {
-            name: ageBandLabelMap[maxAgeBand[0]] || '-',
+            name: AGE_BAND_LABEL_MAP[maxAgeBand[0]] || '-',
             percentage: ageBandPercentage,
             count: maxAgeBand[1]
         }
