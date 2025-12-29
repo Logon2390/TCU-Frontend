@@ -40,7 +40,8 @@
 
             <div>
               <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Fecha de nacimiento</label>
-              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDateLong(formatCivilDate(user.birthday)) }}</p>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{
+                formatDateLong(formatCivilDate(user.birthday)) }}</p>
             </div>
 
             <div>
@@ -197,7 +198,7 @@ const loadUserRecords = async () => {
   }
 }
 
-watch([() => pagination.currentPage.value, () => pagination.itemsPerPage.value], async () => {
+watch(pagination.paginationKey, async () => {
   await loadUserRecords()
 })
 

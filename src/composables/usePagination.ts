@@ -32,6 +32,9 @@ export function usePagination<T>(options: PaginationOptions = {}) {
   const totalItems = computed(() => meta.value.totalItems)
   const hasNextPage = computed(() => currentPage.value < totalPages.value)
   const hasPrevPage = computed(() => currentPage.value > 1)
+  const paginationKey = computed(() => {
+    return `${currentPage.value}-${itemsPerPage.value}`
+  })
 
   // Methods
   const setData = (paginatedResponse: PaginatedResponse<T>) => {
@@ -96,6 +99,7 @@ export function usePagination<T>(options: PaginationOptions = {}) {
     // State
     currentPage,
     itemsPerPage,
+    paginationKey,
     isLoading,
     data,
     meta,
