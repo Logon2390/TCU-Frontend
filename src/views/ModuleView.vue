@@ -140,7 +140,6 @@ const { formatDateLong, formatTime } = useDateFormatter()
 
 const moduleId = parseInt(route.params.id as string)
 const module = ref<Module | null>(null)
-const isInitialLoad = ref(true)
 
 const pagination = usePagination<any>({ initialLimit: 10 })
 const { isLoading: isPaginationLoading, execute: fetchRecordsPaginated } = useFetching(
@@ -209,15 +208,12 @@ const loadModuleRecords = async () => {
   }
 }
 
-watch([() => pagination.currentPage.value, () => pagination.itemsPerPage.value], async () => {
-  if (!isInitialLoad.value) {
-    await loadModuleRecords()
-  }
+watch(pagination.paginationKey, async () => {
+  await loadModuleRecords()
 })
 
 onMounted(async () => {
   await loadModuleData()
   await loadModuleRecords()
-  isInitialLoad.value = false
 })
 </script>

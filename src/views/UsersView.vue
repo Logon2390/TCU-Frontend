@@ -165,7 +165,7 @@ watch(debouncedDocumentSearch, (newValue) => {
     performSearch(newValue)
 })
 
-watch([() => pagination.currentPage.value, () => pagination.itemsPerPage.value], async () => {
+watch(pagination.paginationKey, async () => {
     if (!isSearchMode.value) {
         await loadUsers()
     }
