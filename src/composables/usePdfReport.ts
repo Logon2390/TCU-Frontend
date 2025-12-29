@@ -17,10 +17,11 @@ const GENDER_MAP: Record<string, string> = {
 }
 
 const AGE_RANGE_MAP: Record<string, string> = {
-  infancia: 'Infancia (0-14 años)',
-  juventud: 'Juventud (15-24 años)',
-  adultez_joven: 'Adultez joven (25-44 años)',
-  adultez_media: 'Adultez media (45-64 años)',
+  infancia: 'Infancia (0-9 años)',
+  preadolescencia: 'Preadolescencia (10-12 años)',
+  adolescencia: 'Adolescencia (13-17 años)',
+  adultez_joven: 'Adultez joven (18-35 años)',
+  adultez_media: 'Adultez (36-64 años)',
   vejez: 'Vejez (65+ años)',
 }
 
@@ -264,10 +265,11 @@ export const usePdfReport = () => {
                   { text: 'Rango Etario', bold: true, fillColor: '#f3f4f6' },
                   { text: 'Visitas', bold: true, fillColor: '#f3f4f6' },
                 ],
-                ['Infancia (0-14 años)', stats.ageRangeDistribution.infancia.toString()],
-                ['Juventud (15-24 años)', stats.ageRangeDistribution.juventud.toString()],
-                ['Adultez joven (25-44 años)', stats.ageRangeDistribution.adultez_joven.toString()],
-                ['Adultez media (45-64 años)', stats.ageRangeDistribution.adultez_media.toString()],
+                ['Infancia (0-9 años)', stats.ageRangeDistribution.infancia.toString()],
+                ['Preadolescencia (10-12 años)', stats.ageRangeDistribution.preadolescencia.toString()],
+                ['Adolescencia (13-17 años)', stats.ageRangeDistribution.adolescencia.toString()],
+                ['Adultez joven (18-35 años)', stats.ageRangeDistribution.adultez_joven.toString()],
+                ['Adultez (36-64 años)', stats.ageRangeDistribution.adultez_media.toString()],
                 ['Vejez (65+ años)', stats.ageRangeDistribution.vejez.toString()],
               ],
             },
