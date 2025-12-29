@@ -40,7 +40,7 @@
 
             <div>
               <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Fecha de nacimiento</label>
-              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDate(user.birthday) }}</p>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDateLong(formatCivilDate(user.birthday)) }}</p>
             </div>
 
             <div>
@@ -103,7 +103,7 @@
 
           <template #cell-visitedAt="{ row }">
             <div class="text-sm">
-              <div class="font-medium text-gray-900">{{ formatDate(row.visitedAt) }}</div>
+              <div class="font-medium text-gray-900">{{ formatDateLong(row.visitedAt) }}</div>
               <div class="text-gray-500">{{ formatTime(row.visitedAt) }}</div>
             </div>
           </template>
@@ -119,6 +119,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppTable from '@/components/common/AppTable.vue'
 import { useFetching } from '@/composables/useFetching'
 import { usePagination } from '@/composables/usePagination'
+import { useDateFormatter } from '@/composables/useDateFormatter'
 import userService from '@/service/User.service'
 import recordService from '@/service/Record.service'
 import type { User } from '@/types/user.types'
@@ -127,6 +128,7 @@ import { GENDER_OPTIONS } from '@/types/form.types'
 
 const route = useRoute()
 const router = useRouter()
+const { formatDateLong, formatDateTime, formatTime, formatCivilDate } = useDateFormatter()
 
 const userId = parseInt(route.params.id as string)
 const user = ref<User | null>(null)
@@ -168,33 +170,7 @@ const getGenderLabel = (genderValue: string) => {
   return option ? option.label : genderValue
 }
 
-const formatDate = (dateString: string | Date) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
 
-const formatDateTime = (dateString: string | Date) => {
-  const date = new Date(dateString)
-  return date.toLocaleString('es-ES', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-const formatTime = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleTimeString('es-ES', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
 
 const goBack = () => {
   router.back()

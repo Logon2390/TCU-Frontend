@@ -36,12 +36,14 @@
 
             <div>
               <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Fecha de creación</label>
-              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDate(module.createdAt || '') }}</p>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDateLong(module.createdAt || '') }}
+              </p>
             </div>
 
             <div>
               <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Última actualización</label>
-              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDate(module.updatedAt || '') }}</p>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDateLong(module.updatedAt || '') }}
+              </p>
             </div>
 
             <div>
@@ -110,7 +112,7 @@
 
           <template #cell-visitedAt="{ row }">
             <div class="text-sm">
-              <div class="font-medium text-gray-900">{{ formatDate(row.visitedAt) }}</div>
+              <div class="font-medium text-gray-900">{{ formatDateLong(row.visitedAt) }}</div>
               <div class="text-gray-500">{{ formatTime(row.visitedAt) }}</div>
             </div>
           </template>
@@ -126,6 +128,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppTable from '@/components/common/AppTable.vue'
 import { useFetching } from '@/composables/useFetching'
 import { usePagination } from '@/composables/usePagination'
+import { useDateFormatter } from '@/composables/useDateFormatter'
 import modulesService from '@/service/Modules.service'
 import recordService from '@/service/Record.service'
 import type { TableColumn } from '@/types/component.types'
@@ -133,6 +136,7 @@ import type { Module } from '@/types/modules.types'
 
 const route = useRoute()
 const router = useRouter()
+const { formatDateLong, formatTime } = useDateFormatter()
 
 const moduleId = parseInt(route.params.id as string)
 const module = ref<Module | null>(null)
@@ -178,23 +182,7 @@ const getUserInitials = (name: string) => {
     .join('')
 }
 
-const formatDate = (dateString: string | Date) => {
-  if (!dateString) return 'N/A'
-  const date = new Date(dateString)
-  return date.toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
 
-const formatTime = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleTimeString('es-ES', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
 
 const goBack = () => {
   router.back()
