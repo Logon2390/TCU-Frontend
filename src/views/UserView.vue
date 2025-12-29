@@ -40,7 +40,7 @@
 
             <div>
               <label class="block text-xs md:text-sm font-medium text-gray-600 mb-1">Fecha de nacimiento</label>
-              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDateLong(user.birthday) }}</p>
+              <p class="text-base md:text-lg font-semibold text-gray-900">{{ formatDateLong(formatCivilDate(user.birthday)) }}</p>
             </div>
 
             <div>
@@ -128,7 +128,7 @@ import { GENDER_OPTIONS } from '@/types/form.types'
 
 const route = useRoute()
 const router = useRouter()
-const { formatDateLong, formatDateTime, formatTime } = useDateFormatter()
+const { formatDateLong, formatDateTime, formatTime, formatCivilDate } = useDateFormatter()
 
 const userId = parseInt(route.params.id as string)
 const user = ref<User | null>(null)

@@ -32,7 +32,7 @@
                     {{ getGenderLabel(row.gender) }}
                 </template>
                 <template #cell-birthday="{ row }">
-                    {{ formatDateShort(row.birthday) }}
+                    {{ formatDateShort(formatCivilDate(row.birthday)) }}
                 </template>
                 <template #cell-lastRecord="{ row }">
                     {{ formatDateShort(row.lastRecord) }}
@@ -82,7 +82,7 @@ const { isLoading: isSearching, data: searchData, execute: searchByDocument } = 
 const { isLoading: isCreating, execute: executeCreateUser } = useFetching(userService.createUser)
 const { isLoading: isUpdating, execute: executeUpdateUser } = useFetching(userService.updateUser)
 const { showConfirmation, showToast, showForm } = useModal()
-const { formatDateShort } = useDateFormatter()
+const { formatDateShort, formatCivilDate } = useDateFormatter()
 const router = useRouter()
 const { getUser } = useAuth()
 
